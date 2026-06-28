@@ -177,3 +177,53 @@ Runtime safety:
 
 - Workers may run static validation and non-destructive discovery.
 - Workers must not run live Maestro debug, side-effecting workflow execution, publish, or deploy steps without explicit user approval.
+
+## 2026-06-29 - Checkpoint 2 Final Integration
+
+Checkpoint 2 lanes integrated into `main`:
+
+| Lane                 | Worker commit | Integration result                    |
+| -------------------- | ------------- | ------------------------------------- |
+| Maestro/Data Service | `c1f0460`     | Merged into `main`                    |
+| API Workflows        | `33e27a4`     | Merged into `main`                    |
+| Action Center        | `ce73fe2`     | Sanitized and integrated as `1237dc0` |
+| Apps/Intake          | `87aaa60`     | Merged into `main`                    |
+
+Integration patches applied:
+
+- Polished malformed Markdown tables in the Maestro SDD after merge.
+- Normalized API Workflow HTTP headers to use `Content-Type`.
+- Sanitized Action Center fallback assignment placeholders so the repository does not preserve personal reviewer identifiers.
+- Added `start-treatment-access-case.workflow.json` as the Apps-to-UiPath launch wrapper, reconciling Apps intake, API Workflow, Maestro, Data Service event mirror, and seeded mock API case contracts.
+- Added the required mock API case, patient, and order IDs to the Apps launch schema and samples.
+- Formatted the two large imported API Workflow JSON files after the final Prettier pass.
+
+Static UiPath validation:
+
+- `uip api-workflow validate` passed for all six Checkpoint 2 workflows:
+  - `ehr-order-evidence-pull.workflow.json`
+  - `payer-prior-auth-submit.workflow.json`
+  - `payer-status-fetch.workflow.json`
+  - `pharmacy-scheduling-handoff.workflow.json`
+  - `write-event.workflow.json`
+  - `start-treatment-access-case.workflow.json`
+
+Closeout checks passed:
+
+- `CI=true pnpm verify`
+- `CI=true pnpm format:check`
+- `CI=true pnpm seed`
+- `DEBUG_SMOKE=1 CI=true pnpm smoke:checkpoint1 -- --port 8878`
+
+Smoke note: the Codex sandbox blocked local server binding with `EPERM` during the first smoke attempt. The smoke was rerun with approved escalation on alternate port `8878`; all API health, reset, seeded-state, toggle, event ingestion, and clean-reset checks passed.
+
+Checkpoint 2 result:
+
+- UiPath core case integration artifacts now exist for Maestro/Data Service, API Workflow, Action Center, and Apps intake.
+- The local launch path can hydrate seeded synthetic case `case-syn-001` and write the initial case-created event through the mock API event contract.
+- The custom Command Center remains a visualization surface; UiPath-authored workflow/event records remain the intended live orchestration source.
+- No live Maestro debug, workflow run, publish, deploy, Action Center task creation, or Data Service entity creation was performed.
+
+Next checkpoint:
+
+- Move into the approved live UiPath runtime buildout: review/approve the Maestro SDD, generate the Maestro task plan and `caseplan.json`, then run live runtime smoke only after explicit approval for each side-effecting UiPath action.

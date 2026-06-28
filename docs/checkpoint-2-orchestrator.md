@@ -4,6 +4,8 @@
 
 This is the control document for the main orchestration session while Checkpoint 2 worktree lanes run in isolation.
 
+Status: closed after final integration on 2026-06-29.
+
 Checkpoint 2 outcome: UiPath becomes the live orchestration source for the Treatment Access case. A Maestro Case shape, Data Fabric/Data Service state plan, API Workflow integration surface, Action Center review gates, and intake/launch path are created and validated far enough that the integrated system can advance into live UiPath runtime smoke with explicit consent for any side-effecting run/publish step.
 
 ## Source Of Truth
@@ -18,7 +20,7 @@ Checkpoint 2 outcome: UiPath becomes the live orchestration source for the Treat
 - Implementation plan: `treatment_access_command_center_implementation_plan.md`
 - Project memory: `docs/AGENT_MEMORY.md`
 
-## Active Lanes
+## Lanes
 
 | Merge order | Lane                 | Thread ID                              | Worktree path                                                | Ownership                                     |
 | ----------- | -------------------- | -------------------------------------- | ------------------------------------------------------------ | --------------------------------------------- |
@@ -26,6 +28,14 @@ Checkpoint 2 outcome: UiPath becomes the live orchestration source for the Treat
 | 2           | API Workflows        | `019f1085-484a-7b12-badf-31919d339e04` | `/Users/abhinavgupta/.codex/worktrees/a6c0/Treatment Access` | `uipath/api-workflows/**`                     |
 | 3           | Action Center        | `019f1085-9b20-7680-aaaf-3491421897d5` | `/Users/abhinavgupta/.codex/worktrees/75e4/Treatment Access` | `uipath/action-center/**`                     |
 | 4           | Apps/Intake          | `019f1086-19a4-7871-ab0b-0941097ea50f` | `/Users/abhinavgupta/.codex/worktrees/37c3/Treatment Access` | `uipath/apps/**`, intake docs only            |
+
+Final integration results:
+
+- Maestro/Data Service merged from worker commit `c1f0460`.
+- API Workflows merged from worker commit `33e27a4`.
+- Action Center was sanitized and integrated as `1237dc0`.
+- Apps/Intake merged from worker commit `87aaa60`.
+- Cross-lane launch contract reconciliation landed in `92c2d37`.
 
 ## Monitoring Rules
 
