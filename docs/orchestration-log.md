@@ -17,6 +17,9 @@ UiPath setup verified:
 - Folder key: `4fba2fa1-012b-469a-b6aa-e5be3811c173`
 - Assistant installed and running
 - Action Center task user visible
+- Connected workspace machine assigned to `TreatmentAccessHackathon`
+- Folder runtime now reports `Development: Total 1, Connected 1, Available 1`
+- The tenant's single `Unattended` license remains unallocated for now
 
 Checkpoint 0 goal:
 
@@ -27,3 +30,5 @@ Checkpoint 0 goal:
 - create a clean baseline commit before launching worktree lanes.
 
 No worktree lanes have been launched yet.
+
+Checkpoint 0 is ready for Checkpoint 1 orchestration.

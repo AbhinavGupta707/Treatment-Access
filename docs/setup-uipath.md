@@ -11,6 +11,10 @@
 - Folder key: `4fba2fa1-012b-469a-b6aa-e5be3811c173`
 - Current user role in folder: `Folder Administrator`
 - Action Center task-eligible user: `Abhinav Gupta`
+- Connected workspace machine assigned to project folder:
+  `abhinavg707@gmail.com's workspace machine`
+- Project folder runtime now includes `Development: Total 1, Connected 1,
+Available 1`
 
 ## Verified UiPath Services
 
@@ -53,22 +57,32 @@ uip skills install --agent codex --local
 uip user --output table
 uip tools list --output table
 uip or folders get "TreatmentAccessHackathon" --output table
+uip or folders runtimes "TreatmentAccessHackathon" --output table
+uip or machines list --folder-path "TreatmentAccessHackathon" --all-fields --output table
 uip or users list-in-folder --folder-path "TreatmentAccessHackathon" --output table
 uip tasks users 7986316 --output table
 uip df entities list --output table
 uip agent list --output table
-uip or sessions attended list --output table
+uip or sessions attended list --folder-path "TreatmentAccessHackathon" --output table
 ```
 
-## Current Runtime Caveat
+## Runtime State
 
-Assistant/Robot is installed and has an available attended session in the personal workspace. The project folder currently has serverless runtime allocation but no dedicated local/attended/unattended runtime slots. This is not blocking for Checkpoint 0 or API Workflow work.
+Assistant/Robot is installed and has an available attended session from `ABHINAVS-MINI`. The connected workspace machine has been assigned to the `TreatmentAccessHackathon` folder. The folder currently reports:
 
-Resolve during the RPA fallback checkpoint:
+- `Development`: `Total 1`, `Connected 1`, `Available 1`
+- `Serverless`: `Total 1`, `Connected 0`, `Available 0`
+- `ServerlessTestAutomation`: `Total 1`, `Connected 0`, `Available 0`
+- `Unattended`: `Total 0`, `Connected 0`, `Available 0`
 
-- confirm whether the portal robot should run from personal workspace or project folder;
-- allocate/assign the required local or attended runtime if needed;
-- verify Orchestrator job execution before recording the final demo.
+This is enough to proceed with development and later attended/development-mode RPA fallback testing from the project folder. It does not yet reserve the tenant's single available `Unattended` license. Only allocate the unattended slot if the final portal fallback must run as a fully unattended Orchestrator job instead of a demo/development attended run.
+
+Before recording the final RPA demo:
+
+- publish the portal automation package/process;
+- verify whether it runs against the available `Development` runtime or needs a dedicated unattended machine;
+- if unattended is required, create/assign a project machine with one unattended slot and enable the `Unattended` license;
+- run an Orchestrator job end-to-end and confirm the Command Center receives the portal confirmation event.
 
 ## Orchestrator Assets To Create Later
 
