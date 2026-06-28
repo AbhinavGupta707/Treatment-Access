@@ -1,0 +1,393 @@
+{
+  "contractSchema": "tacc.actionCenter.quickFormContract.v1",
+  "contractVersion": "2026-06-29",
+  "taskKey": "appeal_signoff",
+  "displayName": "Appeal Signoff",
+  "purpose": "Clinician reviews denial reason, administrative appeal draft, citations, and requested edits before the appeal can be submitted.",
+  "uiPath": {
+    "surface": "Action Center",
+    "taskType": "FormTask",
+    "formType": "QuickForm",
+    "folderName": "TreatmentAccessHackathon",
+    "folderId": 7986316,
+    "folderKey": "4fba2fa1-012b-469a-b6aa-e5be3811c173",
+    "taskCatalog": "Treatment Access Clinical Review"
+  },
+  "assignment": {
+    "targetType": "group",
+    "targetName": "Treatment Access Clinician Reviewers",
+    "fallbackUser": {
+      "displayName": "Configured Treatment Access Reviewer",
+      "email": "set-during-live-smoke",
+      "actionCenterUserId": "set-during-live-smoke",
+      "discoveredBy": "uip tasks users 7986316 --output json"
+    },
+    "channels": ["ActionCenter", "Email"],
+    "notes": "Appeal signoff must be completed by a clinician reviewer before the appeal submission API Workflow runs."
+  },
+  "runtime": {
+    "priority": "Critical",
+    "timeout": {
+      "duration": "PT12H",
+      "onTimeout": "activate_secondary_stage",
+      "secondaryStage": "SLA At Risk",
+      "eventAction": "human.task.timeout"
+    },
+    "createWhen": [
+      "PayerDecision.status in ['denied', 'rfi']",
+      "AppealPacket.draft_text exists",
+      "AppealPacket.clinician_approved != true"
+    ]
+  },
+  "quickForm": {
+    "schemaId": "f82b6056-0e44-46ce-bfef-d8d4932aa970",
+    "title": "Appeal Signoff",
+    "inputs": [
+      {
+        "id": "caseid",
+        "label": "Case ID",
+        "type": "text",
+        "binding": "vars.case.case_id"
+      },
+      {
+        "id": "maestrocaseid",
+        "label": "Maestro Case ID",
+        "type": "text",
+        "binding": "vars.case.maestro_case_id"
+      },
+      {
+        "id": "appealid",
+        "label": "Appeal ID",
+        "type": "text",
+        "binding": "vars.appealPacket.appeal_id"
+      },
+      {
+        "id": "denialreason",
+        "label": "Denial Reason",
+        "type": "text",
+        "binding": "vars.payerDecision.reason"
+      },
+      {
+        "id": "denialcode",
+        "label": "Denial Code",
+        "type": "text",
+        "binding": "vars.payerDecision.denial_code"
+      },
+      {
+        "id": "appealdeadline",
+        "label": "Appeal Deadline",
+        "type": "date",
+        "binding": "vars.payerDecision.appeal_deadline"
+      },
+      {
+        "id": "appealstrategy",
+        "label": "Appeal Strategy",
+        "type": "text",
+        "binding": "vars.appealPacket.appeal_strategy"
+      },
+      {
+        "id": "draftsummary",
+        "label": "Appeal Draft Summary",
+        "type": "text",
+        "binding": "vars.appealPacket.draft_summary"
+      },
+      {
+        "id": "citations",
+        "label": "Evidence and Policy Citations",
+        "type": "text",
+        "binding": "vars.appealPacket.evidence_used"
+      },
+      {
+        "id": "unsupportedwarnings",
+        "label": "Unsupported Claim Warnings",
+        "type": "text",
+        "binding": "vars.appealPacket.unsupported_claim_warnings"
+      },
+      {
+        "id": "requestededits",
+        "label": "Requested Edits From Review Queue",
+        "type": "text",
+        "binding": "vars.appealPacket.requested_edits"
+      }
+    ],
+    "inOuts": [
+      {
+        "id": "finaldrafttext",
+        "label": "Final Administrative Appeal Draft",
+        "type": "text",
+        "binding": "vars.appealPacket.draft_text",
+        "variable": "final_draft_text",
+        "required": true
+      },
+      {
+        "id": "finalcitations",
+        "label": "Final Citations",
+        "type": "text",
+        "binding": "vars.appealPacket.evidence_used",
+        "variable": "final_citations",
+        "required": true
+      }
+    ],
+    "outputs": [
+      {
+        "id": "clinicianapproved",
+        "label": "Clinician Approved",
+        "type": "boolean",
+        "variable": "clinician_approved",
+        "required": true
+      },
+      {
+        "id": "clinicianedits",
+        "label": "Clinician Edits",
+        "type": "text",
+        "variable": "clinician_edits",
+        "required": false
+      },
+      {
+        "id": "rejectionreason",
+        "label": "Rejection or Rework Reason",
+        "type": "text",
+        "variable": "rejection_reason",
+        "required": false
+      },
+      {
+        "id": "reviewernotes",
+        "label": "Reviewer Notes",
+        "type": "text",
+        "variable": "reviewer_notes",
+        "required": false
+      }
+    ],
+    "outcomes": [
+      {
+        "id": "approve_appeal",
+        "name": "Approve Appeal",
+        "type": "string",
+        "isPrimary": true,
+        "action": "Continue"
+      },
+      {
+        "id": "approve_with_edits",
+        "name": "Approve With Edits",
+        "type": "string",
+        "isPrimary": false,
+        "action": "Continue"
+      },
+      {
+        "id": "request_changes",
+        "name": "Request Changes",
+        "type": "string",
+        "isPrimary": false,
+        "action": "Continue"
+      },
+      {
+        "id": "reject_appeal",
+        "name": "Reject Appeal",
+        "type": "string",
+        "isPrimary": false,
+        "action": "Continue"
+      }
+    ],
+    "fields": [
+      {
+        "id": "caseid",
+        "label": "Case ID",
+        "type": "text",
+        "direction": "input",
+        "binding": "vars.case.case_id"
+      },
+      {
+        "id": "maestrocaseid",
+        "label": "Maestro Case ID",
+        "type": "text",
+        "direction": "input",
+        "binding": "vars.case.maestro_case_id"
+      },
+      {
+        "id": "appealid",
+        "label": "Appeal ID",
+        "type": "text",
+        "direction": "input",
+        "binding": "vars.appealPacket.appeal_id"
+      },
+      {
+        "id": "denialreason",
+        "label": "Denial Reason",
+        "type": "text",
+        "direction": "input",
+        "binding": "vars.payerDecision.reason"
+      },
+      {
+        "id": "denialcode",
+        "label": "Denial Code",
+        "type": "text",
+        "direction": "input",
+        "binding": "vars.payerDecision.denial_code"
+      },
+      {
+        "id": "appealdeadline",
+        "label": "Appeal Deadline",
+        "type": "date",
+        "direction": "input",
+        "binding": "vars.payerDecision.appeal_deadline"
+      },
+      {
+        "id": "appealstrategy",
+        "label": "Appeal Strategy",
+        "type": "text",
+        "direction": "input",
+        "binding": "vars.appealPacket.appeal_strategy"
+      },
+      {
+        "id": "draftsummary",
+        "label": "Appeal Draft Summary",
+        "type": "text",
+        "direction": "input",
+        "binding": "vars.appealPacket.draft_summary"
+      },
+      {
+        "id": "citations",
+        "label": "Evidence and Policy Citations",
+        "type": "text",
+        "direction": "input",
+        "binding": "vars.appealPacket.evidence_used"
+      },
+      {
+        "id": "unsupportedwarnings",
+        "label": "Unsupported Claim Warnings",
+        "type": "text",
+        "direction": "input",
+        "binding": "vars.appealPacket.unsupported_claim_warnings"
+      },
+      {
+        "id": "requestededits",
+        "label": "Requested Edits From Review Queue",
+        "type": "text",
+        "direction": "input",
+        "binding": "vars.appealPacket.requested_edits"
+      },
+      {
+        "id": "finaldrafttext",
+        "label": "Final Administrative Appeal Draft",
+        "type": "text",
+        "direction": "inOut",
+        "binding": "vars.appealPacket.draft_text",
+        "variable": "final_draft_text",
+        "required": true
+      },
+      {
+        "id": "finalcitations",
+        "label": "Final Citations",
+        "type": "text",
+        "direction": "inOut",
+        "binding": "vars.appealPacket.evidence_used",
+        "variable": "final_citations",
+        "required": true
+      },
+      {
+        "id": "clinicianapproved",
+        "label": "Clinician Approved",
+        "type": "boolean",
+        "direction": "output",
+        "variable": "clinician_approved",
+        "required": true
+      },
+      {
+        "id": "clinicianedits",
+        "label": "Clinician Edits",
+        "type": "text",
+        "direction": "output",
+        "variable": "clinician_edits",
+        "required": false
+      },
+      {
+        "id": "rejectionreason",
+        "label": "Rejection or Rework Reason",
+        "type": "text",
+        "direction": "output",
+        "variable": "rejection_reason",
+        "required": false
+      },
+      {
+        "id": "reviewernotes",
+        "label": "Reviewer Notes",
+        "type": "text",
+        "direction": "output",
+        "variable": "reviewer_notes",
+        "required": false
+      }
+    ]
+  },
+  "pauseResume": {
+    "maestroWaitsOn": "HITL completed handle for node appealSignoff1",
+    "resumeVariable": "$vars.appealSignoff1.output",
+    "allowedResumeOutcomes": [
+      "Approve Appeal",
+      "Approve With Edits",
+      "Request Changes",
+      "Reject Appeal"
+    ],
+    "caseStateUpdates": {
+      "Approve Appeal": {
+        "AppealPacket.clinician_approved": true,
+        "AppealPacket.draft_text": "$output.final_draft_text",
+        "AppealPacket.clinician_edits": "$output.clinician_edits",
+        "SubmissionPacket.human_approved": true,
+        "Case.current_stage": "Denial Rescue / Appeal"
+      },
+      "Approve With Edits": {
+        "AppealPacket.clinician_approved": true,
+        "AppealPacket.draft_text": "$output.final_draft_text",
+        "AppealPacket.clinician_edits": "$output.clinician_edits",
+        "SubmissionPacket.human_approved": true,
+        "Case.current_stage": "Denial Rescue / Appeal"
+      },
+      "Request Changes": {
+        "AppealPacket.clinician_approved": false,
+        "AppealPacket.clinician_edits": "$output.rejection_reason",
+        "Case.active_secondary_stages": "Clinician Rework"
+      },
+      "Reject Appeal": {
+        "AppealPacket.clinician_approved": false,
+        "AppealPacket.clinician_edits": "$output.rejection_reason",
+        "Case.active_secondary_stages": "Clinician Rework"
+      }
+    }
+  },
+  "taskCreatedEventPayload": {
+    "eventType": "human.task.created",
+    "actor_type": "system",
+    "actor_name": "Maestro Case",
+    "task_or_agent_name": "Appeal Signoff",
+    "action": "create_action_center_task",
+    "case_id": "$input.case_id",
+    "maestro_case_id": "$input.maestro_case_id",
+    "input_summary": "Created clinician appeal signoff task for appeal $input.appeal_id.",
+    "output_summary": "Awaiting clinician approval before appeal submission.",
+    "evidence_refs": ["$input.appeal_id", "$input.citations"],
+    "data_service_updates": ["HumanTask", "AuditEvent"]
+  },
+  "downstreamEventPayload": {
+    "eventType": "human.task.completed",
+    "actor_type": "human",
+    "actor_name": "$completed_by_display_name",
+    "task_or_agent_name": "Appeal Signoff",
+    "action": "$outcome",
+    "case_id": "$input.case_id",
+    "maestro_case_id": "$input.maestro_case_id",
+    "input_summary": "Clinician reviewed administrative appeal draft for denial code $input.denial_code.",
+    "output_summary": "$outcome; approved=$output.clinician_approved",
+    "evidence_refs": ["$input.appeal_id", "$output.final_citations"],
+    "data_service_updates": [
+      "AppealPacket",
+      "SubmissionPacket",
+      "AuditEvent",
+      "HumanTask"
+    ]
+  },
+  "guardrails": [
+    "Appeal text is an administrative draft for clinician review, not autonomous medical or legal advice.",
+    "Appeal submission is blocked unless the completed outcome is Approve Appeal or Approve With Edits and clinician_approved is true.",
+    "Unsupported claim warnings must remain visible to the reviewer."
+  ]
+}

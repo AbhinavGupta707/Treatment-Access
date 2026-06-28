@@ -1,0 +1,437 @@
+{
+  "contractSchema": "tacc.actionCenter.quickFormContract.v1",
+  "contractVersion": "2026-06-29",
+  "taskKey": "clinician_evidence_validation",
+  "displayName": "Clinician Evidence Validation",
+  "purpose": "Clinician validates a mapped evidence claim, source citation, policy criterion, and confidence before the claim can be used in a submission packet.",
+  "uiPath": {
+    "surface": "Action Center",
+    "taskType": "FormTask",
+    "formType": "QuickForm",
+    "folderName": "TreatmentAccessHackathon",
+    "folderId": 7986316,
+    "folderKey": "4fba2fa1-012b-469a-b6aa-e5be3811c173",
+    "taskCatalog": "Treatment Access Clinical Review"
+  },
+  "assignment": {
+    "targetType": "group",
+    "targetName": "Treatment Access Clinician Reviewers",
+    "fallbackUser": {
+      "displayName": "Configured Treatment Access Reviewer",
+      "email": "set-during-live-smoke",
+      "actionCenterUserId": "set-during-live-smoke",
+      "discoveredBy": "uip tasks users 7986316 --output json"
+    },
+    "channels": ["ActionCenter", "Email"],
+    "notes": "Use group assignment for live demo once the reviewer group exists. The fallback user is the only assignable user discovered in folder 7986316 during this lane."
+  },
+  "runtime": {
+    "priority": "High",
+    "timeout": {
+      "duration": "PT24H",
+      "onTimeout": "activate_secondary_stage",
+      "secondaryStage": "Human Exception Review",
+      "eventAction": "human.task.timeout"
+    },
+    "createWhen": [
+      "EvidenceMapping.needs_human_review == true",
+      "PolicyCriterion.must_be_clinician_attested == true",
+      "EvidenceMapping.confidence < 0.85",
+      "EvidenceMapping.status == 'Conflicting'"
+    ]
+  },
+  "quickForm": {
+    "schemaId": "c8b81e24-0d2a-4e65-a8a3-550f89b1b2e2",
+    "title": "Clinician Evidence Validation",
+    "inputs": [
+      {
+        "id": "caseid",
+        "label": "Case ID",
+        "type": "text",
+        "binding": "vars.case.case_id"
+      },
+      {
+        "id": "maestrocaseid",
+        "label": "Maestro Case ID",
+        "type": "text",
+        "binding": "vars.case.maestro_case_id"
+      },
+      {
+        "id": "syntheticpatientlabel",
+        "label": "Synthetic Patient Label",
+        "type": "text",
+        "binding": "vars.case.synthetic_patient_label"
+      },
+      {
+        "id": "medicationname",
+        "label": "Requested Medication",
+        "type": "text",
+        "binding": "vars.case.medication_name"
+      },
+      {
+        "id": "payername",
+        "label": "Payer",
+        "type": "text",
+        "binding": "vars.case.payer_name"
+      },
+      {
+        "id": "criterionid",
+        "label": "Policy Criterion ID",
+        "type": "text",
+        "binding": "vars.evidenceMapping.criterion_id"
+      },
+      {
+        "id": "policycriterion",
+        "label": "Policy Criterion",
+        "type": "text",
+        "binding": "vars.policyCriterion.description"
+      },
+      {
+        "id": "policycitation",
+        "label": "Policy Citation",
+        "type": "text",
+        "binding": "vars.policyCriterion.policy_citation"
+      },
+      {
+        "id": "evidencesummary",
+        "label": "Mapped Evidence Summary",
+        "type": "text",
+        "binding": "vars.evidenceMapping.evidence_summary"
+      },
+      {
+        "id": "sourcequoteshort",
+        "label": "Short Source Quote",
+        "type": "text",
+        "binding": "vars.evidenceMapping.source_quote_short"
+      },
+      {
+        "id": "sourceuri",
+        "label": "Source URI",
+        "type": "text",
+        "binding": "vars.evidenceArtifact.source_uri"
+      },
+      {
+        "id": "sourcespan",
+        "label": "Source Span",
+        "type": "text",
+        "binding": "vars.evidenceMapping.source_span"
+      },
+      {
+        "id": "confidence",
+        "label": "Extraction Confidence",
+        "type": "number",
+        "binding": "vars.evidenceMapping.confidence"
+      },
+      {
+        "id": "humanreviewreason",
+        "label": "Review Reason",
+        "type": "text",
+        "binding": "vars.evidenceMapping.human_review_reason"
+      }
+    ],
+    "inOuts": [
+      {
+        "id": "reviewerfinaltext",
+        "label": "Clinician-Approved Evidence Text",
+        "type": "text",
+        "binding": "vars.evidenceMapping.evidence_summary",
+        "variable": "reviewer_final_text",
+        "required": true
+      },
+      {
+        "id": "policycitationfinal",
+        "label": "Corrected Policy Citation",
+        "type": "text",
+        "binding": "vars.policyCriterion.policy_citation",
+        "variable": "policy_citation_final",
+        "required": true
+      }
+    ],
+    "outputs": [
+      {
+        "id": "reviewerdecision",
+        "label": "Reviewer Decision",
+        "type": "text",
+        "variable": "reviewer_decision",
+        "required": true
+      },
+      {
+        "id": "attestationconfirmed",
+        "label": "Clinician Attestation Confirmed",
+        "type": "boolean",
+        "variable": "attestation_confirmed",
+        "required": true
+      },
+      {
+        "id": "reviewernotes",
+        "label": "Reviewer Notes",
+        "type": "text",
+        "variable": "reviewer_notes",
+        "required": false
+      },
+      {
+        "id": "moreevidencereason",
+        "label": "More Evidence Reason",
+        "type": "text",
+        "variable": "more_evidence_reason",
+        "required": false
+      }
+    ],
+    "outcomes": [
+      {
+        "id": "approve",
+        "name": "Approve",
+        "type": "string",
+        "isPrimary": true,
+        "action": "Continue"
+      },
+      {
+        "id": "approve_with_edits",
+        "name": "Approve With Edits",
+        "type": "string",
+        "isPrimary": false,
+        "action": "Continue"
+      },
+      {
+        "id": "reject",
+        "name": "Reject",
+        "type": "string",
+        "isPrimary": false,
+        "action": "Continue"
+      },
+      {
+        "id": "request_more_evidence",
+        "name": "Request More Evidence",
+        "type": "string",
+        "isPrimary": false,
+        "action": "Continue"
+      }
+    ],
+    "fields": [
+      {
+        "id": "caseid",
+        "label": "Case ID",
+        "type": "text",
+        "direction": "input",
+        "binding": "vars.case.case_id"
+      },
+      {
+        "id": "maestrocaseid",
+        "label": "Maestro Case ID",
+        "type": "text",
+        "direction": "input",
+        "binding": "vars.case.maestro_case_id"
+      },
+      {
+        "id": "syntheticpatientlabel",
+        "label": "Synthetic Patient Label",
+        "type": "text",
+        "direction": "input",
+        "binding": "vars.case.synthetic_patient_label"
+      },
+      {
+        "id": "medicationname",
+        "label": "Requested Medication",
+        "type": "text",
+        "direction": "input",
+        "binding": "vars.case.medication_name"
+      },
+      {
+        "id": "payername",
+        "label": "Payer",
+        "type": "text",
+        "direction": "input",
+        "binding": "vars.case.payer_name"
+      },
+      {
+        "id": "criterionid",
+        "label": "Policy Criterion ID",
+        "type": "text",
+        "direction": "input",
+        "binding": "vars.evidenceMapping.criterion_id"
+      },
+      {
+        "id": "policycriterion",
+        "label": "Policy Criterion",
+        "type": "text",
+        "direction": "input",
+        "binding": "vars.policyCriterion.description"
+      },
+      {
+        "id": "policycitation",
+        "label": "Policy Citation",
+        "type": "text",
+        "direction": "input",
+        "binding": "vars.policyCriterion.policy_citation"
+      },
+      {
+        "id": "evidencesummary",
+        "label": "Mapped Evidence Summary",
+        "type": "text",
+        "direction": "input",
+        "binding": "vars.evidenceMapping.evidence_summary"
+      },
+      {
+        "id": "sourcequoteshort",
+        "label": "Short Source Quote",
+        "type": "text",
+        "direction": "input",
+        "binding": "vars.evidenceMapping.source_quote_short"
+      },
+      {
+        "id": "sourceuri",
+        "label": "Source URI",
+        "type": "text",
+        "direction": "input",
+        "binding": "vars.evidenceArtifact.source_uri"
+      },
+      {
+        "id": "sourcespan",
+        "label": "Source Span",
+        "type": "text",
+        "direction": "input",
+        "binding": "vars.evidenceMapping.source_span"
+      },
+      {
+        "id": "confidence",
+        "label": "Extraction Confidence",
+        "type": "number",
+        "direction": "input",
+        "binding": "vars.evidenceMapping.confidence"
+      },
+      {
+        "id": "humanreviewreason",
+        "label": "Review Reason",
+        "type": "text",
+        "direction": "input",
+        "binding": "vars.evidenceMapping.human_review_reason"
+      },
+      {
+        "id": "reviewerfinaltext",
+        "label": "Clinician-Approved Evidence Text",
+        "type": "text",
+        "direction": "inOut",
+        "binding": "vars.evidenceMapping.evidence_summary",
+        "variable": "reviewer_final_text",
+        "required": true
+      },
+      {
+        "id": "policycitationfinal",
+        "label": "Corrected Policy Citation",
+        "type": "text",
+        "direction": "inOut",
+        "binding": "vars.policyCriterion.policy_citation",
+        "variable": "policy_citation_final",
+        "required": true
+      },
+      {
+        "id": "reviewerdecision",
+        "label": "Reviewer Decision",
+        "type": "text",
+        "direction": "output",
+        "variable": "reviewer_decision",
+        "required": true
+      },
+      {
+        "id": "attestationconfirmed",
+        "label": "Clinician Attestation Confirmed",
+        "type": "boolean",
+        "direction": "output",
+        "variable": "attestation_confirmed",
+        "required": true
+      },
+      {
+        "id": "reviewernotes",
+        "label": "Reviewer Notes",
+        "type": "text",
+        "direction": "output",
+        "variable": "reviewer_notes",
+        "required": false
+      },
+      {
+        "id": "moreevidencereason",
+        "label": "More Evidence Reason",
+        "type": "text",
+        "direction": "output",
+        "variable": "more_evidence_reason",
+        "required": false
+      }
+    ]
+  },
+  "pauseResume": {
+    "maestroWaitsOn": "HITL completed handle for node clinicianEvidenceValidation1",
+    "resumeVariable": "$vars.clinicianEvidenceValidation1.output",
+    "allowedResumeOutcomes": [
+      "Approve",
+      "Approve With Edits",
+      "Reject",
+      "Request More Evidence"
+    ],
+    "caseStateUpdates": {
+      "Approve": {
+        "EvidenceMapping.reviewer_decision": "approved",
+        "EvidenceMapping.reviewer_final_text": "$output.reviewer_final_text",
+        "EvidenceMapping.reviewed_at": "$completed_at",
+        "EvidenceMapping.reviewer_id": "$completed_by",
+        "EvidenceMapping.needs_human_review": false
+      },
+      "Approve With Edits": {
+        "EvidenceMapping.reviewer_decision": "approved_with_edits",
+        "EvidenceMapping.reviewer_original_text": "$input.evidence_summary",
+        "EvidenceMapping.reviewer_final_text": "$output.reviewer_final_text",
+        "EvidenceMapping.reviewed_at": "$completed_at",
+        "EvidenceMapping.reviewer_id": "$completed_by",
+        "EvidenceMapping.needs_human_review": false
+      },
+      "Reject": {
+        "EvidenceMapping.reviewer_decision": "rejected",
+        "EvidenceMapping.needs_human_review": true,
+        "Case.active_secondary_stages": "Clinician Rework"
+      },
+      "Request More Evidence": {
+        "EvidenceMapping.reviewer_decision": "more_evidence_requested",
+        "EvidenceMapping.human_review_reason": "$output.more_evidence_reason",
+        "Case.active_secondary_stages": "Missing Evidence"
+      }
+    }
+  },
+  "taskCreatedEventPayload": {
+    "eventType": "human.task.created",
+    "actor_type": "system",
+    "actor_name": "Maestro Case",
+    "task_or_agent_name": "Clinician Evidence Validation",
+    "action": "create_action_center_task",
+    "case_id": "$input.case_id",
+    "maestro_case_id": "$input.maestro_case_id",
+    "input_summary": "Created clinician evidence validation task for policy criterion $input.criterion_id.",
+    "output_summary": "Awaiting clinician review in Action Center.",
+    "evidence_refs": [
+      "$input.source_uri",
+      "$input.source_span",
+      "$input.policy_citation"
+    ],
+    "data_service_updates": ["HumanTask", "AuditEvent"]
+  },
+  "downstreamEventPayload": {
+    "eventType": "human.task.completed",
+    "actor_type": "human",
+    "actor_name": "$completed_by_display_name",
+    "task_or_agent_name": "Clinician Evidence Validation",
+    "action": "$outcome",
+    "case_id": "$input.case_id",
+    "maestro_case_id": "$input.maestro_case_id",
+    "input_summary": "Clinician reviewed mapped evidence for policy criterion $input.criterion_id.",
+    "output_summary": "$output.reviewer_decision",
+    "evidence_refs": [
+      "$input.source_uri",
+      "$input.source_span",
+      "$output.policy_citation_final"
+    ],
+    "data_service_updates": ["EvidenceMapping", "AuditEvent", "HumanTask"]
+  },
+  "guardrails": [
+    "Use synthetic data only.",
+    "Clinical assertion may proceed only when source citation, policy criterion, or clinician approval is present.",
+    "A rejection must re-enter evidence assembly or clinician rework before submission."
+  ]
+}

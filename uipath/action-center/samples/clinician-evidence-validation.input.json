@@ -1,0 +1,28 @@
+{
+  "case": {
+    "case_id": "case-ta-synth-001",
+    "maestro_case_id": "maestro-case-synth-001",
+    "synthetic_patient_label": "Synthetic patient TA-001",
+    "medication_name": "Synthetic biologic therapy",
+    "payer_name": "Northstar Health Plan",
+    "current_stage": "Clinical Validation"
+  },
+  "policyCriterion": {
+    "criterion_id": "criterion-step-therapy-001",
+    "description": "Policy requires documentation of prior therapy trial or contraindication.",
+    "policy_citation": "fixture://payer-policy/northstar-biologic#criterion-step-therapy-001",
+    "must_be_clinician_attested": true
+  },
+  "evidenceArtifact": {
+    "artifact_id": "artifact-med-history-001",
+    "source_uri": "fixture://ehr/medication-history/ta-001"
+  },
+  "evidenceMapping": {
+    "criterion_id": "criterion-step-therapy-001",
+    "evidence_summary": "Synthetic medication history indicates prior conventional therapy was tried before the requested biologic.",
+    "source_quote_short": "Prior conventional therapy recorded in synthetic medication history.",
+    "source_span": "fixture://ehr/medication-history/ta-001#span-12",
+    "confidence": 0.81,
+    "human_review_reason": "Clinician attestation required for high-impact therapy assertion."
+  }
+}

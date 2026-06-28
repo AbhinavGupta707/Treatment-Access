@@ -1,0 +1,19 @@
+{
+  "case": {
+    "case_id": "case-ta-synth-001",
+    "maestro_case_id": "maestro-case-synth-001",
+    "current_stage": "Submission",
+    "sla_due_at": "2026-07-01",
+    "sla_state": "at_risk"
+  },
+  "exception": {
+    "category": "repeated_api_failure",
+    "reason": "Mock payer API returned unavailable twice during synthetic submission.",
+    "attempt_count": 2,
+    "confidence": 0.99,
+    "contradictory_items": "",
+    "recommended_action": "Route to robot portal fallback or retry API after reviewer confirmation.",
+    "trace_id": "trace-synth-submission-002",
+    "corrected_value": ""
+  }
+}

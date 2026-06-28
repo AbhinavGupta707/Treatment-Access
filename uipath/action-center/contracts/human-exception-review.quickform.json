@@ -1,0 +1,413 @@
+{
+  "contractSchema": "tacc.actionCenter.quickFormContract.v1",
+  "contractVersion": "2026-06-29",
+  "taskKey": "human_exception_review",
+  "displayName": "Human Exception Review",
+  "purpose": "Human reviewer resolves repeated API or portal failure, low-confidence extraction, contradictory evidence, or SLA risk before Maestro resumes the case path.",
+  "uiPath": {
+    "surface": "Action Center",
+    "taskType": "FormTask",
+    "formType": "QuickForm",
+    "folderName": "TreatmentAccessHackathon",
+    "folderId": 7986316,
+    "folderKey": "4fba2fa1-012b-469a-b6aa-e5be3811c173",
+    "taskCatalog": "Treatment Access Exception Review"
+  },
+  "assignment": {
+    "targetType": "group",
+    "targetName": "Treatment Access Case Coordinators",
+    "clinicalFallbackGroup": "Treatment Access Clinician Reviewers",
+    "fallbackUser": {
+      "displayName": "Configured Treatment Access Reviewer",
+      "email": "set-during-live-smoke",
+      "actionCenterUserId": "set-during-live-smoke",
+      "discoveredBy": "uip tasks users 7986316 --output json"
+    },
+    "channels": ["ActionCenter", "Email"],
+    "notes": "Route low-confidence extraction and contradictory evidence to clinician reviewers; route API, portal, and SLA exceptions to case coordinators unless clinical judgment is required."
+  },
+  "runtime": {
+    "priority": "High",
+    "timeout": {
+      "duration": "PT8H",
+      "onTimeout": "raise_urgency",
+      "secondaryStage": "SLA At Risk",
+      "eventAction": "human.exception.timeout"
+    },
+    "createWhen": [
+      "SubmissionAttempt.retry_count >= 2",
+      "PortalFallback.failure_count >= 2",
+      "EvidenceArtifact.extraction_confidence < 0.75",
+      "EvidenceMapping.status == 'Conflicting'",
+      "Case.sla_state in ['at_risk', 'breached']"
+    ],
+    "exceptionCategories": [
+      "repeated_api_failure",
+      "repeated_portal_failure",
+      "low_confidence_extraction",
+      "contradictory_evidence",
+      "sla_risk"
+    ]
+  },
+  "quickForm": {
+    "schemaId": "6fd930af-f18b-49cc-94be-c5c0f0792312",
+    "title": "Human Exception Review",
+    "inputs": [
+      {
+        "id": "caseid",
+        "label": "Case ID",
+        "type": "text",
+        "binding": "vars.case.case_id"
+      },
+      {
+        "id": "maestrocaseid",
+        "label": "Maestro Case ID",
+        "type": "text",
+        "binding": "vars.case.maestro_case_id"
+      },
+      {
+        "id": "exceptioncategory",
+        "label": "Exception Category",
+        "type": "text",
+        "binding": "vars.exception.category"
+      },
+      {
+        "id": "impactedstage",
+        "label": "Impacted Stage",
+        "type": "text",
+        "binding": "vars.case.current_stage"
+      },
+      {
+        "id": "failurereason",
+        "label": "Failure or Risk Reason",
+        "type": "text",
+        "binding": "vars.exception.reason"
+      },
+      {
+        "id": "attemptcount",
+        "label": "Attempt Count",
+        "type": "number",
+        "binding": "vars.exception.attempt_count"
+      },
+      {
+        "id": "confidence",
+        "label": "Lowest Confidence",
+        "type": "number",
+        "binding": "vars.exception.confidence"
+      },
+      {
+        "id": "contradictoryitems",
+        "label": "Contradictory Evidence",
+        "type": "text",
+        "binding": "vars.exception.contradictory_items"
+      },
+      {
+        "id": "sladueat",
+        "label": "SLA Due At",
+        "type": "date",
+        "binding": "vars.case.sla_due_at"
+      },
+      {
+        "id": "recommendedaction",
+        "label": "Automation Recommended Action",
+        "type": "text",
+        "binding": "vars.exception.recommended_action"
+      },
+      {
+        "id": "traceid",
+        "label": "Trace or Job ID",
+        "type": "text",
+        "binding": "vars.exception.trace_id"
+      }
+    ],
+    "inOuts": [
+      {
+        "id": "resolutionsummary",
+        "label": "Resolution Summary",
+        "type": "text",
+        "binding": "vars.exception.reason",
+        "variable": "resolution_summary",
+        "required": true
+      },
+      {
+        "id": "correctedvalue",
+        "label": "Corrected Evidence or Routing Value",
+        "type": "text",
+        "binding": "vars.exception.corrected_value",
+        "variable": "corrected_value",
+        "required": false
+      }
+    ],
+    "outputs": [
+      {
+        "id": "reviewerdecision",
+        "label": "Reviewer Decision",
+        "type": "text",
+        "variable": "reviewer_decision",
+        "required": true
+      },
+      {
+        "id": "nextaction",
+        "label": "Next Action",
+        "type": "text",
+        "variable": "next_action",
+        "required": true
+      },
+      {
+        "id": "assignedfollowuprole",
+        "label": "Assigned Follow-up Role",
+        "type": "text",
+        "variable": "assigned_followup_role",
+        "required": false
+      },
+      {
+        "id": "reviewernotes",
+        "label": "Reviewer Notes",
+        "type": "text",
+        "variable": "reviewer_notes",
+        "required": false
+      }
+    ],
+    "outcomes": [
+      {
+        "id": "resume_case",
+        "name": "Resume Case",
+        "type": "string",
+        "isPrimary": true,
+        "action": "Continue"
+      },
+      {
+        "id": "retry_api",
+        "name": "Retry API",
+        "type": "string",
+        "isPrimary": false,
+        "action": "Continue"
+      },
+      {
+        "id": "route_to_robot",
+        "name": "Route To Robot",
+        "type": "string",
+        "isPrimary": false,
+        "action": "Continue"
+      },
+      {
+        "id": "request_clinical_review",
+        "name": "Request Clinical Review",
+        "type": "string",
+        "isPrimary": false,
+        "action": "Continue"
+      },
+      {
+        "id": "escalate",
+        "name": "Escalate",
+        "type": "string",
+        "isPrimary": false,
+        "action": "Continue"
+      }
+    ],
+    "fields": [
+      {
+        "id": "caseid",
+        "label": "Case ID",
+        "type": "text",
+        "direction": "input",
+        "binding": "vars.case.case_id"
+      },
+      {
+        "id": "maestrocaseid",
+        "label": "Maestro Case ID",
+        "type": "text",
+        "direction": "input",
+        "binding": "vars.case.maestro_case_id"
+      },
+      {
+        "id": "exceptioncategory",
+        "label": "Exception Category",
+        "type": "text",
+        "direction": "input",
+        "binding": "vars.exception.category"
+      },
+      {
+        "id": "impactedstage",
+        "label": "Impacted Stage",
+        "type": "text",
+        "direction": "input",
+        "binding": "vars.case.current_stage"
+      },
+      {
+        "id": "failurereason",
+        "label": "Failure or Risk Reason",
+        "type": "text",
+        "direction": "input",
+        "binding": "vars.exception.reason"
+      },
+      {
+        "id": "attemptcount",
+        "label": "Attempt Count",
+        "type": "number",
+        "direction": "input",
+        "binding": "vars.exception.attempt_count"
+      },
+      {
+        "id": "confidence",
+        "label": "Lowest Confidence",
+        "type": "number",
+        "direction": "input",
+        "binding": "vars.exception.confidence"
+      },
+      {
+        "id": "contradictoryitems",
+        "label": "Contradictory Evidence",
+        "type": "text",
+        "direction": "input",
+        "binding": "vars.exception.contradictory_items"
+      },
+      {
+        "id": "sladueat",
+        "label": "SLA Due At",
+        "type": "date",
+        "direction": "input",
+        "binding": "vars.case.sla_due_at"
+      },
+      {
+        "id": "recommendedaction",
+        "label": "Automation Recommended Action",
+        "type": "text",
+        "direction": "input",
+        "binding": "vars.exception.recommended_action"
+      },
+      {
+        "id": "traceid",
+        "label": "Trace or Job ID",
+        "type": "text",
+        "direction": "input",
+        "binding": "vars.exception.trace_id"
+      },
+      {
+        "id": "resolutionsummary",
+        "label": "Resolution Summary",
+        "type": "text",
+        "direction": "inOut",
+        "binding": "vars.exception.reason",
+        "variable": "resolution_summary",
+        "required": true
+      },
+      {
+        "id": "correctedvalue",
+        "label": "Corrected Evidence or Routing Value",
+        "type": "text",
+        "direction": "inOut",
+        "binding": "vars.exception.corrected_value",
+        "variable": "corrected_value",
+        "required": false
+      },
+      {
+        "id": "reviewerdecision",
+        "label": "Reviewer Decision",
+        "type": "text",
+        "direction": "output",
+        "variable": "reviewer_decision",
+        "required": true
+      },
+      {
+        "id": "nextaction",
+        "label": "Next Action",
+        "type": "text",
+        "direction": "output",
+        "variable": "next_action",
+        "required": true
+      },
+      {
+        "id": "assignedfollowuprole",
+        "label": "Assigned Follow-up Role",
+        "type": "text",
+        "direction": "output",
+        "variable": "assigned_followup_role",
+        "required": false
+      },
+      {
+        "id": "reviewernotes",
+        "label": "Reviewer Notes",
+        "type": "text",
+        "direction": "output",
+        "variable": "reviewer_notes",
+        "required": false
+      }
+    ]
+  },
+  "pauseResume": {
+    "maestroWaitsOn": "HITL completed handle for node humanExceptionReview1",
+    "resumeVariable": "$vars.humanExceptionReview1.output",
+    "allowedResumeOutcomes": [
+      "Resume Case",
+      "Retry API",
+      "Route To Robot",
+      "Request Clinical Review",
+      "Escalate"
+    ],
+    "caseStateUpdates": {
+      "Resume Case": {
+        "Case.active_secondary_stages": "clear_current_exception",
+        "HumanTask.status": "completed",
+        "HumanTask.reviewer_notes": "$output.reviewer_notes"
+      },
+      "Retry API": {
+        "SubmissionAttempt.status": "retry_requested",
+        "SubmissionAttempt.retry_count": "$input.attempt_count",
+        "Case.active_secondary_stages": "API Failure / Portal Fallback"
+      },
+      "Route To Robot": {
+        "SubmissionAttempt.channel": "portal_robot",
+        "SubmissionAttempt.status": "robot_fallback_requested",
+        "Case.active_secondary_stages": "API Failure / Portal Fallback"
+      },
+      "Request Clinical Review": {
+        "EvidenceMapping.needs_human_review": true,
+        "EvidenceMapping.human_review_reason": "$output.resolution_summary",
+        "Case.current_stage": "Clinical Validation"
+      },
+      "Escalate": {
+        "Case.urgency": "high",
+        "Case.sla_state": "at_risk",
+        "Case.active_secondary_stages": "SLA At Risk"
+      }
+    }
+  },
+  "taskCreatedEventPayload": {
+    "eventType": "human.task.created",
+    "actor_type": "system",
+    "actor_name": "Maestro Case",
+    "task_or_agent_name": "Human Exception Review",
+    "action": "create_action_center_task",
+    "case_id": "$input.case_id",
+    "maestro_case_id": "$input.maestro_case_id",
+    "input_summary": "Created exception review task for $input.exception_category.",
+    "output_summary": "Awaiting reviewer routing decision in Action Center.",
+    "evidence_refs": ["$input.trace_id"],
+    "data_service_updates": ["HumanTask", "AuditEvent"]
+  },
+  "downstreamEventPayload": {
+    "eventType": "human.task.completed",
+    "actor_type": "human",
+    "actor_name": "$completed_by_display_name",
+    "task_or_agent_name": "Human Exception Review",
+    "action": "$outcome",
+    "case_id": "$input.case_id",
+    "maestro_case_id": "$input.maestro_case_id",
+    "input_summary": "Reviewer handled $input.exception_category during $input.impacted_stage.",
+    "output_summary": "$output.next_action",
+    "evidence_refs": ["$input.trace_id", "$output.corrected_value"],
+    "data_service_updates": [
+      "Case",
+      "SubmissionAttempt",
+      "EvidenceMapping",
+      "AuditEvent",
+      "HumanTask"
+    ]
+  },
+  "guardrails": [
+    "Do not complete the exception task automatically.",
+    "Low-confidence or contradictory clinical evidence must route back to clinical validation before submission.",
+    "Repeated API or portal failures must leave an audit event even when the reviewer chooses retry."
+  ]
+}

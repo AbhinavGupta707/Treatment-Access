@@ -1,0 +1,24 @@
+{
+  "case": {
+    "case_id": "case-ta-synth-001",
+    "maestro_case_id": "maestro-case-synth-001",
+    "current_stage": "Denial Rescue / Appeal"
+  },
+  "payerDecision": {
+    "decision_id": "decision-denial-001",
+    "status": "denied",
+    "reason": "Step therapy documentation incomplete.",
+    "denial_code": "STEP_THERAPY_INCOMPLETE",
+    "appeal_deadline": "2026-07-15",
+    "policy_citation": "fixture://payer-policy/northstar-biologic#criterion-step-therapy-001"
+  },
+  "appealPacket": {
+    "appeal_id": "appeal-synth-001",
+    "appeal_strategy": "Clarify previously submitted synthetic prior-therapy evidence and cite the payer criterion.",
+    "draft_summary": "Administrative appeal draft summarizes source-backed prior-therapy evidence for clinician review.",
+    "draft_text": "This administrative draft requests reconsideration based on the cited synthetic medication-history evidence and payer policy criterion.",
+    "evidence_used": "fixture://ehr/medication-history/ta-001#span-12; fixture://payer-policy/northstar-biologic#criterion-step-therapy-001",
+    "unsupported_claim_warnings": "No unsupported clinical claims detected in the synthetic draft.",
+    "requested_edits": "Confirm wording before appeal submission."
+  }
+}
