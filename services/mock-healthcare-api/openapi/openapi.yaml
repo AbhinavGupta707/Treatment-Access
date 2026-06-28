@@ -1,0 +1,538 @@
+openapi: 3.1.0
+info:
+  title: Treatment Access Mock Healthcare API
+  version: 0.1.0
+  description: >
+    Synthetic-only local/dev API for UiPath API Workflows, agents, robots, and
+    the Command Center. It mocks EHR reads, payer prior authorization, appeal
+    decisions, pharmacy handoffs, scheduling tasks, demo toggles, and an audit
+    event mirror. Do not send real patient, payer, provider, credential, or PHI
+    data to this service.
+servers:
+  - url: http://localhost:8787
+    description: Local development
+tags:
+  - name: Health
+  - name: Demo
+  - name: Cases
+  - name: Events
+  - name: EHR
+  - name: Payer
+  - name: Pharmacy
+  - name: Scheduling
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Service health and synthetic-data confirmation
+      responses:
+        "200":
+          description: Health status
+  /demo/state:
+    get:
+      tags: [Demo]
+      summary: Read the complete in-memory synthetic demo state
+      responses:
+        "200":
+          description: Demo state
+  /demo/reset:
+    post:
+      tags: [Demo]
+      summary: Reset toggles, submissions, handoffs, and audit events to seed state
+      responses:
+        "200":
+          description: Reset state
+  /demo/toggles:
+    get:
+      tags: [Demo]
+      summary: Read active demo toggles
+      responses:
+        "200":
+          description: Toggle state
+    post:
+      tags: [Demo]
+      summary: Update demo behavior toggles
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DemoToggles"
+            examples:
+              missingSafetyLab:
+                value:
+                  missing_safety_lab: true
+              payerUnavailable:
+                value:
+                  payer_api_unavailable: true
+              denialReason:
+                value:
+                  denial_reason: medical_necessity
+      responses:
+        "200":
+          description: Updated toggles
+        "400":
+          $ref: "#/components/responses/ValidationError"
+  /cases:
+    get:
+      tags: [Cases]
+      summary: List synthetic treatment access cases
+      responses:
+        "200":
+          description: Case list
+  /cases/{caseId}:
+    get:
+      tags: [Cases]
+      summary: Read a case snapshot
+      parameters:
+        - $ref: "#/components/parameters/CaseId"
+      responses:
+        "200":
+          description: Case detail
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /cases/{caseId}/events:
+    get:
+      tags: [Events]
+      summary: Read case audit timeline
+      parameters:
+        - $ref: "#/components/parameters/CaseId"
+      responses:
+        "200":
+          description: Case events
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /cases/{caseId}/evidence-matrix:
+    get:
+      tags: [Cases]
+      summary: Read policy criteria and current evidence mappings
+      parameters:
+        - $ref: "#/components/parameters/CaseId"
+      responses:
+        "200":
+          description: Evidence matrix
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /cases/{caseId}/agent-traces:
+    get:
+      tags: [Cases]
+      summary: Read sanitized agent trace summaries from audit events
+      parameters:
+        - $ref: "#/components/parameters/CaseId"
+      responses:
+        "200":
+          description: Agent trace summaries
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /events:
+    get:
+      tags: [Events]
+      summary: List audit events, optionally filtered by case_id
+      parameters:
+        - name: case_id
+          in: query
+          schema:
+            type: string
+          example: case-syn-001
+      responses:
+        "200":
+          description: Audit events
+    post:
+      tags: [Events]
+      summary: Ingest a UiPath, agent, robot, human, or system audit event
+      description: >
+        event_id and timestamp may be omitted; the service will assign them.
+        actor_type, actor_name, task_or_agent_name, action, and case_id are
+        required so the Command Center can render a trustworthy timeline.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuditEventIngest"
+            example:
+              case_id: case-syn-001
+              actor_type: agent
+              actor_name: Evidence Retrieval Agent
+              task_or_agent_name: Evidence Retrieval Agent
+              action: evidence_mapped
+              output_summary: Mapped synthetic evidence to policy criteria.
+              trace_id: trace-syn-001
+      responses:
+        "200":
+          description: Stored event
+        "400":
+          $ref: "#/components/responses/ValidationError"
+  /patients/{id}:
+    get:
+      tags: [EHR]
+      summary: Read synthetic patient snapshot
+      parameters:
+        - $ref: "#/components/parameters/PatientId"
+      responses:
+        "200":
+          description: Patient snapshot
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /patients/{id}/orders/{orderId}:
+    get:
+      tags: [EHR]
+      summary: Read synthetic treatment order
+      parameters:
+        - $ref: "#/components/parameters/PatientId"
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: order-syn-001
+      responses:
+        "200":
+          description: Treatment order
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /patients/{id}/medication-history:
+    get:
+      tags: [EHR]
+      summary: Read synthetic medication history
+      parameters:
+        - $ref: "#/components/parameters/PatientId"
+      responses:
+        "200":
+          description: Medication history
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /patients/{id}/documents:
+    get:
+      tags: [EHR]
+      summary: List synthetic EHR documents without full text
+      parameters:
+        - $ref: "#/components/parameters/PatientId"
+      responses:
+        "200":
+          description: Document list
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /documents/{documentId}:
+    get:
+      tags: [EHR]
+      summary: Read a synthetic document with short fictional text
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: doc-progress-note
+      responses:
+        "200":
+          description: Document detail
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /patients/{id}/labs/safety-screening:
+    post:
+      tags: [EHR]
+      summary: Add clinician-supplied synthetic safety screening and clear missing-lab toggle
+      parameters:
+        - $ref: "#/components/parameters/PatientId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SafetyScreening"
+      responses:
+        "200":
+          description: Added safety screening
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /payer/prior-auth:
+    post:
+      tags: [Payer]
+      summary: Submit a synthetic prior authorization request
+      description: >
+        Returns unavailable with PAYER_API_DOWN when payer_api_unavailable is
+        true. Otherwise returns a submitted ID whose demo status resolves to a
+        deterministic denial reason.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PriorAuthRequest"
+      responses:
+        "200":
+          description: Submission accepted or unavailable
+        "400":
+          $ref: "#/components/responses/ValidationError"
+  /payer/prior-auth/{submissionId}/status:
+    get:
+      tags: [Payer]
+      summary: Read synthetic prior authorization status
+      parameters:
+        - name: submissionId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: pa-submission-syn-001
+      responses:
+        "200":
+          description: Submission decision or unavailable status
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /payer/appeals:
+    post:
+      tags: [Payer]
+      summary: Submit synthetic appeal packet
+      description: >
+        Returns blocked unless clinician_approved is true. Approved appeal
+        submissions resolve to an approval reference for pharmacy handoff.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppealRequest"
+      responses:
+        "200":
+          description: Appeal submitted or blocked
+        "400":
+          $ref: "#/components/responses/ValidationError"
+  /payer/appeals/{appealId}/status:
+    get:
+      tags: [Payer]
+      summary: Read synthetic appeal status
+      parameters:
+        - name: appealId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: appeal-syn-001
+      responses:
+        "200":
+          description: Appeal status
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /pharmacy/handoffs:
+    post:
+      tags: [Pharmacy]
+      summary: Create synthetic specialty pharmacy handoff
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PharmacyHandoffRequest"
+      responses:
+        "200":
+          description: Handoff created
+        "400":
+          $ref: "#/components/responses/ValidationError"
+  /pharmacy/handoffs/{handoffId}:
+    get:
+      tags: [Pharmacy]
+      summary: Read synthetic specialty pharmacy handoff
+      parameters:
+        - name: handoffId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: pharmacy-handoff-syn-001
+      responses:
+        "200":
+          description: Handoff detail
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /scheduling/tasks:
+    post:
+      tags: [Scheduling]
+      summary: Create synthetic patient-access scheduling task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SchedulingTaskRequest"
+      responses:
+        "200":
+          description: Scheduling task created
+        "400":
+          $ref: "#/components/responses/ValidationError"
+components:
+  parameters:
+    CaseId:
+      name: caseId
+      in: path
+      required: true
+      schema:
+        type: string
+      example: case-syn-001
+    PatientId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      example: patient-syn-001
+  responses:
+    ValidationError:
+      description: Deterministic validation error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotFound:
+      description: Synthetic fixture was not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  schemas:
+    DemoToggles:
+      type: object
+      properties:
+        missing_safety_lab:
+          type: boolean
+        payer_api_unavailable:
+          type: boolean
+        denial_reason:
+          type: string
+          enum: [step_therapy, safety_screen, medical_necessity]
+        clinician_rejects_assertion:
+          type: boolean
+    AuditEventIngest:
+      type: object
+      required: [case_id, actor_type, actor_name, task_or_agent_name, action]
+      properties:
+        event_id:
+          type: string
+        case_id:
+          type: string
+        maestro_case_id:
+          type: string
+        actor_type:
+          type: string
+          enum: [agent, api_workflow, robot, human, system]
+        actor_name:
+          type: string
+        task_or_agent_name:
+          type: string
+        action:
+          type: string
+        input_summary:
+          type: string
+        output_summary:
+          type: string
+        evidence_refs:
+          type: array
+          items:
+            type: string
+        trace_id:
+          type: string
+        orchestrator_job_id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+    SafetyScreening:
+      type: object
+      properties:
+        collected_at:
+          type: string
+          example: "2026-06-29"
+        tb_result:
+          type: string
+          enum: [negative, positive, indeterminate]
+        hepatitis_b_surface_antigen:
+          type: string
+          enum: [negative, positive, unknown]
+        source:
+          type: string
+        actor_name:
+          type: string
+    PriorAuthRequest:
+      type: object
+      properties:
+        case_id:
+          type: string
+          default: case-syn-001
+        patient_id:
+          type: string
+          default: patient-syn-001
+        order_id:
+          type: string
+          default: order-syn-001
+        channel:
+          type: string
+          enum: [api, portal_fallback]
+        submitted_by:
+          type: string
+        evidence_refs:
+          type: array
+          items:
+            type: string
+    AppealRequest:
+      type: object
+      required: [submission_id]
+      properties:
+        case_id:
+          type: string
+          default: case-syn-001
+        submission_id:
+          type: string
+        appeal_summary:
+          type: string
+        clinician_approved:
+          type: boolean
+        submitted_by:
+          type: string
+        evidence_refs:
+          type: array
+          items:
+            type: string
+    PharmacyHandoffRequest:
+      type: object
+      required: [approval_reference]
+      properties:
+        case_id:
+          type: string
+          default: case-syn-001
+        patient_id:
+          type: string
+          default: patient-syn-001
+        order_id:
+          type: string
+          default: order-syn-001
+        approval_reference:
+          type: string
+        requested_by:
+          type: string
+    SchedulingTaskRequest:
+      type: object
+      required: [handoff_id]
+      properties:
+        case_id:
+          type: string
+          default: case-syn-001
+        handoff_id:
+          type: string
+        task_type:
+          type: string
+        requested_by:
+          type: string
+    Error:
+      type: object
+      required: [error, message, syntheticDataOnly]
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        syntheticDataOnly:
+          type: boolean
+          const: true
