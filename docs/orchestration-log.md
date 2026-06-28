@@ -29,7 +29,7 @@ Checkpoint 0 goal:
 - add docs and setup verification;
 - create a clean baseline commit before launching worktree lanes.
 
-No worktree lanes have been launched yet.
+No worktree lanes had been launched at the end of Checkpoint 0.
 
 Checkpoint 0 is ready for Checkpoint 1 orchestration.
 
@@ -43,12 +43,12 @@ e2dcce8 Document UiPath project runtime assignment
 
 Launched worktree lanes:
 
-| Lane                      | Pending worktree ID                          | Ownership                                             |
-| ------------------------- | -------------------------------------------- | ----------------------------------------------------- |
-| Mock Healthcare API       | `local:f3eb3290-2877-405c-822c-36b9e49f3489` | `services/mock-healthcare-api/**`                     |
-| Demo Data & Fixture       | `local:4f12bc25-206f-46b6-86a1-1510fb8a8739` | `packages/demo-data/**`, `packages/shared-schemas/**` |
-| Command Center Data Shell | `local:576ad7f2-faba-41cd-8d08-287b2d9d3ff6` | `apps/command-center/**`                              |
-| QA/Reset                  | `local:d9634821-e772-4df1-8a43-0443f8c44f97` | `scripts/**`, checkpoint testing docs                 |
+| Lane                      | Thread ID                              | Worktree path                                                | Ownership                                             |
+| ------------------------- | -------------------------------------- | ------------------------------------------------------------ | ----------------------------------------------------- |
+| Mock Healthcare API       | `019f105f-90ac-7ee3-be9b-7854e00e8dee` | `/Users/abhinavgupta/.codex/worktrees/17fd/Treatment Access` | `services/mock-healthcare-api/**`                     |
+| Demo Data & Fixture       | `019f105f-d13c-7021-b53a-740ffa29e38a` | `/Users/abhinavgupta/.codex/worktrees/a333/Treatment Access` | `packages/demo-data/**`, `packages/shared-schemas/**` |
+| Command Center Data Shell | `019f1060-0b18-7b31-8cda-bb5778f445da` | `/Users/abhinavgupta/.codex/worktrees/f760/Treatment Access` | `apps/command-center/**`                              |
+| QA/Reset                  | `019f1060-44e8-73d1-9457-568ed29838f0` | `/Users/abhinavgupta/.codex/worktrees/1b65/Treatment Access` | `scripts/**`, checkpoint testing docs                 |
 
 Merge order:
 
@@ -58,3 +58,13 @@ Merge order:
 4. Command Center Data Shell
 
 Integration target: `main`.
+
+Control runbook: `docs/checkpoint-1-orchestrator.md`.
+
+Heartbeat automation: `treatment-access-checkpoint-1-orchestrator`.
+
+Main branch launch-log commit:
+
+```text
+cb56adc Launch checkpoint 1 orchestration lanes
+```
