@@ -1,0 +1,9 @@
+{
+  "apiBaseUrl": "http://127.0.0.1:8787",
+  "caseId": "case-syn-001",
+  "patientId": "patient-syn-001",
+  "orderId": "order-syn-001",
+  "approvalReference": "approval-syn-001",
+  "requestedBy": "Care Continuity Agent",
+  "taskType": "patient_access_coordination"
+}
