@@ -32,7 +32,11 @@
           "action": { "type": "string" },
           "inputSummary": { "type": "string" },
           "outputSummary": { "type": "string" },
-          "evidenceRefs": { "type": "array", "items": { "type": "string" }, "default": [] },
+          "evidenceRefs": {
+            "type": "array",
+            "items": { "type": "string" },
+            "default": []
+          },
           "traceId": { "type": "string" },
           "orchestratorJobId": { "type": "string" }
         },
@@ -66,8 +70,15 @@
             "WorkflowStart": {
               "set": "${Object.entries($workflow.definition?.document?.metadata?.variables?.schema?.document?.properties || {}).reduce((acc, [name, def]) => ({ ...acc, [name]: def?.default }), {}) }",
               "output": { "as": "${$input}" },
-              "export": { "as": "{ ...$context, variables: { ...$context.variables, ...$output } }" },
-              "metadata": { "activityType": "Assign", "displayName": "Workflow start", "fullName": "Assign", "isTransparent": true }
+              "export": {
+                "as": "{ ...$context, variables: { ...$context.variables, ...$output } }"
+              },
+              "metadata": {
+                "activityType": "Assign",
+                "displayName": "Workflow start",
+                "fullName": "Assign",
+                "isTransparent": true
+              }
             }
           },
           {
@@ -83,12 +94,21 @@
                   "authentication": "manual",
                   "method": "POST",
                   "url": "${$workflow.input.apiBaseUrl + '/events'}",
-                  "headers": { "ContentType": "application/json" },
+                  "headers": { "Content-Type": "application/json" },
                   "body": "${{ case_id: $workflow.input.caseId, maestro_case_id: $workflow.input.maestroCaseId, actor_type: 'api_workflow', actor_name: $workflow.input.actorName || 'UiPath API Workflow', task_or_agent_name: $workflow.input.taskOrAgentName || 'API Workflow', action: $workflow.input.action, input_summary: $workflow.input.inputSummary, output_summary: $workflow.input.outputSummary, evidence_refs: $workflow.input.evidenceRefs || [], trace_id: $workflow.input.traceId, orchestrator_job_id: $workflow.input.orchestratorJobId }}"
                 }
               },
-              "export": { "as": "{ ...$context, outputs: { ...$context?.outputs, \"http_request_1\": $output } }" },
-              "metadata": { "fullName": "Connector", "activityType": "Connector", "displayName": "Write Audit Event", "uiPathActivityTypeId": "5c4cc855-b42a-37e6-b910-de8588998fce", "assemblyQualifiedName": "Connector", "configuration": "{\"essentialConfiguration\":{\"connectorVersion\":\"\",\"executionType\":null,\"customFieldsRequestDetails\":null,\"instanceParameters\":{\"version\":\"1.0.0\",\"connectorKey\":\"uipath-uipath-http\",\"activityType\":\"Curated\",\"objectName\":\"http-request\",\"httpMethod\":\"POST\",\"operation\":null,\"eventOperation\":null,\"eventMode\":null,\"connectorObjects\":null,\"previewEndpoint\":null},\"objectName\":\"http-request\",\"operation\":null,\"packageVersion\":\"1.0.0\",\"httpMethod\":\"POST\",\"path\":\"/http-request\",\"unifiedTypesCompatible\":true,\"savedJitInputFieldId\":\"in_http-request\"}}" }
+              "export": {
+                "as": "{ ...$context, outputs: { ...$context?.outputs, \"http_request_1\": $output } }"
+              },
+              "metadata": {
+                "fullName": "Connector",
+                "activityType": "Connector",
+                "displayName": "Write Audit Event",
+                "uiPathActivityTypeId": "5c4cc855-b42a-37e6-b910-de8588998fce",
+                "assemblyQualifiedName": "Connector",
+                "configuration": "{\"essentialConfiguration\":{\"connectorVersion\":\"\",\"executionType\":null,\"customFieldsRequestDetails\":null,\"instanceParameters\":{\"version\":\"1.0.0\",\"connectorKey\":\"uipath-uipath-http\",\"activityType\":\"Curated\",\"objectName\":\"http-request\",\"httpMethod\":\"POST\",\"operation\":null,\"eventOperation\":null,\"eventMode\":null,\"connectorObjects\":null,\"previewEndpoint\":null},\"objectName\":\"http-request\",\"operation\":null,\"packageVersion\":\"1.0.0\",\"httpMethod\":\"POST\",\"path\":\"/http-request\",\"unifiedTypesCompatible\":true,\"savedJitInputFieldId\":\"in_http-request\"}}"
+              }
             }
           },
           {
@@ -96,12 +116,22 @@
               "response": "${{ workflow: 'write_event', caseId: $workflow.input.caseId, eventWrite: $context.outputs.http_request_1.content, event: $context.outputs.http_request_1.content.event, eventCount: $context.outputs.http_request_1.content.eventCount, httpStatus: $context.outputs.http_request_1.statusCode, syntheticDataOnly: true }}",
               "markJobAsFailed": false,
               "then": "end",
-              "export": { "as": "{ ...$context, outputs: { ...$context?.outputs, \"Response_1\": $output } }" },
-              "metadata": { "activityType": "Response", "displayName": "Response", "fullName": "Response" }
+              "export": {
+                "as": "{ ...$context, outputs: { ...$context?.outputs, \"Response_1\": $output } }"
+              },
+              "metadata": {
+                "activityType": "Response",
+                "displayName": "Response",
+                "fullName": "Response"
+              }
             }
           }
         ],
-        "metadata": { "activityType": "Sequence", "displayName": "Sequence", "fullName": "Sequence" }
+        "metadata": {
+          "activityType": "Sequence",
+          "displayName": "Sequence",
+          "fullName": "Sequence"
+        }
       }
     }
   ],
