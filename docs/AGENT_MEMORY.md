@@ -40,3 +40,23 @@ Integration note: Command Center fallback state was reconciled with the enriched
 ## Next Checkpoint
 
 Start Checkpoint 2 from the verified `main` branch. Recommended focus: UiPath Core Case Integration, with Maestro case shape, API Workflow calls into the mock API, Action Center/human review handoff, and event writes that appear in the Command Center timeline.
+
+## Checkpoint 2 Status
+
+Checkpoint 2 orchestration is being launched from `main` after Checkpoint 1 verification.
+
+Planned lanes:
+
+- Maestro/Data Service: define case shape, stages, secondary stages, Data Fabric/Data Service entity contracts, and field ownership.
+- API Workflows: create local UiPath API Workflow artifacts for EHR pull, event mirror write, payer submit/status, and pharmacy handoff.
+- Action Center: define clinician evidence validation and appeal signoff gates with task schemas, assignment notes, and pause/resume contract.
+- Apps/Intake: define or scaffold the UiPath intake/launch path so a real case can start from UiPath rather than local UI state.
+
+UiPath baseline before launch:
+
+- CLI `uip` version `1.195.1`.
+- Logged into org `galacticus`, tenant `DefaultTenant`.
+- Folder `TreatmentAccessHackathon` visible with key `4fba2fa1-012b-469a-b6aa-e5be3811c173`.
+- Command surfaces registered: Maestro Case, API Workflow, Action Center Tasks, Data Fabric, Coded Apps.
+
+Run/publish safety: static validation and discovery may run autonomously, but live Maestro debug, side-effecting workflow execution, publish, or deploy steps need explicit user approval.

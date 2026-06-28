@@ -141,3 +141,39 @@ Checkpoint 1 result:
 Known note: rendered browser screenshot capture remained unavailable in the Codex environment because the in-app browser backend was not discovered and Playwright is not installed in this repo. Build and live HTTP smoke coverage passed.
 
 Next checkpoint: start UiPath Core Case Integration from the verified `main` branch.
+
+## 2026-06-29 - Checkpoint 2 Launch Prep
+
+Starting point:
+
+```text
+799e0c1 Finalize checkpoint 1 integration
+```
+
+Checkpoint 2 outcome:
+
+- Create the UiPath core case integration layer: Maestro Case/Data Service shape, API Workflow calls into the mock healthcare API, Action Center review gates, and an intake/launch path.
+- Keep UiPath as the orchestration and governance source. The Command Center should visualize UiPath-written state/events rather than becoming the runtime system of record.
+
+Planned isolated lanes:
+
+| Merge order | Lane                 | Ownership                                     |
+| ----------- | -------------------- | --------------------------------------------- |
+| 1           | Maestro/Data Service | `uipath/maestro/**`, `uipath/data-service/**` |
+| 2           | API Workflows        | `uipath/api-workflows/**`                     |
+| 3           | Action Center        | `uipath/action-center/**`                     |
+| 4           | Apps/Intake          | `uipath/apps/**`, intake docs only            |
+
+Control runbook: `docs/checkpoint-2-orchestrator.md`.
+
+UiPath baseline checks before launch:
+
+- `uip --version` reports `1.195.1`.
+- `uip login status --output json` reports org `galacticus`, tenant `DefaultTenant`.
+- `uip or folders list --output json` includes `TreatmentAccessHackathon` with key `4fba2fa1-012b-469a-b6aa-e5be3811c173`.
+- Installed/registered command surfaces include `maestro case`, `api-workflow`, `tasks`, `df`, and `codedapp`.
+
+Runtime safety:
+
+- Workers may run static validation and non-destructive discovery.
+- Workers must not run live Maestro debug, side-effecting workflow execution, publish, or deploy steps without explicit user approval.
