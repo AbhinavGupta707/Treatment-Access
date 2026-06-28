@@ -1,0 +1,546 @@
+{
+  "contractVersion": "2026-06-29.checkpoint2",
+  "scope": {
+    "uipathFolderName": "TreatmentAccessHackathon",
+    "uipathFolderKey": "4fba2fa1-012b-469a-b6aa-e5be3811c173",
+    "liveEntityCreationApproved": false,
+    "syntheticDataOnly": true,
+    "syntheticDataDisclaimer": "Synthetic demo data only. Not PHI. Not medical or legal advice."
+  },
+  "naming": {
+    "entityPrefix": "Tacc",
+    "fieldCase": "camelCase",
+    "stageEnum": [
+      "intake",
+      "policy_evidence",
+      "clinical_validation",
+      "submission",
+      "payer_decision",
+      "denial_rescue",
+      "care_continuity",
+      "closure"
+    ],
+    "secondaryFlagEnum": [
+      "missing_evidence",
+      "api_failure_portal_fallback",
+      "denial_rescue_appeal",
+      "clinician_rework",
+      "sla_risk",
+      "human_exception_review"
+    ]
+  },
+  "entities": [
+    {
+      "name": "TaccCaseState",
+      "displayName": "Treatment Access Case State",
+      "description": "Current case snapshot mirrored from UiPath-owned runtime state.",
+      "primaryKeyField": "caseId",
+      "fields": [
+        {
+          "fieldName": "caseId",
+          "type": "STRING",
+          "isRequired": true,
+          "isUnique": true,
+          "lengthLimit": 80
+        },
+        { "fieldName": "maestroCaseId", "type": "STRING", "lengthLimit": 120 },
+        {
+          "fieldName": "externalCaseKey",
+          "type": "STRING",
+          "lengthLimit": 120
+        },
+        {
+          "fieldName": "patientId",
+          "type": "STRING",
+          "isRequired": true,
+          "lengthLimit": 80
+        },
+        {
+          "fieldName": "orderId",
+          "type": "STRING",
+          "isRequired": true,
+          "lengthLimit": 80
+        },
+        {
+          "fieldName": "payerId",
+          "type": "STRING",
+          "isRequired": true,
+          "lengthLimit": 80
+        },
+        { "fieldName": "serviceType", "type": "STRING", "lengthLimit": 120 },
+        { "fieldName": "medicationName", "type": "STRING", "lengthLimit": 160 },
+        { "fieldName": "urgency", "type": "STRING", "lengthLimit": 40 },
+        { "fieldName": "caseStatus", "type": "STRING", "lengthLimit": 80 },
+        { "fieldName": "currentStage", "type": "STRING", "lengthLimit": 80 },
+        {
+          "fieldName": "activeSecondaryStageFlagsJson",
+          "type": "STRING",
+          "lengthLimit": 1000
+        },
+        { "fieldName": "payerStatus", "type": "STRING", "lengthLimit": 80 },
+        {
+          "fieldName": "evidenceStatusSummary",
+          "type": "STRING",
+          "lengthLimit": 500
+        },
+        {
+          "fieldName": "humanReviewState",
+          "type": "STRING",
+          "lengthLimit": 160
+        },
+        {
+          "fieldName": "submissionIdsJson",
+          "type": "STRING",
+          "lengthLimit": 1000
+        },
+        { "fieldName": "appealStatus", "type": "STRING", "lengthLimit": 120 },
+        {
+          "fieldName": "pharmacyHandoffStatus",
+          "type": "STRING",
+          "lengthLimit": 120
+        },
+        { "fieldName": "lastEventTimestamp", "type": "DATETIME" },
+        { "fieldName": "slaDueAt", "type": "DATETIME" },
+        { "fieldName": "slaState", "type": "STRING", "lengthLimit": 40 },
+        { "fieldName": "outcome", "type": "STRING", "lengthLimit": 120 },
+        {
+          "fieldName": "syntheticDataDisclaimer",
+          "type": "STRING",
+          "isRequired": true,
+          "lengthLimit": 240
+        },
+        { "fieldName": "createdAt", "type": "DATETIME" },
+        { "fieldName": "updatedAt", "type": "DATETIME" }
+      ]
+    },
+    {
+      "name": "TaccEvidenceMapping",
+      "displayName": "Treatment Access Evidence Mapping",
+      "description": "Policy criterion to source evidence row with provenance and clinician review fields.",
+      "primaryKeyField": "mappingId",
+      "fields": [
+        {
+          "fieldName": "mappingId",
+          "type": "STRING",
+          "isRequired": true,
+          "isUnique": true,
+          "lengthLimit": 80
+        },
+        {
+          "fieldName": "caseId",
+          "type": "STRING",
+          "isRequired": true,
+          "lengthLimit": 80
+        },
+        {
+          "fieldName": "criterionId",
+          "type": "STRING",
+          "isRequired": true,
+          "lengthLimit": 80
+        },
+        { "fieldName": "policyId", "type": "STRING", "lengthLimit": 80 },
+        { "fieldName": "artifactId", "type": "STRING", "lengthLimit": 80 },
+        { "fieldName": "artifactType", "type": "STRING", "lengthLimit": 80 },
+        {
+          "fieldName": "requiredEvidenceType",
+          "type": "STRING",
+          "lengthLimit": 120
+        },
+        { "fieldName": "severity", "type": "STRING", "lengthLimit": 40 },
+        { "fieldName": "mappingStatus", "type": "STRING", "lengthLimit": 60 },
+        {
+          "fieldName": "evidenceSummary",
+          "type": "STRING",
+          "lengthLimit": 1000
+        },
+        {
+          "fieldName": "sourceQuoteShort",
+          "type": "STRING",
+          "lengthLimit": 500
+        },
+        {
+          "fieldName": "sourceSpanJson",
+          "type": "STRING",
+          "lengthLimit": 1000
+        },
+        { "fieldName": "policyCitation", "type": "STRING", "lengthLimit": 500 },
+        {
+          "fieldName": "confidence",
+          "type": "DECIMAL",
+          "decimalPrecision": 4,
+          "minValue": 0,
+          "maxValue": 1
+        },
+        { "fieldName": "needsHumanReview", "type": "BOOLEAN" },
+        {
+          "fieldName": "humanReviewReason",
+          "type": "STRING",
+          "lengthLimit": 500
+        },
+        {
+          "fieldName": "reviewerDecision",
+          "type": "STRING",
+          "lengthLimit": 80
+        },
+        {
+          "fieldName": "reviewerOriginalText",
+          "type": "STRING",
+          "lengthLimit": 2000
+        },
+        {
+          "fieldName": "reviewerFinalText",
+          "type": "STRING",
+          "lengthLimit": 2000
+        },
+        { "fieldName": "reviewerId", "type": "STRING", "lengthLimit": 120 },
+        { "fieldName": "reviewedAt", "type": "DATETIME" },
+        {
+          "fieldName": "syntheticDataDisclaimer",
+          "type": "STRING",
+          "isRequired": true,
+          "lengthLimit": 240
+        },
+        { "fieldName": "createdAt", "type": "DATETIME" },
+        { "fieldName": "updatedAt", "type": "DATETIME" }
+      ]
+    },
+    {
+      "name": "TaccAuditEvent",
+      "displayName": "Treatment Access Audit Event",
+      "description": "Append-only event stream written by UiPath tasks and read by Command Center.",
+      "primaryKeyField": "eventId",
+      "fields": [
+        {
+          "fieldName": "eventId",
+          "type": "STRING",
+          "isRequired": true,
+          "isUnique": true,
+          "lengthLimit": 100
+        },
+        {
+          "fieldName": "caseId",
+          "type": "STRING",
+          "isRequired": true,
+          "lengthLimit": 80
+        },
+        { "fieldName": "maestroCaseId", "type": "STRING", "lengthLimit": 120 },
+        {
+          "fieldName": "eventType",
+          "type": "STRING",
+          "isRequired": true,
+          "lengthLimit": 100
+        },
+        { "fieldName": "eventAction", "type": "STRING", "lengthLimit": 120 },
+        { "fieldName": "primaryStage", "type": "STRING", "lengthLimit": 80 },
+        {
+          "fieldName": "secondaryStageFlag",
+          "type": "STRING",
+          "lengthLimit": 80
+        },
+        { "fieldName": "actorType", "type": "STRING", "lengthLimit": 80 },
+        { "fieldName": "actorName", "type": "STRING", "lengthLimit": 160 },
+        {
+          "fieldName": "taskOrAgentName",
+          "type": "STRING",
+          "lengthLimit": 160
+        },
+        { "fieldName": "inputSummary", "type": "STRING", "lengthLimit": 1500 },
+        { "fieldName": "outputSummary", "type": "STRING", "lengthLimit": 2000 },
+        {
+          "fieldName": "evidenceRefsJson",
+          "type": "STRING",
+          "lengthLimit": 2000
+        },
+        { "fieldName": "traceId", "type": "STRING", "lengthLimit": 160 },
+        {
+          "fieldName": "orchestratorJobId",
+          "type": "STRING",
+          "lengthLimit": 160
+        },
+        {
+          "fieldName": "sourceRecordType",
+          "type": "STRING",
+          "lengthLimit": 120
+        },
+        { "fieldName": "sourceRecordId", "type": "STRING", "lengthLimit": 120 },
+        { "fieldName": "payloadJson", "type": "STRING", "lengthLimit": 8000 },
+        {
+          "fieldName": "syntheticDataDisclaimer",
+          "type": "STRING",
+          "isRequired": true,
+          "lengthLimit": 240
+        },
+        {
+          "fieldName": "eventTimestamp",
+          "type": "DATETIME",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "name": "TaccHumanReviewTask",
+      "displayName": "Treatment Access Human Review Task",
+      "description": "Action Center task mirror for clinician, nurse, coordinator, and exception review gates.",
+      "primaryKeyField": "taskId",
+      "fields": [
+        {
+          "fieldName": "taskId",
+          "type": "STRING",
+          "isRequired": true,
+          "isUnique": true,
+          "lengthLimit": 120
+        },
+        {
+          "fieldName": "caseId",
+          "type": "STRING",
+          "isRequired": true,
+          "lengthLimit": 80
+        },
+        {
+          "fieldName": "actionCenterTaskId",
+          "type": "STRING",
+          "lengthLimit": 120
+        },
+        { "fieldName": "taskCategory", "type": "STRING", "lengthLimit": 100 },
+        { "fieldName": "assignedRole", "type": "STRING", "lengthLimit": 120 },
+        { "fieldName": "assignedUser", "type": "STRING", "lengthLimit": 160 },
+        { "fieldName": "taskStatus", "type": "STRING", "lengthLimit": 80 },
+        { "fieldName": "reviewPrompt", "type": "STRING", "lengthLimit": 2000 },
+        {
+          "fieldName": "reviewerDecision",
+          "type": "STRING",
+          "lengthLimit": 80
+        },
+        { "fieldName": "reviewerNotes", "type": "STRING", "lengthLimit": 2000 },
+        { "fieldName": "dueAt", "type": "DATETIME" },
+        { "fieldName": "createdAt", "type": "DATETIME" },
+        { "fieldName": "completedAt", "type": "DATETIME" },
+        {
+          "fieldName": "syntheticDataDisclaimer",
+          "type": "STRING",
+          "isRequired": true,
+          "lengthLimit": 240
+        }
+      ]
+    },
+    {
+      "name": "TaccPayerSubmission",
+      "displayName": "Treatment Access Payer Submission",
+      "description": "Payer prior authorization or appeal submission attempt through API or portal fallback.",
+      "primaryKeyField": "attemptId",
+      "fields": [
+        {
+          "fieldName": "attemptId",
+          "type": "STRING",
+          "isRequired": true,
+          "isUnique": true,
+          "lengthLimit": 100
+        },
+        {
+          "fieldName": "caseId",
+          "type": "STRING",
+          "isRequired": true,
+          "lengthLimit": 80
+        },
+        { "fieldName": "packetId", "type": "STRING", "lengthLimit": 100 },
+        { "fieldName": "submissionKind", "type": "STRING", "lengthLimit": 80 },
+        {
+          "fieldName": "submissionChannel",
+          "type": "STRING",
+          "lengthLimit": 80
+        },
+        {
+          "fieldName": "submissionStatus",
+          "type": "STRING",
+          "lengthLimit": 80
+        },
+        { "fieldName": "startedAt", "type": "DATETIME" },
+        { "fieldName": "completedAt", "type": "DATETIME" },
+        {
+          "fieldName": "payloadSummary",
+          "type": "STRING",
+          "lengthLimit": 2000
+        },
+        {
+          "fieldName": "responseSummary",
+          "type": "STRING",
+          "lengthLimit": 2000
+        },
+        {
+          "fieldName": "orchestratorJobId",
+          "type": "STRING",
+          "lengthLimit": 160
+        },
+        {
+          "fieldName": "portalConfirmationId",
+          "type": "STRING",
+          "lengthLimit": 160
+        },
+        {
+          "fieldName": "payerSubmissionId",
+          "type": "STRING",
+          "lengthLimit": 160
+        },
+        { "fieldName": "errorCode", "type": "STRING", "lengthLimit": 120 },
+        {
+          "fieldName": "retryCount",
+          "type": "INTEGER",
+          "minValue": 0,
+          "maxValue": 10
+        },
+        {
+          "fieldName": "syntheticDataDisclaimer",
+          "type": "STRING",
+          "isRequired": true,
+          "lengthLimit": 240
+        }
+      ]
+    },
+    {
+      "name": "TaccAppealPacket",
+      "displayName": "Treatment Access Appeal Packet",
+      "description": "Administrative appeal draft and clinician signoff state.",
+      "primaryKeyField": "appealId",
+      "fields": [
+        {
+          "fieldName": "appealId",
+          "type": "STRING",
+          "isRequired": true,
+          "isUnique": true,
+          "lengthLimit": 100
+        },
+        {
+          "fieldName": "caseId",
+          "type": "STRING",
+          "isRequired": true,
+          "lengthLimit": 80
+        },
+        {
+          "fieldName": "payerDecisionId",
+          "type": "STRING",
+          "lengthLimit": 100
+        },
+        { "fieldName": "denialReason", "type": "STRING", "lengthLimit": 1000 },
+        { "fieldName": "denialCode", "type": "STRING", "lengthLimit": 120 },
+        { "fieldName": "appealDeadline", "type": "DATETIME" },
+        {
+          "fieldName": "appealStrategy",
+          "type": "STRING",
+          "lengthLimit": 1500
+        },
+        {
+          "fieldName": "evidenceUsedJson",
+          "type": "STRING",
+          "lengthLimit": 4000
+        },
+        { "fieldName": "draftText", "type": "STRING", "lengthLimit": 8000 },
+        {
+          "fieldName": "unsupportedClaimWarningsJson",
+          "type": "STRING",
+          "lengthLimit": 4000
+        },
+        { "fieldName": "clinicianApproved", "type": "BOOLEAN" },
+        {
+          "fieldName": "clinicianEdits",
+          "type": "STRING",
+          "lengthLimit": 4000
+        },
+        { "fieldName": "appealStatus", "type": "STRING", "lengthLimit": 120 },
+        { "fieldName": "submittedAt", "type": "DATETIME" },
+        {
+          "fieldName": "packetVersion",
+          "type": "INTEGER",
+          "minValue": 1,
+          "maxValue": 99
+        },
+        {
+          "fieldName": "syntheticDataDisclaimer",
+          "type": "STRING",
+          "isRequired": true,
+          "lengthLimit": 240
+        },
+        { "fieldName": "createdAt", "type": "DATETIME" },
+        { "fieldName": "updatedAt", "type": "DATETIME" }
+      ]
+    },
+    {
+      "name": "TaccPharmacyHandoff",
+      "displayName": "Treatment Access Pharmacy Handoff",
+      "description": "Specialty pharmacy or scheduling handoff after approval.",
+      "primaryKeyField": "handoffId",
+      "fields": [
+        {
+          "fieldName": "handoffId",
+          "type": "STRING",
+          "isRequired": true,
+          "isUnique": true,
+          "lengthLimit": 100
+        },
+        {
+          "fieldName": "caseId",
+          "type": "STRING",
+          "isRequired": true,
+          "lengthLimit": 80
+        },
+        { "fieldName": "approvalSource", "type": "STRING", "lengthLimit": 120 },
+        { "fieldName": "handoffStatus", "type": "STRING", "lengthLimit": 120 },
+        {
+          "fieldName": "pharmacySubmissionId",
+          "type": "STRING",
+          "lengthLimit": 160
+        },
+        {
+          "fieldName": "schedulingTaskId",
+          "type": "STRING",
+          "lengthLimit": 160
+        },
+        {
+          "fieldName": "coordinatorRole",
+          "type": "STRING",
+          "lengthLimit": 120
+        },
+        {
+          "fieldName": "payloadSummary",
+          "type": "STRING",
+          "lengthLimit": 2000
+        },
+        {
+          "fieldName": "responseSummary",
+          "type": "STRING",
+          "lengthLimit": 2000
+        },
+        { "fieldName": "startedAt", "type": "DATETIME" },
+        { "fieldName": "completedAt", "type": "DATETIME" },
+        {
+          "fieldName": "syntheticDataDisclaimer",
+          "type": "STRING",
+          "isRequired": true,
+          "lengthLimit": 240
+        }
+      ]
+    }
+  ],
+  "readModels": [
+    {
+      "name": "CommandCenterCaseSnapshot",
+      "sourceEntities": [
+        "TaccCaseState",
+        "TaccHumanReviewTask",
+        "TaccPayerSubmission",
+        "TaccAppealPacket",
+        "TaccPharmacyHandoff"
+      ],
+      "key": "caseId"
+    },
+    {
+      "name": "CommandCenterEvidenceMatrix",
+      "sourceEntities": ["TaccEvidenceMapping"],
+      "key": "caseId"
+    },
+    {
+      "name": "CommandCenterAuditTimeline",
+      "sourceEntities": ["TaccAuditEvent"],
+      "key": "caseId"
+    }
+  ]
+}
