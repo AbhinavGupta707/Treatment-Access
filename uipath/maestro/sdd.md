@@ -171,10 +171,10 @@ approval, edit, rejection, or request for more evidence.
 
 #### Stage Exit Conditions
 
-| WHEN                                                        | IF                                         | Exit Type | Marks Stage Complete                                | Display Name |
-| ----------------------------------------------------------- | ------------------------------------------ | --------- | --------------------------------------------------- | ------------ |
-| `required-tasks-completed`                                  | `=js:vars.clinicianDecision === "approved" |           | vars.clinicianDecision === "edited"`                | exit-only    | Yes | Clinical validation complete |
-| `selected-tasks-completed("Clinician Evidence Validation")` | `=js:vars.clinicianDecision === "rejected" |           | vars.clinicianDecision === "request_more_evidence"` | exit-only    | No  | Divert to clinician rework   |
+| WHEN                                                        | IF                                                                                                  | Exit Type | Marks Stage Complete | Display Name                 |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | --------- | -------------------- | ---------------------------- |
+| `required-tasks-completed`                                  | `=js:vars.clinicianDecision === "approved" \|\| vars.clinicianDecision === "edited"`                | exit-only | Yes                  | Clinical validation complete |
+| `selected-tasks-completed("Clinician Evidence Validation")` | `=js:vars.clinicianDecision === "rejected" \|\| vars.clinicianDecision === "request_more_evidence"` | exit-only | No                   | Divert to clinician rework   |
 
 #### Tasks
 
@@ -227,10 +227,10 @@ rescue for denied or request-for-information outcomes.
 
 #### Stage Exit Conditions
 
-| WHEN                                               | IF                                    | Exit Type | Marks Stage Complete        | Display Name   |
-| -------------------------------------------------- | ------------------------------------- | --------- | --------------------------- | -------------- |
-| `required-tasks-completed`                         | `=js:vars.payerStatus === "approved"` | exit-only | Yes                         | Payer approved |
-| `selected-tasks-completed("Fetch Payer Decision")` | `=js:vars.payerStatus === "denied"    |           | vars.payerStatus === "rfi"` | exit-only      | No  | Divert to denial rescue |
+| WHEN                                               | IF                                                                  | Exit Type | Marks Stage Complete | Display Name            |
+| -------------------------------------------------- | ------------------------------------------------------------------- | --------- | -------------------- | ----------------------- |
+| `required-tasks-completed`                         | `=js:vars.payerStatus === "approved"`                               | exit-only | Yes                  | Payer approved          |
+| `selected-tasks-completed("Fetch Payer Decision")` | `=js:vars.payerStatus === "denied" \|\| vars.payerStatus === "rfi"` | exit-only | No                   | Divert to denial rescue |
 
 #### Tasks
 
@@ -249,9 +249,9 @@ source-backed evidence, and requires clinician signoff before resubmission.
 
 #### Stage Entry Conditions
 
-| WHEN                                      | IF                                 | Interrupting | Display Name                |
-| ----------------------------------------- | ---------------------------------- | ------------ | --------------------------- |
-| `selected-stage-exited("Payer Decision")` | `=js:vars.payerStatus === "denied" |              | vars.payerStatus === "rfi"` | No  | Denial or RFI received |
+| WHEN                                      | IF                                                                  | Interrupting | Display Name           |
+| ----------------------------------------- | ------------------------------------------------------------------- | ------------ | ---------------------- |
+| `selected-stage-exited("Payer Decision")` | `=js:vars.payerStatus === "denied" \|\| vars.payerStatus === "rfi"` | No           | Denial or RFI received |
 
 #### Stage Exit Conditions
 
