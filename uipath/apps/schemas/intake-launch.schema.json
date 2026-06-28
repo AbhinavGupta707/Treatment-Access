@@ -1,0 +1,204 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://treatment-access.local/uipath/apps/intake-launch.schema.json",
+  "title": "Treatment Access Intake Launch Payload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "patient",
+    "order",
+    "payer",
+    "treatment",
+    "urgency",
+    "scenario",
+    "caseStart"
+  ],
+  "properties": {
+    "patient": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["syntheticPatientId"],
+      "properties": {
+        "syntheticPatientId": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^syn-patient-[a-z0-9-]+$"
+        },
+        "displayLabel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      }
+    },
+    "order": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["syntheticOrderId"],
+      "properties": {
+        "syntheticOrderId": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^syn-order-[a-z0-9-]+$"
+        },
+        "diagnosisCode": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32
+        }
+      }
+    },
+    "payer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payerId"],
+      "properties": {
+        "payerId": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^payer-[a-z0-9-]+$"
+        },
+        "planId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        }
+      }
+    },
+    "treatment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["treatmentId"],
+      "properties": {
+        "treatmentId": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^tx-[a-z0-9-]+$"
+        },
+        "serviceLine": {
+          "type": "string",
+          "enum": [
+            "gastroenterology",
+            "rheumatology",
+            "dermatology",
+            "oncology",
+            "other"
+          ]
+        }
+      }
+    },
+    "urgency": {
+      "type": "string",
+      "enum": ["routine", "urgent", "expedited"]
+    },
+    "documents": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "policyDocumentId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "clinicalPacketId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "denialLetterId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        }
+      }
+    },
+    "scenario": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "forceMissingEvidence",
+        "forceClinicianReview",
+        "forcePayerApiFailure",
+        "forceInitialDenial",
+        "forceAppealApproval",
+        "seedTimeline"
+      ],
+      "properties": {
+        "forceMissingEvidence": {
+          "type": "boolean"
+        },
+        "forceClinicianReview": {
+          "type": "boolean"
+        },
+        "forcePayerApiFailure": {
+          "type": "boolean"
+        },
+        "forceInitialDenial": {
+          "type": "boolean"
+        },
+        "forceAppealApproval": {
+          "type": "boolean"
+        },
+        "seedTimeline": {
+          "type": "string",
+          "enum": ["minimal", "judge_demo", "full_trace"]
+        }
+      }
+    },
+    "caseStart": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requestedByRole",
+        "sourceSurface",
+        "demoRunId",
+        "requestedAtUtc",
+        "uipathFolderKey"
+      ],
+      "properties": {
+        "requestedByRole": {
+          "type": "string",
+          "enum": [
+            "pa_specialist",
+            "clinician",
+            "nurse_coordinator",
+            "revenue_cycle_manager",
+            "patient_access_coordinator",
+            "compliance_reviewer"
+          ]
+        },
+        "sourceSurface": {
+          "type": "string",
+          "enum": [
+            "uipath_apps",
+            "maestro_case_app",
+            "studio_web_manual_start"
+          ]
+        },
+        "demoRunId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "pattern": "^demo-[A-Za-z0-9_.:-]+$"
+        },
+        "requestedAtUtc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "uipathFolderKey": {
+          "type": "string",
+          "const": "4fba2fa1-012b-469a-b6aa-e5be3811c173"
+        },
+        "commandCenterBaseUrl": {
+          "type": "string",
+          "format": "uri",
+          "maxLength": 240
+        },
+        "operatorNotes": {
+          "type": "string",
+          "maxLength": 500
+        }
+      }
+    }
+  }
+}

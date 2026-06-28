@@ -1,0 +1,40 @@
+{
+  "patient": {
+    "syntheticPatientId": "syn-patient-ibd-001",
+    "displayLabel": "Synthetic IBD patient 001"
+  },
+  "order": {
+    "syntheticOrderId": "syn-order-biologic-001",
+    "diagnosisCode": "SYN-IBD"
+  },
+  "payer": {
+    "payerId": "payer-northstar",
+    "planId": "plan-commercial-demo"
+  },
+  "treatment": {
+    "treatmentId": "tx-biologic-alpha",
+    "serviceLine": "gastroenterology"
+  },
+  "urgency": "routine",
+  "documents": {
+    "policyDocumentId": "policy-northstar-biologic-2026",
+    "clinicalPacketId": "chart-packet-ibd-complete"
+  },
+  "scenario": {
+    "forceMissingEvidence": false,
+    "forceClinicianReview": true,
+    "forcePayerApiFailure": false,
+    "forceInitialDenial": false,
+    "forceAppealApproval": false,
+    "seedTimeline": "minimal"
+  },
+  "caseStart": {
+    "requestedByRole": "pa_specialist",
+    "sourceSurface": "uipath_apps",
+    "demoRunId": "demo-2026-06-29-happy-path",
+    "requestedAtUtc": "2026-06-29T09:00:00Z",
+    "uipathFolderKey": "4fba2fa1-012b-469a-b6aa-e5be3811c173",
+    "commandCenterBaseUrl": "http://localhost:3000",
+    "operatorNotes": "Synthetic happy path launch."
+  }
+}

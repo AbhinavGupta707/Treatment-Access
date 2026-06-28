@@ -1,0 +1,41 @@
+{
+  "patient": {
+    "syntheticPatientId": "syn-patient-ibd-001",
+    "displayLabel": "Synthetic IBD patient 001"
+  },
+  "order": {
+    "syntheticOrderId": "syn-order-biologic-001",
+    "diagnosisCode": "SYN-IBD"
+  },
+  "payer": {
+    "payerId": "payer-northstar",
+    "planId": "plan-commercial-demo"
+  },
+  "treatment": {
+    "treatmentId": "tx-biologic-alpha",
+    "serviceLine": "gastroenterology"
+  },
+  "urgency": "urgent",
+  "documents": {
+    "policyDocumentId": "policy-northstar-biologic-2026",
+    "clinicalPacketId": "chart-packet-ibd-gap",
+    "denialLetterId": "denial-northstar-step-therapy"
+  },
+  "scenario": {
+    "forceMissingEvidence": true,
+    "forceClinicianReview": true,
+    "forcePayerApiFailure": true,
+    "forceInitialDenial": true,
+    "forceAppealApproval": true,
+    "seedTimeline": "judge_demo"
+  },
+  "caseStart": {
+    "requestedByRole": "pa_specialist",
+    "sourceSurface": "uipath_apps",
+    "demoRunId": "demo-2026-06-29-denial-rescue",
+    "requestedAtUtc": "2026-06-29T09:05:00Z",
+    "uipathFolderKey": "4fba2fa1-012b-469a-b6aa-e5be3811c173",
+    "commandCenterBaseUrl": "http://localhost:3000",
+    "operatorNotes": "Synthetic judge demo path with portal fallback and appeal approval."
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://treatment-access.local/uipath/apps/event-mirror-record.schema.json",
+  "title": "Treatment Access Event Mirror Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "eventId",
+    "eventType",
+    "taccCaseId",
+    "maestroCaseInstanceId",
+    "demoRunId",
+    "occurredAtUtc",
+    "stage",
+    "status",
+    "source",
+    "summary",
+    "payload"
+  ],
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "eventType": {
+      "type": "string",
+      "enum": [
+        "case.created",
+        "case.stage_changed",
+        "case.task_started",
+        "case.task_completed",
+        "case.exception"
+      ]
+    },
+    "taccCaseId": {
+      "type": "string",
+      "pattern": "^TACC-[0-9]{8}-[0-9A-Za-z]+$"
+    },
+    "maestroCaseInstanceId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "demoRunId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "occurredAtUtc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "stage": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "status": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["surface", "producer", "uipathFolderKey"],
+      "properties": {
+        "surface": {
+          "type": "string",
+          "enum": [
+            "uipath_apps",
+            "maestro_case_app",
+            "studio_web_manual_start",
+            "maestro_case",
+            "api_workflow"
+          ]
+        },
+        "producer": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "uipathFolderKey": {
+          "type": "string",
+          "const": "4fba2fa1-012b-469a-b6aa-e5be3811c173"
+        }
+      }
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}
