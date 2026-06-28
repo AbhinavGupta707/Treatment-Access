@@ -821,9 +821,15 @@ function caseSnapshot(state: MockState): TreatmentAccessCase {
             ? "policy_evidence"
             : seedCase.current_stage,
     active_secondary_stages: [
-      ...(state.toggles.missing_safety_lab ? ["Missing Evidence"] : []),
-      ...(hasUnavailableSubmission ? ["API Failure / Portal Fallback"] : []),
-      ...(hasSubmission && !hasAppeal ? ["Denial Rescue / Appeal"] : []),
+      ...(state.toggles.missing_safety_lab
+        ? (["missing_evidence"] as const)
+        : []),
+      ...(hasUnavailableSubmission
+        ? (["api_failure_portal_fallback"] as const)
+        : []),
+      ...(hasSubmission && !hasAppeal
+        ? (["denial_rescue_appeal"] as const)
+        : []),
     ],
     last_event_at: latestEvent?.timestamp ?? seedCase.last_event_at,
   };

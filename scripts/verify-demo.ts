@@ -125,9 +125,33 @@ try {
     payerResponse.status === "unavailable",
     "payer API did not report unavailable when toggled",
   );
+  assert(
+    payerResponse.fallback_required === true,
+    "payer API unavailable path did not require fallback",
+  );
+
+  const unavailableDecision = await getJson(
+    `/payer/prior-auth/${payerResponse.submission_id}/status`,
+  );
+  assert(
+    unavailableDecision.status === "unavailable",
+    "unavailable submission status did not remain unavailable",
+  );
+
+  await postJson("/demo/toggles", {
+    payer_api_unavailable: false,
+    denial_reason: "safety_screen",
+  });
+  const deniedPayerResponse = await postJson("/payer/prior-auth", {
+    case_id: seededState.case.case_id,
+  });
+  assert(
+    deniedPayerResponse.status === "submitted",
+    "payer API did not accept submission after availability was restored",
+  );
 
   const payerDecision = await getJson(
-    "/payer/prior-auth/pa-submission-syn-001/status",
+    `/payer/prior-auth/${deniedPayerResponse.submission_id}/status`,
   );
   assert(
     payerDecision.reason === "safety_screen",

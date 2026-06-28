@@ -38,7 +38,7 @@ describe("mock healthcare api", () => {
         order_id: "order-syn-001",
       },
       patient: {
-        synthetic_name: "Maya Rivers",
+        synthetic_name: "Synthetic Patient TAC-001",
       },
       order: {
         medication_name: "Fictionalimab",

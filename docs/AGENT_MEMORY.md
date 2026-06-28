@@ -16,3 +16,7 @@ Treatment Access Command Center for UiPath AgentHack 2026 Track 1 - Maestro Case
 ## Current Setup Risk
 
 Assistant/Robot is installed and available. The connected workspace machine is assigned to `TreatmentAccessHackathon`, and the folder reports one connected/available `Development` runtime. The tenant's single `Unattended` license is intentionally unallocated; reserve it later only if the final RPA portal fallback must run as a fully unattended Orchestrator job.
+
+## Checkpoint 1 Status
+
+Data/contracts, mock API, and QA/reset lanes are merged into `main`. Command Center Data Shell is still active in its isolated worktree and should be reviewed/merged last after it reports completion.

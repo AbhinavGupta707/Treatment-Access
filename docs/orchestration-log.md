@@ -68,3 +68,41 @@ Main branch launch-log commit:
 ```text
 cb56adc Launch checkpoint 1 orchestration lanes
 ```
+
+## 2026-06-28 - Checkpoint 1 Partial Integration
+
+Merged lanes:
+
+| Lane                | Worker commit | Integration result |
+| ------------------- | ------------- | ------------------ |
+| Demo Data & Fixture | `c9d4e42`     | Merged into `main` |
+| Mock Healthcare API | `e978bcf`     | Merged into `main` |
+| QA/Reset            | `20efb54`     | Merged into `main` |
+
+Active lane still running:
+
+| Lane                      | Thread ID                              | Worktree path                                                |
+| ------------------------- | -------------------------------------- | ------------------------------------------------------------ |
+| Command Center Data Shell | `019f1060-0b18-7b31-8cda-bb5778f445da` | `/Users/abhinavgupta/.codex/worktrees/f760/Treatment Access` |
+
+Integration patches applied:
+
+- Updated mock API test expectation for the enriched synthetic patient label.
+- Updated `active_secondary_stages` values to use shared-schema secondary stage flags.
+- Updated `scripts/verify-demo.ts` so the smoke test checks payer API unavailable fallback and denial-reason behavior as two separate payer states.
+
+Checks run after integration:
+
+- `CI=true pnpm --filter @tacc/shared-schemas test`
+- `CI=true pnpm --filter @tacc/demo-data test`
+- `CI=true pnpm build:contracts`
+- `CI=true pnpm --filter @tacc/mock-healthcare-api test`
+- `CI=true pnpm --filter @tacc/mock-healthcare-api typecheck`
+- `CI=true pnpm --filter @tacc/mock-healthcare-api build`
+- `CI=true pnpm verify:setup`
+- `CI=true pnpm format:check`
+- `git diff --check`
+- `CI=true pnpm test`
+- `CI=true pnpm smoke:checkpoint1 -- --port 8877`
+
+Note: the default smoke port `8787` was already occupied by a local API process, so the integrated smoke was verified on alternate port `8877`.
