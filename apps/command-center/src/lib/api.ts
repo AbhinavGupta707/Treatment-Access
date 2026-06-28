@@ -12,6 +12,42 @@ import type { DemoState, RuntimeState } from "./types";
 
 const fallbackNow = "2026-06-28T22:00:00.000Z";
 
+const fallbackCitations = {
+  diagnosis: {
+    citation_id: "citation-fallback-diagnosis",
+    label: "Synthetic progress note",
+    source_span: {
+      artifact_id: "artifact-progress-note",
+      source_uri: "fixture://fallback/progress-note.md",
+      section_label: "Assessment",
+      excerpt:
+        "Fictional source excerpt: symptoms remain moderate-to-severe despite therapy.",
+    },
+  },
+  stepTherapy: {
+    citation_id: "citation-fallback-step-therapy",
+    label: "Synthetic medication history",
+    source_span: {
+      artifact_id: "artifact-med-history",
+      source_uri: "fixture://fallback/medication-history.json",
+      section_label: "Prior therapies",
+      excerpt:
+        "Fictional source excerpt: inadequate response to mesalamine and steroid taper.",
+    },
+  },
+  safety: {
+    citation_id: "citation-fallback-safety-screen",
+    label: "Synthetic safety screening",
+    source_span: {
+      artifact_id: "artifact-safety-labs",
+      source_uri: "fixture://fallback/safety-screening.csv",
+      section_label: "Screening results",
+      excerpt:
+        "Fictional source excerpt: TB negative; hepatitis B surface antigen negative.",
+    },
+  },
+};
+
 const fallbackState: DemoState = {
   case: {
     case_id: "case-syn-001",
@@ -24,11 +60,14 @@ const fallbackState: DemoState = {
     urgency: "urgent",
     status: "Local synthetic fallback",
     current_stage: "intake",
-    active_secondary_stages: ["event_mirror_unavailable"],
+    active_secondary_stages: ["api_failure_portal_fallback", "sla_at_risk"],
     sla_due_at: "2026-07-01T17:00:00.000Z",
     sla_state: "at_risk",
     outcome: null,
+    payer_status: "unavailable",
     last_event_at: fallbackNow,
+    synthetic_data_disclaimer:
+      "Synthetic fictional demo data; not a real person or encounter.",
   },
   patient: {
     patient_id: "patient-syn-001",
@@ -37,6 +76,8 @@ const fallbackState: DemoState = {
     diagnosis_codes: ["K50.90"],
     coverage_plan: "Northstar Premier PPO",
     provider_id: "provider-syn-gi-001",
+    preferred_contact_channel: "portal",
+    synthetic_data_disclaimer: "Synthetic fictional patient for demo use only.",
   },
   order: {
     order_id: "order-syn-001",
@@ -102,6 +143,7 @@ const fallbackState: DemoState = {
       human_review_reason:
         "High-impact medical assertion requires clinician validation.",
       reviewer_decision: "pending",
+      citations: [fallbackCitations.diagnosis],
     },
     {
       mapping_id: "mapping-step-therapy",
@@ -117,6 +159,7 @@ const fallbackState: DemoState = {
       confidence: 0.94,
       needs_human_review: false,
       reviewer_decision: "pending",
+      citations: [fallbackCitations.stepTherapy],
     },
     {
       mapping_id: "mapping-safety-screen",
@@ -132,6 +175,7 @@ const fallbackState: DemoState = {
       confidence: 0.91,
       needs_human_review: false,
       reviewer_decision: "pending",
+      citations: [fallbackCitations.safety],
     },
   ],
   toggles: {
@@ -139,6 +183,8 @@ const fallbackState: DemoState = {
     payer_api_unavailable: false,
     denial_reason: "step_therapy",
     clinician_rejects_assertion: false,
+    force_low_confidence_extraction: false,
+    pharmacy_handoff_failure: false,
   },
   events: [
     {

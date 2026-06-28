@@ -454,7 +454,9 @@ function EvidenceMatrix({
                   />
                   <p>{evidence?.evidence_summary ?? "No mapping available."}</p>
                   <small>
-                    {evidence?.source_span ?? criterion.source_span}
+                    {formatSourceReference(
+                      evidence?.source_span ?? criterion.source_span,
+                    )}
                   </small>
                 </div>
                 <div role="cell">
@@ -858,6 +860,16 @@ function actorIcon(actorType: AuditEvent["actor_type"]) {
 
 function labelize(value: string) {
   return value.replace(/_/g, " ");
+}
+
+function formatSourceReference(
+  source:
+    EvidenceMapping["source_span"] | PolicyCriterion["source_span"] | undefined,
+) {
+  if (!source) return "No source reference";
+  if (typeof source === "string") return source;
+
+  return [source.source_uri, source.section_label].filter(Boolean).join(" · ");
 }
 
 function formatTime(value: string) {

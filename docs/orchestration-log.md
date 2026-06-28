@@ -106,3 +106,38 @@ Checks run after integration:
 - `CI=true pnpm smoke:checkpoint1 -- --port 8877`
 
 Note: the default smoke port `8787` was already occupied by a local API process, so the integrated smoke was verified on alternate port `8877`.
+
+## 2026-06-28 - Checkpoint 1 Final Integration
+
+Merged final lane:
+
+| Lane                      | Worker commit | Integration result |
+| ------------------------- | ------------- | ------------------ |
+| Command Center Data Shell | `a86bc68`     | Merged into `main` |
+
+Integration patches applied:
+
+- Updated the Command Center API-unavailable fallback to use the enriched shared contract: valid secondary stage flags, patient synthetic disclaimer fields, required toggle fields, payer unavailable status, and citation-backed fallback evidence mappings.
+- Updated the evidence matrix rendering so both legacy string spans and structured source spans display cleanly.
+
+Final checks passed:
+
+- `CI=true pnpm verify:setup`
+- `git diff --check`
+- `CI=true pnpm --filter @tacc/command-center typecheck`
+- `CI=true pnpm --filter @tacc/command-center build`
+- `CI=true pnpm verify`
+- `CI=true pnpm format:check`
+- `CI=true pnpm seed`
+- `CI=true pnpm smoke:checkpoint1 -- --port 8877`
+
+Checkpoint 1 result:
+
+- Enriched synthetic fixture contracts are available for UiPath workflow lanes.
+- Mock healthcare API exposes live local endpoints for demo state, reset, toggles, payer decisions, pharmacy handoff, and events.
+- Repeatable seed/reset/smoke tooling is in place.
+- Command Center renders an API-backed operations console with honest fallback behavior.
+
+Known note: rendered browser screenshot capture remained unavailable in the Codex environment because the in-app browser backend was not discovered and Playwright is not installed in this repo. Build and live HTTP smoke coverage passed.
+
+Next checkpoint: start UiPath Core Case Integration from the verified `main` branch.
