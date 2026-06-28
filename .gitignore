@@ -1,0 +1,33 @@
+.DS_Store
+
+# Dependencies and package-manager state
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+.turbo/
+coverage/
+*.tsbuildinfo
+
+# Local env/secrets
+.env
+.env.*
+!.env.example
+
+# Deployment/local tooling
+.vercel/
+*.log
+
+# UiPath local/generated assets
+.uipath/.skills/
+.agents/skills/
+UiPath Assistant*.dmg
+*.nupkg
+*.uipx
+
+# Test/runtime artifacts
+playwright-report/
+test-results/
+.vitest/
