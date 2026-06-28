@@ -11,6 +11,7 @@ Checkpoint 2 outcome: UiPath becomes the live orchestration source for the Treat
 - Project root: `/Users/abhinavgupta/Desktop/UiPath/Treatment Access`
 - Integration branch: `main`
 - Checkpoint 1 verified commit: `799e0c1 Finalize checkpoint 1 integration`
+- Checkpoint 2 launch commit: `27ff4f6 Launch checkpoint 2 orchestration`
 - UiPath folder: `TreatmentAccessHackathon`
 - UiPath folder key: `4fba2fa1-012b-469a-b6aa-e5be3811c173`
 - Orchestration log: `docs/orchestration-log.md`
@@ -19,12 +20,12 @@ Checkpoint 2 outcome: UiPath becomes the live orchestration source for the Treat
 
 ## Active Lanes
 
-| Merge order | Lane                 | Thread ID | Worktree path | Ownership                                     |
-| ----------- | -------------------- | --------- | ------------- | --------------------------------------------- |
-| 1           | Maestro/Data Service | TBD       | TBD           | `uipath/maestro/**`, `uipath/data-service/**` |
-| 2           | API Workflows        | TBD       | TBD           | `uipath/api-workflows/**`                     |
-| 3           | Action Center        | TBD       | TBD           | `uipath/action-center/**`                     |
-| 4           | Apps/Intake          | TBD       | TBD           | `uipath/apps/**`, intake docs only            |
+| Merge order | Lane                 | Thread ID                              | Worktree path                                                | Ownership                                     |
+| ----------- | -------------------- | -------------------------------------- | ------------------------------------------------------------ | --------------------------------------------- |
+| 1           | Maestro/Data Service | `019f1084-f0bc-7bd3-a9fe-7cb4d7cab18b` | `/Users/abhinavgupta/.codex/worktrees/ccc5/Treatment Access` | `uipath/maestro/**`, `uipath/data-service/**` |
+| 2           | API Workflows        | `019f1085-484a-7b12-badf-31919d339e04` | `/Users/abhinavgupta/.codex/worktrees/a6c0/Treatment Access` | `uipath/api-workflows/**`                     |
+| 3           | Action Center        | `019f1085-9b20-7680-aaaf-3491421897d5` | `/Users/abhinavgupta/.codex/worktrees/75e4/Treatment Access` | `uipath/action-center/**`                     |
+| 4           | Apps/Intake          | `019f1086-19a4-7871-ab0b-0941097ea50f` | `/Users/abhinavgupta/.codex/worktrees/37c3/Treatment Access` | `uipath/apps/**`, intake docs only            |
 
 ## Monitoring Rules
 

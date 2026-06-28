@@ -45,12 +45,16 @@ Start Checkpoint 2 from the verified `main` branch. Recommended focus: UiPath Co
 
 Checkpoint 2 orchestration is being launched from `main` after Checkpoint 1 verification.
 
-Planned lanes:
+Launch commit: `27ff4f6 Launch checkpoint 2 orchestration`.
 
-- Maestro/Data Service: define case shape, stages, secondary stages, Data Fabric/Data Service entity contracts, and field ownership.
-- API Workflows: create local UiPath API Workflow artifacts for EHR pull, event mirror write, payer submit/status, and pharmacy handoff.
-- Action Center: define clinician evidence validation and appeal signoff gates with task schemas, assignment notes, and pause/resume contract.
-- Apps/Intake: define or scaffold the UiPath intake/launch path so a real case can start from UiPath rather than local UI state.
+Active lanes:
+
+| Lane                 | Thread ID                              | Worktree path                                                |
+| -------------------- | -------------------------------------- | ------------------------------------------------------------ |
+| Maestro/Data Service | `019f1084-f0bc-7bd3-a9fe-7cb4d7cab18b` | `/Users/abhinavgupta/.codex/worktrees/ccc5/Treatment Access` |
+| API Workflows        | `019f1085-484a-7b12-badf-31919d339e04` | `/Users/abhinavgupta/.codex/worktrees/a6c0/Treatment Access` |
+| Action Center        | `019f1085-9b20-7680-aaaf-3491421897d5` | `/Users/abhinavgupta/.codex/worktrees/75e4/Treatment Access` |
+| Apps/Intake          | `019f1086-19a4-7871-ab0b-0941097ea50f` | `/Users/abhinavgupta/.codex/worktrees/37c3/Treatment Access` |
 
 UiPath baseline before launch:
 

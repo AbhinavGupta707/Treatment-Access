@@ -155,14 +155,14 @@ Checkpoint 2 outcome:
 - Create the UiPath core case integration layer: Maestro Case/Data Service shape, API Workflow calls into the mock healthcare API, Action Center review gates, and an intake/launch path.
 - Keep UiPath as the orchestration and governance source. The Command Center should visualize UiPath-written state/events rather than becoming the runtime system of record.
 
-Planned isolated lanes:
+Active isolated lanes:
 
-| Merge order | Lane                 | Ownership                                     |
-| ----------- | -------------------- | --------------------------------------------- |
-| 1           | Maestro/Data Service | `uipath/maestro/**`, `uipath/data-service/**` |
-| 2           | API Workflows        | `uipath/api-workflows/**`                     |
-| 3           | Action Center        | `uipath/action-center/**`                     |
-| 4           | Apps/Intake          | `uipath/apps/**`, intake docs only            |
+| Merge order | Lane                 | Thread ID                              | Worktree path                                                | Ownership                                     |
+| ----------- | -------------------- | -------------------------------------- | ------------------------------------------------------------ | --------------------------------------------- |
+| 1           | Maestro/Data Service | `019f1084-f0bc-7bd3-a9fe-7cb4d7cab18b` | `/Users/abhinavgupta/.codex/worktrees/ccc5/Treatment Access` | `uipath/maestro/**`, `uipath/data-service/**` |
+| 2           | API Workflows        | `019f1085-484a-7b12-badf-31919d339e04` | `/Users/abhinavgupta/.codex/worktrees/a6c0/Treatment Access` | `uipath/api-workflows/**`                     |
+| 3           | Action Center        | `019f1085-9b20-7680-aaaf-3491421897d5` | `/Users/abhinavgupta/.codex/worktrees/75e4/Treatment Access` | `uipath/action-center/**`                     |
+| 4           | Apps/Intake          | `019f1086-19a4-7871-ab0b-0941097ea50f` | `/Users/abhinavgupta/.codex/worktrees/37c3/Treatment Access` | `uipath/apps/**`, intake docs only            |
 
 Control runbook: `docs/checkpoint-2-orchestrator.md`.
 
