@@ -1,0 +1,12 @@
+{
+  "apiBaseUrl": "http://127.0.0.1:8787",
+  "caseId": "case-syn-001",
+  "patientId": "patient-syn-001",
+  "orderId": "order-syn-001",
+  "submittedBy": "UiPath API Workflow",
+  "evidenceRefs": [
+    "fixture://evidence/diagnosis",
+    "fixture://evidence/prior-therapy",
+    "fixture://evidence/safety-screen"
+  ]
+}

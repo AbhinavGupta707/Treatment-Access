@@ -1,0 +1,12 @@
+{
+  "apiBaseUrl": "http://127.0.0.1:8787",
+  "caseId": "case-syn-001",
+  "maestroCaseId": "maestro-case-syn-001",
+  "actorName": "UiPath API Workflow",
+  "taskOrAgentName": "Checkpoint 2 API Workflow Smoke",
+  "action": "api_workflow_static_smoke_ready",
+  "inputSummary": "Prepared synthetic Checkpoint 2 API workflow sample input.",
+  "outputSummary": "Workflow is ready for approved local no-auth smoke.",
+  "evidenceRefs": ["fixture://orders/order-syn-001"],
+  "traceId": "trace-syn-api-workflow-sample"
+}

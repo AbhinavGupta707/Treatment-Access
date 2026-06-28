@@ -1,0 +1,105 @@
+{
+  "document": {
+    "dsl": "1.0.0",
+    "name": "TreatmentAccessPayerPriorAuthSubmit",
+    "version": "0.0.1",
+    "namespace": "treatment_access.api_workflows",
+    "metadata": {
+      "variables": {
+        "schema": {
+          "format": "json",
+          "document": {
+            "type": "object",
+            "properties": {},
+            "title": "Variables"
+          }
+        }
+      }
+    }
+  },
+  "input": {
+    "schema": {
+      "format": "json",
+      "document": {
+        "type": "object",
+        "required": ["apiBaseUrl", "caseId", "patientId", "orderId"],
+        "properties": {
+          "apiBaseUrl": { "type": "string" },
+          "caseId": { "type": "string" },
+          "patientId": { "type": "string" },
+          "orderId": { "type": "string" },
+          "evidenceRefs": { "type": "array", "items": { "type": "string" }, "default": [] },
+          "submittedBy": { "type": "string", "default": "UiPath API Workflow" }
+        },
+        "title": "Inputs"
+      }
+    }
+  },
+  "output": {
+    "schema": {
+      "format": "json",
+      "document": {
+        "type": "object",
+        "properties": {
+          "workflow": { "type": "string" },
+          "caseId": { "type": "string" },
+          "submission": { "type": "object" },
+          "submissionId": { "type": "string" },
+          "status": { "type": "string" },
+          "fallbackRequired": { "type": "boolean" },
+          "httpStatus": { "type": "number" },
+          "syntheticDataOnly": { "type": "boolean" }
+        },
+        "title": "Outputs"
+      }
+    }
+  },
+  "do": [
+    {
+      "Sequence_1": {
+        "do": [
+          {
+            "WorkflowStart": {
+              "set": "${Object.entries($workflow.definition?.document?.metadata?.variables?.schema?.document?.properties || {}).reduce((acc, [name, def]) => ({ ...acc, [name]: def?.default }), {}) }",
+              "output": { "as": "${$input}" },
+              "export": { "as": "{ ...$context, variables: { ...$context.variables, ...$output } }" },
+              "metadata": { "activityType": "Assign", "displayName": "Workflow start", "fullName": "Assign", "isTransparent": true }
+            }
+          },
+          {
+            "HttpRequest_SubmitPriorAuth": {
+              "call": "UiPath.Http",
+              "with": {
+                "connector": "uipath-uipath-http",
+                "connectionId": "ImplicitConnection",
+                "connectionResourceId": "ImplicitConnection",
+                "method": "POST",
+                "endpoint": "/http-request",
+                "bodyParameters": {
+                  "authentication": "manual",
+                  "method": "POST",
+                  "url": "${$workflow.input.apiBaseUrl + '/payer/prior-auth'}",
+                  "headers": { "ContentType": "application/json" },
+                  "body": "${{ case_id: $workflow.input.caseId, patient_id: $workflow.input.patientId, order_id: $workflow.input.orderId, channel: 'api', submitted_by: $workflow.input.submittedBy || 'UiPath API Workflow', evidence_refs: $workflow.input.evidenceRefs || [] }}"
+                }
+              },
+              "export": { "as": "{ ...$context, outputs: { ...$context?.outputs, \"http_request_1\": $output } }" },
+              "metadata": { "fullName": "Connector", "activityType": "Connector", "displayName": "Submit Prior Authorization", "uiPathActivityTypeId": "5c4cc855-b42a-37e6-b910-de8588998fce", "assemblyQualifiedName": "Connector", "configuration": "{\"essentialConfiguration\":{\"connectorVersion\":\"\",\"executionType\":null,\"customFieldsRequestDetails\":null,\"instanceParameters\":{\"version\":\"1.0.0\",\"connectorKey\":\"uipath-uipath-http\",\"activityType\":\"Curated\",\"objectName\":\"http-request\",\"httpMethod\":\"POST\",\"operation\":null,\"eventOperation\":null,\"eventMode\":null,\"connectorObjects\":null,\"previewEndpoint\":null},\"objectName\":\"http-request\",\"operation\":null,\"packageVersion\":\"1.0.0\",\"httpMethod\":\"POST\",\"path\":\"/http-request\",\"unifiedTypesCompatible\":true,\"savedJitInputFieldId\":\"in_http-request\"}}" }
+            }
+          },
+          {
+            "Response_1": {
+              "response": "${{ workflow: 'payer_prior_auth_submit', caseId: $workflow.input.caseId, submission: $context.outputs.http_request_1.content, submissionId: $context.outputs.http_request_1.content.submission_id, status: $context.outputs.http_request_1.content.status, fallbackRequired: $context.outputs.http_request_1.content.fallback_required || false, httpStatus: $context.outputs.http_request_1.statusCode, syntheticDataOnly: true }}",
+              "markJobAsFailed": false,
+              "then": "end",
+              "export": { "as": "{ ...$context, outputs: { ...$context?.outputs, \"Response_1\": $output } }" },
+              "metadata": { "activityType": "Response", "displayName": "Response", "fullName": "Response" }
+            }
+          }
+        ],
+        "metadata": { "activityType": "Sequence", "displayName": "Sequence", "fullName": "Sequence" }
+      }
+    }
+  ],
+  "evaluate": { "mode": "strict", "language": "javascript" }
+}
