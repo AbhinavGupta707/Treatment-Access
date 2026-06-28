@@ -1,0 +1,18 @@
+{
+  "apiBaseUrl": "http://127.0.0.1:8787",
+  "caseId": "case-syn-001",
+  "taccCaseId": "TACC-20260629-001",
+  "patientId": "patient-syn-001",
+  "orderId": "order-syn-001",
+  "maestroCaseInstanceId": "maestro-case-instance-demo-001",
+  "demoRunId": "demo-2026-06-29-denial-rescue",
+  "launchSurface": "uipath_apps",
+  "requestedByRole": "pa_specialist",
+  "intakePayload": {
+    "syntheticPatientId": "syn-patient-ibd-001",
+    "syntheticOrderId": "syn-order-biologic-001",
+    "payerId": "payer-northstar",
+    "treatmentId": "tx-biologic-alpha",
+    "urgency": "urgent"
+  }
+}

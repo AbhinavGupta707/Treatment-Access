@@ -121,7 +121,7 @@ hydrates patient/order/coverage data, and writes the first mirror event.
 
 | #   | Task Name                         | Type         | Required | Run Only Once | Persona | SLA |
 | --- | --------------------------------- | ------------ | -------- | ------------- | ------- | --- |
-| 1   | Register Case State               | api-workflow | Yes      | Yes           | system  | -   |
+| 1   | StartTreatmentAccessCase          | api-workflow | Yes      | Yes           | system  | -   |
 | 2   | Pull Synthetic EHR Snapshot       | api-workflow | Yes      | Yes           | system  | -   |
 | 3   | Write Event Mirror - Case Created | api-workflow | Yes      | No            | system  | -   |
 
@@ -371,12 +371,12 @@ Each flag is written to Data Service and mirrored as an audit event.
 
 ### API Workflows
 
-| Workflow         | Folder                   | Resource ID (+version)    | Inputs -> Outputs                               | Used By Tasks                                             |
-| ---------------- | ------------------------ | ------------------------- | ----------------------------------------------- | --------------------------------------------------------- |
-| TaccCaseStateApi | TreatmentAccessHackathon | Pending API Workflow lane | caseId, eventType, payload -> status, recordId  | Register Case State, all event mirror write tasks         |
-| TaccMockEhrApi   | TreatmentAccessHackathon | Pending API Workflow lane | patientId, orderId -> patientOrderSnapshotJson  | Pull Synthetic EHR Snapshot                               |
-| TaccPayerApi     | TreatmentAccessHackathon | Pending API Workflow lane | caseId, packetJson -> submissionId, payerStatus | Submit Payer API, Fetch Payer Decision, Submit Appeal API |
-| TaccPharmacyApi  | TreatmentAccessHackathon | Pending API Workflow lane | caseId, approvalJson -> handoffId, status       | Send Pharmacy Handoff                                     |
+| Workflow         | Folder                   | Resource ID (+version)                                                   | Inputs -> Outputs                               | Used By Tasks                                             |
+| ---------------- | ------------------------ | ------------------------------------------------------------------------ | ----------------------------------------------- | --------------------------------------------------------- |
+| TaccCaseStateApi | TreatmentAccessHackathon | `start-treatment-access-case.workflow.json`, `write-event.workflow.json` | caseId, eventType, payload -> status, recordId  | StartTreatmentAccessCase, all event mirror write tasks    |
+| TaccMockEhrApi   | TreatmentAccessHackathon | Pending API Workflow lane                                                | patientId, orderId -> patientOrderSnapshotJson  | Pull Synthetic EHR Snapshot                               |
+| TaccPayerApi     | TreatmentAccessHackathon | Pending API Workflow lane                                                | caseId, packetJson -> submissionId, payerStatus | Submit Payer API, Fetch Payer Decision, Submit Appeal API |
+| TaccPharmacyApi  | TreatmentAccessHackathon | Pending API Workflow lane                                                | caseId, approvalJson -> handoffId, status       | Send Pharmacy Handoff                                     |
 
 ### Agents
 

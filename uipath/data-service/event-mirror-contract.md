@@ -26,8 +26,8 @@ Every event write uses this envelope:
   "primaryStage": "intake",
   "secondaryStageFlag": "",
   "actorType": "maestro|api_workflow|agent|action_center|rpa|system",
-  "actorName": "Register Case State",
-  "taskOrAgentName": "Register Case State",
+  "actorName": "StartTreatmentAccessCase",
+  "taskOrAgentName": "StartTreatmentAccessCase",
   "inputSummary": "Synthetic order TAC-ORDER-001 accepted",
   "outputSummary": "Case shell created",
   "evidenceRefsJson": "[]",
@@ -45,7 +45,7 @@ Every event write uses this envelope:
 
 | UiPath task                      | Event type                    | Data Service write                                                                 | Command Center impact                              |
 | -------------------------------- | ----------------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------- |
-| Register Case State              | `case.created`                | Upsert `TaccCaseState`                                                             | Case appears in list                               |
+| StartTreatmentAccessCase         | `case.created`                | Hydrate or upsert `TaccCaseState`; write mock event mirror in local Checkpoint 2   | Case appears in list                               |
 | Pull Synthetic EHR Snapshot      | `ehr.snapshot.pulled`         | Update `TaccCaseState.patientOrderSnapshotJson` through case snapshot payload      | Intake detail shows hydrated synthetic order       |
 | Coverage Requirement Agent       | `policy.criteria.extracted`   | Write policy criteria payload into audit event                                     | Policy criteria count and citations visible        |
 | Evidence Retrieval Agent         | `evidence.mapping.updated`    | Upsert `TaccEvidenceMapping` rows                                                  | Evidence matrix updates                            |

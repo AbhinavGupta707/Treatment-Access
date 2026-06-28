@@ -11,13 +11,14 @@ credential, or PHI data to these workflows.
 
 ## Workflows
 
-| Workflow | Purpose | Key inputs | Structured response |
-| --- | --- | --- | --- |
-| `ehr-order-evidence-pull.workflow.json` | Pulls case snapshot, evidence matrix, patient, order, medication history, and EHR document list from the mock API. | `apiBaseUrl`, `caseId`, `patientId`, `orderId` | `caseSnapshot`, `evidenceMatrix`, `patient`, `order`, `medicationHistory`, `documents`, `httpStatus` |
-| `write-event.workflow.json` | Writes a case-linked audit/event mirror record with actor `api_workflow`. | `apiBaseUrl`, `caseId`, `action`, `inputSummary`, `outputSummary`, optional trace/job/evidence fields | `eventWrite`, `event`, `eventCount`, `httpStatus` |
-| `payer-prior-auth-submit.workflow.json` | Submits synthetic prior authorization to `POST /payer/prior-auth`. | `apiBaseUrl`, `caseId`, `patientId`, `orderId`, `evidenceRefs` | `submission`, `submissionId`, `fallbackRequired`, `httpStatus` |
-| `payer-status-fetch.workflow.json` | Fetches payer status/decision from `GET /payer/prior-auth/{submissionId}/status`. | `apiBaseUrl`, `caseId`, `submissionId` | `payerStatus`, `decisionStatus`, `denialCode`, `reason`, `fallbackRequired`, `httpStatus` |
-| `pharmacy-scheduling-handoff.workflow.json` | Creates a pharmacy handoff and then a scheduling task linked to the returned `handoff_id`. | `apiBaseUrl`, `caseId`, `patientId`, `orderId`, `approvalReference` | `pharmacyHandoff`, `schedulingTask`, `handoffId`, `schedulingTaskId`, `httpStatus` |
+| Workflow                                    | Purpose                                                                                                            | Key inputs                                                                                                | Structured response                                                                                  |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `start-treatment-access-case.workflow.json` | Hydrates the seeded synthetic case from the mock API and writes the first `case_created` event from UiPath.        | `apiBaseUrl`, `caseId`, `patientId`, `orderId`, `demoRunId`, optional `taccCaseId` and Maestro runtime id | `caseSnapshot`, `eventWrite`, `nextStage`, `httpStatus`                                              |
+| `ehr-order-evidence-pull.workflow.json`     | Pulls case snapshot, evidence matrix, patient, order, medication history, and EHR document list from the mock API. | `apiBaseUrl`, `caseId`, `patientId`, `orderId`                                                            | `caseSnapshot`, `evidenceMatrix`, `patient`, `order`, `medicationHistory`, `documents`, `httpStatus` |
+| `write-event.workflow.json`                 | Writes a case-linked audit/event mirror record with actor `api_workflow`.                                          | `apiBaseUrl`, `caseId`, `action`, `inputSummary`, `outputSummary`, optional trace/job/evidence fields     | `eventWrite`, `event`, `eventCount`, `httpStatus`                                                    |
+| `payer-prior-auth-submit.workflow.json`     | Submits synthetic prior authorization to `POST /payer/prior-auth`.                                                 | `apiBaseUrl`, `caseId`, `patientId`, `orderId`, `evidenceRefs`                                            | `submission`, `submissionId`, `fallbackRequired`, `httpStatus`                                       |
+| `payer-status-fetch.workflow.json`          | Fetches payer status/decision from `GET /payer/prior-auth/{submissionId}/status`.                                  | `apiBaseUrl`, `caseId`, `submissionId`                                                                    | `payerStatus`, `decisionStatus`, `denialCode`, `reason`, `fallbackRequired`, `httpStatus`            |
+| `pharmacy-scheduling-handoff.workflow.json` | Creates a pharmacy handoff and then a scheduling task linked to the returned `handoff_id`.                         | `apiBaseUrl`, `caseId`, `patientId`, `orderId`, `approvalReference`                                       | `pharmacyHandoff`, `schedulingTask`, `handoffId`, `schedulingTaskId`, `httpStatus`                   |
 
 ## Maestro Call Pattern
 
@@ -30,11 +31,12 @@ Maestro should bind the case fields into each workflow input:
 
 Recommended sequence:
 
-1. Intake & Hydration calls `ehr-order-evidence-pull.workflow.json`.
-2. Material Maestro or agent steps call `write-event.workflow.json` after state changes.
-3. Submission calls `payer-prior-auth-submit.workflow.json`.
-4. Payer Decision calls `payer-status-fetch.workflow.json` with the returned `submissionId`.
-5. Approval & Care Continuity calls `pharmacy-scheduling-handoff.workflow.json`.
+1. Intake & Hydration calls `start-treatment-access-case.workflow.json`.
+2. Intake & Hydration calls `ehr-order-evidence-pull.workflow.json`.
+3. Material Maestro or agent steps call `write-event.workflow.json` after state changes.
+4. Submission calls `payer-prior-auth-submit.workflow.json`.
+5. Payer Decision calls `payer-status-fetch.workflow.json` with the returned `submissionId`.
+6. Approval & Care Continuity calls `pharmacy-scheduling-handoff.workflow.json`.
 
 ## Samples
 
@@ -52,6 +54,7 @@ Approved local no-auth smoke commands, after the mock API is running and after
 explicit user/orchestrator approval:
 
 ```bash
+uip api-workflow run uipath/api-workflows/start-treatment-access-case.workflow.json --no-auth --input-arguments "$(cat uipath/api-workflows/samples/start-treatment-access-case.sample.json)" --output json
 uip api-workflow run uipath/api-workflows/ehr-order-evidence-pull.workflow.json --no-auth --input-arguments "$(cat uipath/api-workflows/samples/ehr-order-evidence-pull.sample.json)" --output json
 uip api-workflow run uipath/api-workflows/write-event.workflow.json --no-auth --input-arguments "$(cat uipath/api-workflows/samples/write-event.sample.json)" --output json
 uip api-workflow run uipath/api-workflows/payer-prior-auth-submit.workflow.json --no-auth --input-arguments "$(cat uipath/api-workflows/samples/payer-prior-auth-submit.sample.json)" --output json

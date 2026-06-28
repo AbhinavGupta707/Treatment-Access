@@ -36,6 +36,9 @@
     "requestedAtUtc": "2026-06-29T09:05:00Z",
     "uipathFolderKey": "4fba2fa1-012b-469a-b6aa-e5be3811c173",
     "commandCenterBaseUrl": "http://localhost:3000",
+    "mockApiCaseId": "case-syn-001",
+    "mockApiPatientId": "patient-syn-001",
+    "mockApiOrderId": "order-syn-001",
     "operatorNotes": "Synthetic judge demo path with portal fallback and appeal approval."
   }
 }

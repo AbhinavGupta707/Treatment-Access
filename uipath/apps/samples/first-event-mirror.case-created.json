@@ -16,6 +16,9 @@
   "payload": {
     "syntheticPatientId": "syn-patient-ibd-001",
     "syntheticOrderId": "syn-order-biologic-001",
+    "mockApiCaseId": "case-syn-001",
+    "mockApiPatientId": "patient-syn-001",
+    "mockApiOrderId": "order-syn-001",
     "payerId": "payer-northstar",
     "treatmentId": "tx-biologic-alpha",
     "urgency": "urgent",

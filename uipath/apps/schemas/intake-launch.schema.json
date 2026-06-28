@@ -153,7 +153,10 @@
         "sourceSurface",
         "demoRunId",
         "requestedAtUtc",
-        "uipathFolderKey"
+        "uipathFolderKey",
+        "mockApiCaseId",
+        "mockApiPatientId",
+        "mockApiOrderId"
       ],
       "properties": {
         "requestedByRole": {
@@ -169,11 +172,7 @@
         },
         "sourceSurface": {
           "type": "string",
-          "enum": [
-            "uipath_apps",
-            "maestro_case_app",
-            "studio_web_manual_start"
-          ]
+          "enum": ["uipath_apps", "maestro_case_app", "studio_web_manual_start"]
         },
         "demoRunId": {
           "type": "string",
@@ -193,6 +192,18 @@
           "type": "string",
           "format": "uri",
           "maxLength": 240
+        },
+        "mockApiCaseId": {
+          "type": "string",
+          "pattern": "^case-syn-[a-z0-9-]+$"
+        },
+        "mockApiPatientId": {
+          "type": "string",
+          "pattern": "^patient-syn-[a-z0-9-]+$"
+        },
+        "mockApiOrderId": {
+          "type": "string",
+          "pattern": "^order-syn-[a-z0-9-]+$"
         },
         "operatorNotes": {
           "type": "string",
