@@ -1,0 +1,31 @@
+{
+  "eventId": "evt_TACC-20260629-001_case_created_001",
+  "eventType": "case.created",
+  "taccCaseId": "TACC-20260629-001",
+  "maestroCaseInstanceId": "maestro-case-instance-demo-001",
+  "demoRunId": "demo-2026-06-29-denial-rescue",
+  "occurredAtUtc": "2026-06-29T09:05:10Z",
+  "stage": "Intake & Hydration",
+  "status": "intake_started",
+  "source": {
+    "surface": "uipath_apps",
+    "producer": "StartTreatmentAccessCase",
+    "uipathFolderKey": "4fba2fa1-012b-469a-b6aa-e5be3811c173"
+  },
+  "summary": "Synthetic intake submitted from UiPath and Treatment Access case created.",
+  "payload": {
+    "syntheticPatientId": "syn-patient-ibd-001",
+    "syntheticOrderId": "syn-order-biologic-001",
+    "payerId": "payer-northstar",
+    "treatmentId": "tx-biologic-alpha",
+    "urgency": "urgent",
+    "scenario": {
+      "forceMissingEvidence": true,
+      "forceClinicianReview": true,
+      "forcePayerApiFailure": true,
+      "forceInitialDenial": true,
+      "forceAppealApproval": true,
+      "seedTimeline": "judge_demo"
+    }
+  }
+}
