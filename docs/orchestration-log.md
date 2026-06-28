@@ -32,3 +32,29 @@ Checkpoint 0 goal:
 No worktree lanes have been launched yet.
 
 Checkpoint 0 is ready for Checkpoint 1 orchestration.
+
+## 2026-06-28 - Checkpoint 1 Launch
+
+Base commit:
+
+```text
+e2dcce8 Document UiPath project runtime assignment
+```
+
+Launched worktree lanes:
+
+| Lane                      | Pending worktree ID                          | Ownership                                             |
+| ------------------------- | -------------------------------------------- | ----------------------------------------------------- |
+| Mock Healthcare API       | `local:f3eb3290-2877-405c-822c-36b9e49f3489` | `services/mock-healthcare-api/**`                     |
+| Demo Data & Fixture       | `local:4f12bc25-206f-46b6-86a1-1510fb8a8739` | `packages/demo-data/**`, `packages/shared-schemas/**` |
+| Command Center Data Shell | `local:576ad7f2-faba-41cd-8d08-287b2d9d3ff6` | `apps/command-center/**`                              |
+| QA/Reset                  | `local:d9634821-e772-4df1-8a43-0443f8c44f97` | `scripts/**`, checkpoint testing docs                 |
+
+Merge order:
+
+1. Demo Data & Fixture
+2. Mock Healthcare API
+3. QA/Reset
+4. Command Center Data Shell
+
+Integration target: `main`.
