@@ -3,19 +3,26 @@ import { createRoot } from "react-dom/client";
 import {
   Activity,
   AlertTriangle,
+  ArrowRight,
   Bot,
   CheckCircle2,
   CircleDashed,
+  ClipboardCheck,
   Clock3,
   DatabaseZap,
   FileCheck2,
+  FileText,
   HeartPulse,
   History,
+  KeyRound,
+  Network,
   RefreshCw,
   RotateCcw,
+  ShieldAlert,
   ShieldCheck,
   Stethoscope,
   ToggleLeft,
+  Truck,
   UserCheck,
   Workflow,
 } from "lucide-react";
@@ -27,7 +34,12 @@ import type {
   TreatmentAccessCase,
 } from "@tacc/shared-schemas";
 import { loadRuntimeState, resetDemoState, updateDemoToggles } from "./lib/api";
-import type { ActorFilter, DemoState, RuntimeState } from "./lib/types";
+import type {
+  ActorFilter,
+  DemoState,
+  MirrorSubmission,
+  RuntimeState,
+} from "./lib/types";
 import "./styles.css";
 
 const stages: Array<{
@@ -36,32 +48,67 @@ const stages: Array<{
   owner: string;
 }> = [
   { id: "intake", label: "Intake", owner: "Maestro" },
-  { id: "policy_evidence", label: "Evidence", owner: "Agent" },
-  { id: "clinical_validation", label: "Validation", owner: "Action Center" },
-  { id: "submission", label: "Submission", owner: "API Workflow" },
+  { id: "policy_evidence", label: "Policy + evidence", owner: "Agents" },
+  { id: "clinical_validation", label: "Clinical gate", owner: "Action Center" },
+  { id: "submission", label: "Payer submit", owner: "API Workflow" },
   { id: "payer_decision", label: "Decision", owner: "Payer" },
-  { id: "denial_rescue", label: "Appeal", owner: "Agent" },
+  { id: "denial_rescue", label: "Denial rescue", owner: "Agents" },
   { id: "care_continuity", label: "Care handoff", owner: "API Workflow" },
-  { id: "closure", label: "Audit", owner: "Maestro" },
+  { id: "closure", label: "Audit packet", owner: "Maestro" },
 ];
 
 const actorFilters: Array<{ id: ActorFilter; label: string }> = [
   { id: "all", label: "All" },
-  { id: "agent", label: "Agent" },
-  { id: "api_workflow", label: "API Workflow" },
+  { id: "agent", label: "Agents" },
+  { id: "api_workflow", label: "API" },
   { id: "robot", label: "Robot" },
-  { id: "human", label: "Action Center" },
+  { id: "human", label: "Humans" },
   { id: "system", label: "System" },
 ];
 
-const agentTracks = [
-  "Coverage Requirement",
-  "Evidence Retrieval",
-  "Missing Evidence",
-  "Submission Packet",
-  "Denial Rescue",
-  "Appeal Packet",
-  "Care Continuity",
+const agentDefinitions = [
+  {
+    name: "Coverage Requirement",
+    traceNeedle: "Coverage Requirement Agent",
+    role: "Reads payer policy into criteria",
+    tool: "Policy fixture + citations",
+  },
+  {
+    name: "Evidence Retrieval",
+    traceNeedle: "Evidence Retrieval Agent",
+    role: "Maps chart artifacts to criteria",
+    tool: "EHR fixtures + evidence matrix",
+  },
+  {
+    name: "Missing Evidence",
+    traceNeedle: "Missing Evidence Agent",
+    role: "Finds blocking documentation gaps",
+    tool: "Action Center task packet",
+  },
+  {
+    name: "Submission Packet",
+    traceNeedle: "Submission Packet Agent",
+    role: "Builds payer-ready packet",
+    tool: "Attachments + unsupported warnings",
+  },
+  {
+    name: "Denial Rescue",
+    traceNeedle: "Denial Rescue Agent",
+    role: "Classifies denial and strategy",
+    tool: "Payer decision + policy citation",
+  },
+  {
+    name: "Appeal Packet",
+    traceNeedle: "Appeal Packet Agent",
+    role: "Drafts administrative appeal",
+    tool: "Source-grounded draft",
+  },
+  {
+    name: "Care Continuity",
+    traceNeedle: "Care Continuity Agent",
+    role: "Routes approval to pharmacy",
+    tool: "Handoff + scheduling task",
+  },
 ];
 
 function App() {
@@ -116,7 +163,7 @@ function App() {
       await refresh(true);
     } catch (error) {
       setMutationError(
-        error instanceof Error ? error.message : "Unable to reset",
+        error instanceof Error ? error.message : "Unable to reset demo",
       );
     }
   };
@@ -179,77 +226,57 @@ function Dashboard({
 
   return (
     <main className="app-shell">
-      <aside className="case-queue" aria-label="Case queue">
-        <div className="brand-lockup">
-          <div className="brand-mark" aria-hidden="true">
-            <HeartPulse size={20} />
-          </div>
-          <div>
-            <strong>Treatment Access</strong>
-            <span>Command Center</span>
-          </div>
-        </div>
-
-        <div className="queue-meta">
-          <span>
-            {runtime.source === "api" ? "Event mirror" : "Fallback cache"}
-          </span>
-          <span>{formatTime(runtime.lastFetchedAt)}</span>
-        </div>
-
+      <aside className="case-rail" aria-label="Command Center navigation">
+        <BrandLockup />
+        <SourceCard runtime={runtime} />
         <CaseQueueItem
           caseRecord={selectedCase}
           event={latestEvent(data.events)}
           patientName={data.patient?.synthetic_name ?? "Synthetic patient"}
           selected
         />
-
-        <div className="queue-footer">
-          <StatusDot tone={runtime.source === "api" ? "good" : "danger"} />
-          <span>{runtime.apiBaseUrl}</span>
-        </div>
+        <DemoRunbook data={data} />
       </aside>
 
       <section className="workspace">
         <TopBar
-          apiUnavailable={runtime.source === "fallback"}
           isRefreshing={isRefreshing}
           lastError={runtime.error}
           mutationError={mutationError}
           onRefresh={onRefresh}
           onReset={onReset}
-          source={runtime.source}
+          runtime={runtime}
         />
 
         <CaseHeader
           caseRecord={selectedCase}
+          data={data}
           foundCount={summary.found}
-          orderMedication={
-            data.order?.medication_name ?? selectedCase.medication_name
-          }
-          patientName={data.patient?.synthetic_name ?? "Synthetic patient"}
           pendingCount={summary.pending}
         />
 
         <StageRail activeStage={selectedCase.current_stage} />
 
+        <ProofStrip data={data} runtime={runtime} />
+
         <div className="content-grid">
           <section className="primary-stack">
-            <AgentTraceStrip data={data} />
+            <AgentTraceBoard data={data} />
             <EvidenceMatrix
               criteria={data.criteria}
               evidenceByCriterion={evidenceByCriterion}
             />
           </section>
 
-          <aside className="right-rail" aria-label="Operational state">
-            <PayerStatusCard data={data} />
+          <aside className="right-rail" aria-label="Runtime proof points">
+            <FallbackPanel data={data} runtime={runtime} />
+            <HumanGatesPanel data={data} />
+            <AppealCarePanel data={data} />
             <DemoTogglesPanel
               disabled={runtime.source !== "api"}
               onToggle={onToggle}
               toggles={data.toggles}
             />
-            <HumanActionPanel data={data} />
             <TimelinePanel
               actorFilter={actorFilter}
               events={data.events}
@@ -262,33 +289,68 @@ function Dashboard({
   );
 }
 
+function BrandLockup() {
+  return (
+    <div className="brand-lockup">
+      <div className="brand-mark" aria-hidden="true">
+        <HeartPulse size={20} />
+      </div>
+      <div>
+        <strong>Treatment Access</strong>
+        <span>Command Center</span>
+      </div>
+    </div>
+  );
+}
+
+function SourceCard({ runtime }: { runtime: RuntimeState }) {
+  const isLive = runtime.source === "api";
+  return (
+    <section className="rail-section">
+      <div className="rail-label">State source</div>
+      <div className={`source-card ${isLive ? "live" : "fallback"}`}>
+        <DatabaseZap size={18} />
+        <div>
+          <strong>{isLive ? "Event mirror API" : "Fallback cache"}</strong>
+          <span>{runtime.apiBaseUrl}</span>
+        </div>
+      </div>
+      <p className="source-note">
+        Visualization only. UiPath workflows, agents, robots, and human actions
+        write the case records this screen reads.
+      </p>
+    </section>
+  );
+}
+
 function TopBar({
-  apiUnavailable,
   isRefreshing,
   lastError,
   mutationError,
   onRefresh,
   onReset,
-  source,
+  runtime,
 }: {
-  apiUnavailable: boolean;
   isRefreshing: boolean;
   lastError: string | null;
   mutationError: string | null;
   onRefresh: () => void;
   onReset: () => void;
-  source: RuntimeState["source"];
+  runtime: RuntimeState;
 }) {
   return (
     <header className="top-bar">
       <div className="status-cluster">
-        <span className={`source-chip ${source}`}>
+        <span className={`source-chip ${runtime.source}`}>
           <DatabaseZap size={14} />
-          {source === "api" ? "Live mock API" : "API unavailable"}
+          {runtime.source === "api"
+            ? "Live event mirror"
+            : "Mirror unreachable"}
         </span>
-        {apiUnavailable ? (
-          <span className="inline-alert">{lastError}</span>
-        ) : null}
+        <span className="time-chip">
+          Fetched {formatTime(runtime.lastFetchedAt)}
+        </span>
+        {lastError ? <span className="inline-alert">{lastError}</span> : null}
         {mutationError ? (
           <span className="inline-alert">{mutationError}</span>
         ) : null}
@@ -300,7 +362,7 @@ function TopBar({
         </button>
         <button className="icon-button" onClick={onReset} type="button">
           <RotateCcw size={16} />
-          <span>Reset</span>
+          <span>Reset demo</span>
         </button>
       </div>
     </header>
@@ -309,20 +371,23 @@ function TopBar({
 
 function CaseHeader({
   caseRecord,
+  data,
   foundCount,
-  orderMedication,
-  patientName,
   pendingCount,
 }: {
   caseRecord: TreatmentAccessCase;
+  data: DemoState;
   foundCount: number;
-  orderMedication: string;
-  patientName: string;
   pendingCount: number;
 }) {
+  const orderMedication =
+    data.order?.medication_name ?? caseRecord.medication_name;
+  const patientName = data.patient?.synthetic_name ?? "Synthetic patient";
+  const latest = latestEvent(data.events);
+
   return (
     <section className="case-header">
-      <div>
+      <div className="case-header-copy">
         <div className="case-key">
           <span>{caseRecord.external_case_key ?? caseRecord.case_id}</span>
           <StatusPill tone="informational" value="synthetic data" />
@@ -333,12 +398,24 @@ function CaseHeader({
         <h1>{patientName}</h1>
         <p>
           {orderMedication} · {caseRecord.payer_id} ·{" "}
-          {labelize(caseRecord.urgency)}
+          {labelize(caseRecord.urgency)} · {caseRecord.status}
         </p>
+        <div className="latest-line">
+          <Clock3 size={14} />
+          <span>
+            {latest
+              ? displayEventSummary(latest)
+              : "Waiting for first event mirror write."}
+          </span>
+        </div>
       </div>
       <div className="case-stats" aria-label="Case state summary">
-        <MetricTile label="Evidence found" value={`${foundCount}`} />
+        <MetricTile
+          label="Evidence mapped"
+          value={`${foundCount}/${data.criteria.length}`}
+        />
         <MetricTile label="Human gates" value={`${pendingCount}`} />
+        <MetricTile label="Mirror events" value={`${data.events.length}`} />
         <MetricTile
           label="SLA due"
           value={formatShortDate(caseRecord.sla_due_at)}
@@ -356,14 +433,14 @@ function StageRail({
   const activeIndex = stages.findIndex((stage) => stage.id === activeStage);
 
   return (
-    <nav className="stage-rail" aria-label="Case stages">
+    <nav className="stage-rail" aria-label="Maestro case stages">
       {stages.map((stage, index) => {
         const state =
           index < activeIndex
             ? "complete"
             : index === activeIndex
               ? "active"
-              : "";
+              : "queued";
         return (
           <div className={`stage-node ${state}`} key={stage.id}>
             <span className="stage-dot" aria-hidden="true" />
@@ -378,29 +455,132 @@ function StageRail({
   );
 }
 
-function AgentTraceStrip({ data }: { data: DemoState }) {
-  const missing = data.evidenceMappings.some((row) => row.status === "missing");
-  const needsHuman = data.evidenceMappings.some(
-    (row) => row.needs_human_review,
+function ProofStrip({
+  data,
+  runtime,
+}: {
+  data: DemoState;
+  runtime: RuntimeState;
+}) {
+  const hasRobotProof = hasRobotEvent(data) || Boolean(portalSubmission(data));
+  const hasHumanGate = data.evidenceMappings.some(
+    (row) => row.needs_human_review || row.status === "missing",
   );
+  const hasAppeal = data.appeals.length > 0 || hasEventAction(data, "appeal");
+  const hasHandoff =
+    data.handoffs.length > 0 || hasEventAction(data, "handoff");
 
   return (
-    <section className="panel trace-strip" aria-label="Agent traces">
-      <PanelTitle icon={<Bot size={17} />} title="Agent Trace Strip" />
-      <div className="trace-grid">
-        {agentTracks.map((name, index) => {
-          const tone =
-            (name === "Missing Evidence" && missing) ||
-            (name === "Submission Packet" && needsHuman)
-              ? "warn"
-              : index < 2
-                ? "good"
-                : "idle";
+    <section className="proof-strip" aria-label="Walkthrough proof chain">
+      <ProofStep
+        icon={<DatabaseZap size={16} />}
+        label="Live source"
+        state={runtime.source === "api" ? "good" : "warn"}
+        value={
+          runtime.source === "api"
+            ? "Event mirror reachable"
+            : "Showing local cache"
+        }
+      />
+      <ProofStep
+        icon={<Bot size={16} />}
+        label="Seven agents"
+        state="good"
+        value={`${agentDefinitions.length} surfaced distinctly`}
+      />
+      <ProofStep
+        icon={<UserCheck size={16} />}
+        label="Action Center"
+        state={hasHumanGate ? "warn" : "good"}
+        value={hasHumanGate ? "Gate pending/needed" : "No open evidence gate"}
+      />
+      <ProofStep
+        icon={<ShieldAlert size={16} />}
+        label="API failure"
+        state={apiFailureActive(data) ? "danger" : "idle"}
+        value={
+          apiFailureActive(data) ? "Fallback required" : "API channel ready"
+        }
+      />
+      <ProofStep
+        icon={<Activity size={16} />}
+        label="Portal robot"
+        state={
+          hasRobotProof ? "good" : apiFailureActive(data) ? "warn" : "idle"
+        }
+        value={
+          hasRobotProof ? "Job/confirmation present" : "Awaiting robot event"
+        }
+      />
+      <ProofStep
+        icon={<Truck size={16} />}
+        label="Appeal + care"
+        state={hasHandoff ? "good" : hasAppeal ? "warn" : "idle"}
+        value={
+          hasHandoff
+            ? "Handoff created"
+            : hasAppeal
+              ? "Appeal in review"
+              : "Queued later"
+        }
+      />
+    </section>
+  );
+}
+
+function ProofStep({
+  icon,
+  label,
+  state,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  state: "good" | "warn" | "danger" | "idle";
+  value: string;
+}) {
+  return (
+    <div className={`proof-step ${state}`}>
+      <div className="proof-icon">{icon}</div>
+      <div>
+        <span>{label}</span>
+        <strong>{value}</strong>
+      </div>
+    </div>
+  );
+}
+
+function AgentTraceBoard({ data }: { data: DemoState }) {
+  return (
+    <section className="panel trace-board" aria-label="Seven agent traces">
+      <PanelTitle
+        icon={<Bot size={17} />}
+        kicker="Agent Builder"
+        title="Seven Specialized Agents"
+      />
+      <div className="agent-grid">
+        {agentDefinitions.map((agent) => {
+          const view = agentView(agent.name, agent.traceNeedle, data);
           return (
-            <div className={`trace-card ${tone}`} key={name}>
-              <span>{name}</span>
-              <strong>{traceStatus(name, data)}</strong>
-            </div>
+            <article className={`agent-card ${view.tone}`} key={agent.name}>
+              <div className="agent-card-top">
+                <span className="agent-index">{view.index}</span>
+                <StatusPill tone={view.tone} value={view.status} />
+              </div>
+              <h3>{agent.name}</h3>
+              <p>{agent.role}</p>
+              <dl>
+                <div>
+                  <dt>Tooling</dt>
+                  <dd>{agent.tool}</dd>
+                </div>
+                <div>
+                  <dt>Output hint</dt>
+                  <dd>{view.output}</dd>
+                </div>
+              </dl>
+              <small>{view.traceLabel}</small>
+            </article>
           );
         })}
       </div>
@@ -417,7 +597,11 @@ function EvidenceMatrix({
 }) {
   return (
     <section className="panel evidence-panel">
-      <PanelTitle icon={<FileCheck2 size={17} />} title="Evidence Matrix" />
+      <PanelTitle
+        icon={<FileCheck2 size={17} />}
+        kicker="Policy to chart"
+        title="Evidence Matrix"
+      />
       {criteria.length === 0 ? (
         <EmptyState
           detail="No policy criteria returned."
@@ -427,9 +611,9 @@ function EvidenceMatrix({
         <div className="matrix-table" role="table" aria-label="Evidence matrix">
           <div className="matrix-row matrix-head" role="row">
             <span role="columnheader">Policy criterion</span>
-            <span role="columnheader">Evidence</span>
-            <span role="columnheader">Confidence</span>
-            <span role="columnheader">Review</span>
+            <span role="columnheader">Mapped evidence</span>
+            <span role="columnheader">Source / confidence</span>
+            <span role="columnheader">Governance</span>
           </div>
           {criteria.map((criterion) => {
             const evidence = evidenceByCriterion.get(criterion.criterion_id);
@@ -450,9 +634,15 @@ function EvidenceMatrix({
                 <div role="cell">
                   <StatusPill
                     tone={evidenceTone(evidence?.status)}
-                    value={labelize(evidence?.status ?? "not_mapped")}
+                    value={labelize(evidence?.status ?? "not mapped")}
                   />
                   <p>{evidence?.evidence_summary ?? "No mapping available."}</p>
+                  {evidence?.source_quote_short ? (
+                    <small>{evidence.source_quote_short}</small>
+                  ) : null}
+                </div>
+                <div role="cell">
+                  <ConfidenceMeter value={evidence?.confidence ?? 0} />
                   <small>
                     {formatSourceReference(
                       evidence?.source_span ?? criterion.source_span,
@@ -460,16 +650,15 @@ function EvidenceMatrix({
                   </small>
                 </div>
                 <div role="cell">
-                  <ConfidenceMeter value={evidence?.confidence ?? 0} />
-                </div>
-                <div role="cell">
                   <strong>
-                    {labelize(evidence?.reviewer_decision ?? "pending")}
+                    {evidence?.needs_human_review
+                      ? "Action Center review"
+                      : "Evidence-linked"}
                   </strong>
                   <small>
                     {evidence?.needs_human_review
                       ? evidence.human_review_reason
-                      : "No human gate"}
+                      : "Clinical assertion has evidence or policy citation."}
                   </small>
                 </div>
               </div>
@@ -481,41 +670,206 @@ function EvidenceMatrix({
   );
 }
 
-function PayerStatusCard({ data }: { data: DemoState }) {
-  const apiDown = data.toggles.payer_api_unavailable;
-  const missing = data.evidenceMappings.some((row) => row.status === "missing");
-  const needsHuman = data.evidenceMappings.some(
-    (row) => row.needs_human_review,
-  );
-  const status = missing
-    ? "Blocked before submission"
-    : needsHuman
-      ? "Awaiting clinical validation"
-      : apiDown
-        ? "Portal fallback armed"
-        : "API channel ready";
+function FallbackPanel({
+  data,
+  runtime,
+}: {
+  data: DemoState;
+  runtime: RuntimeState;
+}) {
+  const apiAttempt = apiSubmission(data);
+  const portalAttempt = portalSubmission(data);
+  const robotEvent = latestRobotEvent(data);
+  const apiDown = apiFailureActive(data);
+  const confirmation =
+    portalAttempt?.portal_confirmation_id ??
+    extractConfirmation(robotEvent?.output_summary);
+  const jobId =
+    portalAttempt?.orchestrator_job_id ?? robotEvent?.orchestrator_job_id;
 
   return (
-    <section className="panel payer-card">
-      <PanelTitle icon={<ShieldCheck size={17} />} title="Payer Status" />
-      <div className={`payer-indicator ${apiDown ? "danger" : "good"}`}>
-        {apiDown ? <AlertTriangle size={24} /> : <CheckCircle2 size={24} />}
-        <div>
-          <strong>{status}</strong>
-          <span>{apiDown ? "PAYER_API_DOWN" : "Northstar prior auth API"}</span>
-        </div>
+    <section className="panel fallback-panel">
+      <PanelTitle
+        icon={<Network size={17} />}
+        kicker="Exception path"
+        title="API Failure To Portal Robot"
+      />
+      <div className="fallback-flow">
+        <FlowNode
+          icon={<ShieldCheck size={16} />}
+          label="Payer API"
+          state={apiDown ? "danger" : "good"}
+          value={apiDown ? "Unavailable" : "Ready"}
+        />
+        <ArrowRight className="flow-arrow" size={16} />
+        <FlowNode
+          icon={<Activity size={16} />}
+          label="UiPath robot"
+          state={
+            portalAttempt || robotEvent ? "good" : apiDown ? "warn" : "idle"
+          }
+          value={
+            portalAttempt || robotEvent ? "Portal submitted" : "Awaiting event"
+          }
+        />
       </div>
       <div className="status-list">
         <KeyValue
-          label="Denial mode"
-          value={labelize(data.toggles.denial_reason)}
+          label="API attempt"
+          value={
+            apiAttempt
+              ? attemptStatus(apiAttempt)
+              : apiDown
+                ? "Armed by toggle"
+                : "Not attempted"
+          }
         />
         <KeyValue
-          label="Submission path"
-          value={apiDown ? "Robot fallback" : "API workflow"}
+          label="Robot job"
+          value={
+            jobId ??
+            (apiDown
+              ? "Unavailable until Orchestrator writes"
+              : "Not requested")
+          }
         />
-        <KeyValue label="Decision state" value="Not submitted" />
+        <KeyValue
+          label="Portal confirmation"
+          value={confirmation ?? "No confirmation in mirror yet"}
+        />
+        <KeyValue
+          label="Mirror source"
+          value={
+            runtime.source === "api" ? "Live API state" : "Local cache only"
+          }
+        />
       </div>
+      <p className="panel-note">
+        Portal fallback is displayed only as a mirror of UiPath robot/job
+        events. When no job or confirmation is present, the UI labels it
+        unavailable.
+      </p>
+    </section>
+  );
+}
+
+function HumanGatesPanel({ data }: { data: DemoState }) {
+  const pendingRows = data.evidenceMappings.filter(
+    (row) => row.needs_human_review || row.status === "missing",
+  );
+  const rejection = data.toggles.clinician_rejects_assertion;
+  const appealNeedsReview = data.appeals.some(
+    (appeal) => appeal.status === "blocked" || !appeal.clinician_approved,
+  );
+
+  return (
+    <section className="panel">
+      <PanelTitle
+        icon={<UserCheck size={17} />}
+        kicker="Action Center"
+        title="Human Gates"
+      />
+      <div className="action-list">
+        {pendingRows.map((row) => (
+          <div className="action-row" key={row.mapping_id}>
+            <Stethoscope size={16} />
+            <div>
+              <strong>{actionTitle(row)}</strong>
+              <span>{row.human_review_reason ?? labelize(row.status)}</span>
+            </div>
+          </div>
+        ))}
+        <div className={`action-row ${appealNeedsReview ? "warn" : ""}`}>
+          <ClipboardCheck size={16} />
+          <div>
+            <strong>Appeal signoff</strong>
+            <span>
+              {appealNeedsReview
+                ? "Administrative draft awaiting clinician approval."
+                : "Appeal gate will appear after denial rescue."}
+            </span>
+          </div>
+        </div>
+        {rejection ? (
+          <div className="action-row danger">
+            <AlertTriangle size={16} />
+            <div>
+              <strong>Clinician rework</strong>
+              <span>Unsupported assertion rejected by reviewer.</span>
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </section>
+  );
+}
+
+function AppealCarePanel({ data }: { data: DemoState }) {
+  const denialAttempt =
+    data.submissions.find(
+      (submission) => submission.decision_status === "denied",
+    ) ?? data.submissions.find((submission) => submission.denial_code);
+  const appeal = data.appeals.at(-1);
+  const handoff = data.handoffs.at(-1);
+  const task = data.schedulingTasks.at(-1);
+
+  return (
+    <section className="panel">
+      <PanelTitle
+        icon={<FileText size={17} />}
+        kicker="Rescue loop"
+        title="Denial, Appeal, Care"
+      />
+      <div className="handoff-stack">
+        <StateLine
+          icon={<ShieldAlert size={15} />}
+          label="Denial rescue"
+          state={denialAttempt ? "warn" : "idle"}
+          value={
+            denialAttempt?.denial_code ?? labelize(data.toggles.denial_reason)
+          }
+        />
+        <StateLine
+          icon={<ClipboardCheck size={15} />}
+          label="Appeal review"
+          state={
+            appeal?.decision_status === "approved"
+              ? "good"
+              : appeal
+                ? "warn"
+                : "idle"
+          }
+          value={
+            appeal
+              ? appeal.clinician_approved
+                ? "Clinician approved"
+                : "Clinician review required"
+              : "Appeal packet not mirrored yet"
+          }
+        />
+        <StateLine
+          icon={<Truck size={15} />}
+          label="Care handoff"
+          state={handoff ? "good" : "idle"}
+          value={
+            handoff
+              ? (handoff.approval_reference ?? handoff.status ?? "Created")
+              : "Waiting for approval event"
+          }
+        />
+        <StateLine
+          icon={<KeyRound size={15} />}
+          label="Coordinator task"
+          state={task ? "good" : "idle"}
+          value={
+            task ? `${task.scheduling_task_id} · ${task.owner}` : "Not created"
+          }
+        />
+      </div>
+      <p className="panel-note">
+        Appeal language is an administrative draft for clinician review, not
+        autonomous medical or legal advice.
+      </p>
     </section>
   );
 }
@@ -531,7 +885,11 @@ function DemoTogglesPanel({
 }) {
   return (
     <section className="panel">
-      <PanelTitle icon={<ToggleLeft size={17} />} title="Degraded States" />
+      <PanelTitle
+        icon={<ToggleLeft size={17} />}
+        kicker="Demo controls"
+        title="Degraded States"
+      />
       <ToggleRow
         checked={toggles.missing_safety_lab}
         disabled={disabled}
@@ -568,42 +926,11 @@ function DemoTogglesPanel({
           <option value="medical_necessity">Medical necessity</option>
         </select>
       </label>
-    </section>
-  );
-}
-
-function HumanActionPanel({ data }: { data: DemoState }) {
-  const pendingRows = data.evidenceMappings.filter(
-    (row) => row.needs_human_review || row.status === "missing",
-  );
-  const rejection = data.toggles.clinician_rejects_assertion;
-
-  return (
-    <section className="panel">
-      <PanelTitle icon={<UserCheck size={17} />} title="Human Actions" />
-      <div className="action-list">
-        {pendingRows.map((row) => (
-          <div className="action-row" key={row.mapping_id}>
-            <Stethoscope size={16} />
-            <div>
-              <strong>{actionTitle(row)}</strong>
-              <span>{row.human_review_reason ?? labelize(row.status)}</span>
-            </div>
-          </div>
-        ))}
-        {rejection ? (
-          <div className="action-row danger">
-            <AlertTriangle size={16} />
-            <div>
-              <strong>Clinician rework</strong>
-              <span>Unsupported assertion rejected by reviewer</span>
-            </div>
-          </div>
-        ) : null}
-        {pendingRows.length === 0 && !rejection ? (
-          <div className="quiet-state">No pending human gates</div>
-        ) : null}
-      </div>
+      {disabled ? (
+        <p className="panel-note">
+          Controls are disabled because the event mirror is unavailable.
+        </p>
+      ) : null}
     </section>
   );
 }
@@ -624,7 +951,11 @@ function TimelinePanel({
 
   return (
     <section className="panel timeline-panel">
-      <PanelTitle icon={<History size={17} />} title="Audit Timeline" />
+      <PanelTitle
+        icon={<History size={17} />}
+        kicker="Audit trail"
+        title="Runtime Events"
+      />
       <div
         className="actor-filter"
         role="tablist"
@@ -645,7 +976,7 @@ function TimelinePanel({
       </div>
       <div className="timeline-list">
         {filteredEvents.length === 0 ? (
-          <div className="quiet-state">No events for this actor</div>
+          <div className="quiet-state">No events for this actor yet.</div>
         ) : (
           filteredEvents
             .slice()
@@ -671,12 +1002,56 @@ function TimelineEvent({ event }: { event: AuditEvent }) {
           <time dateTime={event.timestamp}>{formatTime(event.timestamp)}</time>
         </div>
         <span>{event.actor_name}</span>
-        <p>{event.output_summary}</p>
+        <p>{displayEventSummary(event)}</p>
         {event.trace_id || event.orchestrator_job_id ? (
           <small>{event.trace_id ?? event.orchestrator_job_id}</small>
         ) : null}
       </div>
     </article>
+  );
+}
+
+function DemoRunbook({ data }: { data: DemoState }) {
+  const steps = [
+    {
+      label: "Maestro case started",
+      active: Boolean(data.case?.maestro_case_id),
+    },
+    {
+      label: "Policy and evidence mapped",
+      active: data.criteria.length > 0 && data.evidenceMappings.length > 0,
+    },
+    {
+      label: "Human gate shown",
+      active: data.evidenceMappings.some((row) => row.needs_human_review),
+    },
+    {
+      label: "API failure triggers fallback",
+      active: apiFailureActive(data),
+    },
+    {
+      label: "Robot writes confirmation",
+      active: Boolean(portalSubmission(data) || latestRobotEvent(data)),
+    },
+    {
+      label: "Appeal and handoff complete",
+      active: data.appeals.length > 0 || data.handoffs.length > 0,
+    },
+  ];
+
+  return (
+    <section className="rail-section runbook">
+      <div className="rail-label">Judge walkthrough</div>
+      {steps.map((step) => (
+        <div
+          className={step.active ? "runbook-step active" : "runbook-step"}
+          key={step.label}
+        >
+          <StatusDot tone={step.active ? "good" : "idle"} />
+          <span>{step.label}</span>
+        </div>
+      ))}
+    </section>
   );
 }
 
@@ -702,7 +1077,7 @@ function CaseQueueItem({
       </div>
       <span>{patientName}</span>
       <p>{caseRecord.status}</p>
-      <small>{event?.output_summary ?? "No events recorded"}</small>
+      <small>{event ? displayEventSummary(event) : "No events recorded"}</small>
     </button>
   );
 }
@@ -713,6 +1088,7 @@ function LoadingShell() {
       <div className="loading-card">
         <CircleDashed className="spin" size={28} />
         <strong>Loading command state</strong>
+        <span>Reading the UiPath event mirror or local synthetic cache.</span>
       </div>
     </main>
   );
@@ -728,11 +1104,22 @@ function EmptyState({ detail, title }: { detail: string; title: string }) {
   );
 }
 
-function PanelTitle({ icon, title }: { icon: React.ReactNode; title: string }) {
+function PanelTitle({
+  icon,
+  kicker,
+  title,
+}: {
+  icon: React.ReactNode;
+  kicker: string;
+  title: string;
+}) {
   return (
     <div className="panel-title">
-      {icon}
-      <h2>{title}</h2>
+      <div className="panel-icon">{icon}</div>
+      <div>
+        <span>{kicker}</span>
+        <h2>{title}</h2>
+      </div>
     </div>
   );
 }
@@ -779,11 +1166,53 @@ function ToggleRow({
   );
 }
 
+function FlowNode({
+  icon,
+  label,
+  state,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  state: "good" | "warn" | "danger" | "idle";
+  value: string;
+}) {
+  return (
+    <div className={`flow-node ${state}`}>
+      {icon}
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+function StateLine({
+  icon,
+  label,
+  state,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  state: "good" | "warn" | "danger" | "idle";
+  value: string;
+}) {
+  return (
+    <div className={`state-line ${state}`}>
+      <div className="state-icon">{icon}</div>
+      <div>
+        <span>{label}</span>
+        <strong>{value}</strong>
+      </div>
+    </div>
+  );
+}
+
 function StatusPill({ tone, value }: { tone?: string; value: string }) {
   return <span className={`status-pill ${tone ?? "neutral"}`}>{value}</span>;
 }
 
-function StatusDot({ tone }: { tone: "good" | "danger" | "warn" }) {
+function StatusDot({ tone }: { tone: "good" | "danger" | "warn" | "idle" }) {
   return <span className={`status-dot ${tone}`} aria-hidden="true" />;
 }
 
@@ -802,7 +1231,9 @@ function ConfidenceMeter({ value }: { value: number }) {
 function summarizeEvidence(rows: EvidenceMapping[]) {
   return rows.reduce(
     (acc, row) => {
-      if (row.status === "found") acc.found += 1;
+      if (row.status === "found" || row.status === "needs_human_validation") {
+        acc.found += 1;
+      }
       if (row.needs_human_review || row.status === "missing") acc.pending += 1;
       return acc;
     },
@@ -816,24 +1247,106 @@ function latestEvent(events: AuditEvent[]) {
     .sort((a, b) => b.timestamp.localeCompare(a.timestamp))[0];
 }
 
-function traceStatus(name: string, data: DemoState) {
-  if (name === "Coverage Requirement")
-    return `${data.criteria.length} criteria`;
-  if (name === "Evidence Retrieval")
-    return `${summarizeEvidence(data.evidenceMappings).found} mapped`;
+function agentView(name: string, traceNeedle: string, data: DemoState) {
+  const index = String(
+    agentDefinitions.findIndex((agent) => agent.name === name) + 1,
+  ).padStart(2, "0");
+  const event = [...data.events]
+    .reverse()
+    .find((candidate) =>
+      `${candidate.actor_name} ${candidate.task_or_agent_name}`.includes(
+        traceNeedle,
+      ),
+    );
+  const missing = data.evidenceMappings.some((row) => row.status === "missing");
+  const needsHuman = data.evidenceMappings.some(
+    (row) => row.needs_human_review,
+  );
+  const denial = data.submissions.some(
+    (submission) =>
+      submission.decision_status === "denied" ||
+      Boolean(submission.denial_code),
+  );
+  const appeal = data.appeals.at(-1);
+  const handoff = data.handoffs.at(-1);
+
+  if (event) {
+    return {
+      index,
+      tone: "good",
+      status: "completed",
+      output: event.output_summary,
+      traceLabel: event.trace_id ?? event.action,
+    };
+  }
+
   if (name === "Missing Evidence") {
-    return data.evidenceMappings.some((row) => row.status === "missing")
-      ? "Blocking gap"
-      : "Clear";
+    return {
+      index,
+      tone: missing ? "danger" : "good",
+      status: missing ? "blocking" : "clear",
+      output: missing
+        ? "Blocking gap routed for human follow-up."
+        : "No missing blocking evidence in current matrix.",
+      traceLabel: "derived from evidence matrix",
+    };
   }
+
   if (name === "Submission Packet") {
-    return data.evidenceMappings.some((row) => row.needs_human_review)
-      ? "Human gate"
-      : "Ready";
+    return {
+      index,
+      tone: needsHuman ? "warn" : "idle",
+      status: needsHuman ? "needs human" : "queued",
+      output: needsHuman
+        ? "Packet waits for clinician-attested assertion."
+        : "Ready after evidence gate completion.",
+      traceLabel: "awaiting packet trace",
+    };
   }
-  if (name === "Denial Rescue") return labelize(data.toggles.denial_reason);
-  if (name === "Appeal Packet") return "Clinician signoff";
-  return "Pending approval";
+
+  if (name === "Denial Rescue") {
+    return {
+      index,
+      tone: denial ? "warn" : "idle",
+      status: denial ? "active" : "queued",
+      output: denial
+        ? `Classify ${labelize(data.toggles.denial_reason)} denial.`
+        : "Starts after payer denial event.",
+      traceLabel: "payer decision dependent",
+    };
+  }
+
+  if (name === "Appeal Packet") {
+    return {
+      index,
+      tone: appeal ? "warn" : "idle",
+      status: appeal ? "review" : "queued",
+      output: appeal
+        ? "Administrative draft must be approved by clinician."
+        : "Draft appears after denial rescue.",
+      traceLabel: "Action Center signoff required",
+    };
+  }
+
+  if (name === "Care Continuity") {
+    return {
+      index,
+      tone: handoff ? "good" : "idle",
+      status: handoff ? "handoff" : "queued",
+      output: handoff
+        ? "Approval routed to specialty pharmacy coordinator."
+        : "Waits for approval or appeal approval.",
+      traceLabel: "care handoff event",
+    };
+  }
+
+  return {
+    index,
+    tone: "idle",
+    status: "queued",
+    output: "Waiting for UiPath runtime trace.",
+    traceLabel: "not mirrored yet",
+  };
 }
 
 function actionTitle(row: EvidenceMapping) {
@@ -858,8 +1371,87 @@ function actorIcon(actorType: AuditEvent["actor_type"]) {
   return <Clock3 size={14} />;
 }
 
-function labelize(value: string) {
-  return value.replace(/_/g, " ");
+function apiSubmission(data: DemoState) {
+  return data.submissions.find((submission) =>
+    ["api", "payer_api"].includes(submission.channel),
+  );
+}
+
+function portalSubmission(data: DemoState) {
+  return data.submissions.find((submission) =>
+    ["portal_fallback", "payer_portal_rpa"].includes(submission.channel),
+  );
+}
+
+function apiFailureActive(data: DemoState) {
+  return (
+    data.toggles.payer_api_unavailable ||
+    data.case?.active_secondary_stages.includes(
+      "api_failure_portal_fallback",
+    ) ||
+    data.submissions.some(
+      (submission) =>
+        submission.status === "unavailable" ||
+        submission.status === "fallback_required" ||
+        submission.fallback_required,
+    ) ||
+    data.events.some((event) => event.action.includes("unavailable"))
+  );
+}
+
+function latestRobotEvent(data: DemoState) {
+  return data.events
+    .slice()
+    .reverse()
+    .find((event) => event.actor_type === "robot");
+}
+
+function hasRobotEvent(data: DemoState) {
+  return data.events.some((event) => event.actor_type === "robot");
+}
+
+function hasEventAction(data: DemoState, needle: string) {
+  return data.events.some((event) => event.action.includes(needle));
+}
+
+function attemptStatus(attempt: MirrorSubmission) {
+  return [
+    labelize(attempt.status),
+    attempt.error_code,
+    attempt.decision_status ? labelize(attempt.decision_status) : undefined,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
+
+function extractConfirmation(value?: string) {
+  if (!value) return undefined;
+  return value.match(/[A-Z]{3,}[-A-Z0-9]*SYN[-A-Z0-9]*/)?.[0];
+}
+
+function displayEventSummary(event: AuditEvent) {
+  if (event.action === "demo_toggles_updated") {
+    const apiDown = event.output_summary.includes(
+      '"payer_api_unavailable":true',
+    );
+    const missingLab = event.output_summary.includes(
+      '"missing_safety_lab":true',
+    );
+    const rejected = event.output_summary.includes(
+      '"clinician_rejects_assertion":true',
+    );
+    const active = [
+      apiDown ? "payer API failure" : undefined,
+      missingLab ? "missing safety screen" : undefined,
+      rejected ? "clinician rejection" : undefined,
+    ].filter(Boolean);
+
+    return active.length > 0
+      ? `Demo toggles updated: ${active.join(", ")} active.`
+      : "Demo toggles updated: baseline path restored.";
+  }
+
+  return event.output_summary;
 }
 
 function formatSourceReference(
@@ -870,6 +1462,10 @@ function formatSourceReference(
   if (typeof source === "string") return source;
 
   return [source.source_uri, source.section_label].filter(Boolean).join(" · ");
+}
+
+function labelize(value: string) {
+  return value.replace(/_/g, " ");
 }
 
 function formatTime(value: string) {
