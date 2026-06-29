@@ -1,0 +1,150 @@
+{
+  "$schema": "https://cloud.uipath.com/draft/2024-12/entry-point",
+  "$id": "entry-points.json",
+  "entryPoints": [
+    {
+      "filePath": "/content/agent.json",
+      "uniqueId": "b52b6d2a-4da0-4b14-a958-2047d8a8c306",
+      "type": "agent",
+      "input": {
+        "type": "object",
+        "properties": {
+          "caseSnapshot": {
+            "type": "object",
+            "description": "TreatmentAccessCase-shaped case snapshot from UiPath-owned state."
+          },
+          "payerDecision": {
+            "type": "object",
+            "description": "PayerDecision-shaped denial record."
+          },
+          "denialRescue": {
+            "type": "object",
+            "description": "Output from Denial Rescue Agent with selected strategy and evidence refs."
+          },
+          "submissionPacket": {
+            "type": "object",
+            "description": "SubmissionPacket-shaped original packet."
+          },
+          "evidenceMappings": {
+            "type": "array",
+            "description": "EvidenceMapping array available for source-grounded drafting."
+          },
+          "citations": {
+            "type": "array",
+            "description": "Citation array to use in administrative appeal text."
+          },
+          "clinicianReview": {
+            "type": "object",
+            "description": "Current clinician signoff state. Drafting usually starts pending."
+          },
+          "generatedAtIso": {
+            "type": "string",
+            "description": "ISO timestamp supplied by the UiPath workflow."
+          }
+        },
+        "required": [
+          "caseSnapshot",
+          "payerDecision",
+          "denialRescue",
+          "submissionPacket",
+          "evidenceMappings",
+          "citations",
+          "clinicianReview",
+          "generatedAtIso"
+        ]
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "appeal_id": {
+            "type": "string",
+            "description": "Deterministic appeal packet identifier."
+          },
+          "case_id": {
+            "type": "string",
+            "description": "Case identifier copied from caseSnapshot.case_id."
+          },
+          "denial_reason": {
+            "type": "string",
+            "description": "Source-grounded denial reason summary."
+          },
+          "appeal_strategy": {
+            "type": "string",
+            "description": "Strategy copied or summarized from Denial Rescue Agent output."
+          },
+          "draft_text": {
+            "type": "string",
+            "description": "Administrative appeal draft labelled for clinician review."
+          },
+          "draft_summary": {
+            "type": "string",
+            "description": "Short summary for Action Center review."
+          },
+          "evidence_used": {
+            "type": "array",
+            "description": "Evidence mapping, artifact, attachment, and denial refs used in the draft."
+          },
+          "citations": {
+            "type": "array",
+            "description": "Citation objects or citation refs used in the draft."
+          },
+          "unsupported_claim_warnings": {
+            "type": "array",
+            "description": "Warnings for unsupported claims or assertions needing clinician signoff."
+          },
+          "clinician_review_required": {
+            "type": "boolean",
+            "description": "Always true unless clinicianReview already documents completed approval."
+          },
+          "clinician_approved": {
+            "type": "boolean",
+            "description": "True only if input clinicianReview explicitly indicates approval; otherwise false."
+          },
+          "clinician_gate_status": {
+            "type": "string",
+            "description": "One of requires_signoff, approved_with_edits, approved, blocked_rework."
+          },
+          "action_center_task_key": {
+            "type": "string",
+            "description": "Action Center contract key to create for review."
+          },
+          "administrative_label": {
+            "type": "string",
+            "description": "Required disclaimer label for the draft."
+          },
+          "generated_at": {
+            "type": "string",
+            "description": "ISO timestamp copied from generatedAtIso."
+          },
+          "version": {
+            "type": "string",
+            "description": "Agent packet contract version."
+          },
+          "audit_summary": {
+            "type": "string",
+            "description": "One-sentence event summary for the write-event API workflow."
+          }
+        },
+        "required": [
+          "appeal_id",
+          "case_id",
+          "denial_reason",
+          "appeal_strategy",
+          "draft_text",
+          "draft_summary",
+          "evidence_used",
+          "citations",
+          "unsupported_claim_warnings",
+          "clinician_review_required",
+          "clinician_approved",
+          "clinician_gate_status",
+          "action_center_task_key",
+          "administrative_label",
+          "generated_at",
+          "version",
+          "audit_summary"
+        ]
+      }
+    }
+  ]
+}

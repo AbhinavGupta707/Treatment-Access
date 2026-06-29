@@ -1,0 +1,243 @@
+{
+  "version": "1.1.0",
+  "settings": {
+    "model": "gpt-4o-2024-11-20",
+    "maxTokens": 12000,
+    "temperature": 0,
+    "engine": "basic-v2",
+    "maxIterations": 8,
+    "mode": "standard"
+  },
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "caseSnapshot": {
+        "type": "object",
+        "description": "TreatmentAccessCase-shaped case snapshot from UiPath-owned state."
+      },
+      "patientSnapshot": {
+        "type": "object",
+        "description": "Synthetic PatientSnapshot for payer form fields."
+      },
+      "order": {
+        "type": "object",
+        "description": "Synthetic TreatmentOrder for the requested treatment."
+      },
+      "payerPolicy": {
+        "type": "object",
+        "description": "PayerPolicy output from the Coverage Requirement Agent."
+      },
+      "criteria": {
+        "type": "array",
+        "description": "PolicyCriterion array with severity, attestation, and citation metadata."
+      },
+      "evidenceMappings": {
+        "type": "array",
+        "description": "EvidenceMapping array from the Evidence Retrieval and Missing Evidence agents."
+      },
+      "attachments": {
+        "type": "array",
+        "description": "AttachmentMetadata array for synthetic packet attachments."
+      },
+      "humanApprovals": {
+        "type": "array",
+        "description": "Completed human validation decisions for clinician-attested assertions."
+      },
+      "builtAtIso": {
+        "type": "string",
+        "description": "ISO timestamp supplied by the UiPath workflow."
+      }
+    },
+    "required": [
+      "caseSnapshot",
+      "patientSnapshot",
+      "order",
+      "payerPolicy",
+      "criteria",
+      "evidenceMappings",
+      "attachments",
+      "humanApprovals",
+      "builtAtIso"
+    ]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "packet_id": {
+        "type": "string",
+        "description": "Deterministic packet identifier for downstream submission."
+      },
+      "case_id": {
+        "type": "string",
+        "description": "Case identifier copied from caseSnapshot.case_id."
+      },
+      "ready_to_submit": {
+        "type": "boolean",
+        "description": "True only when every blocking criterion has evidence and every required clinician validation is approved."
+      },
+      "submission_gate": {
+        "type": "string",
+        "description": "One of ready, blocked_missing_evidence, blocked_clinician_validation, blocked_conflicting_evidence."
+      },
+      "block_reasons": {
+        "type": "array",
+        "description": "Blocking reasons that explain why submission is refused."
+      },
+      "form_fields": {
+        "type": "object",
+        "description": "Payer-ready administrative form field values grounded in the input."
+      },
+      "attachment_ids": {
+        "type": "array",
+        "description": "Synthetic attachment IDs selected for the packet."
+      },
+      "cover_letter_summary": {
+        "type": "string",
+        "description": "Administrative cover summary. No unsupported medical or legal advice."
+      },
+      "evidence_refs": {
+        "type": "array",
+        "description": "Evidence mapping, artifact, attachment, citation, and approval references used in the packet."
+      },
+      "unsupported_claim_warnings": {
+        "type": "array",
+        "description": "Claims that must not be submitted without additional evidence or clinician approval."
+      },
+      "required_human_approval_refs": {
+        "type": "array",
+        "description": "Human approval references checked for clinician-attested criteria."
+      },
+      "built_at": {
+        "type": "string",
+        "description": "ISO timestamp copied from builtAtIso."
+      },
+      "version": {
+        "type": "string",
+        "description": "Agent packet contract version."
+      },
+      "audit_summary": {
+        "type": "string",
+        "description": "One-sentence event summary for the write-event API workflow."
+      }
+    },
+    "required": [
+      "packet_id",
+      "case_id",
+      "ready_to_submit",
+      "submission_gate",
+      "block_reasons",
+      "form_fields",
+      "attachment_ids",
+      "cover_letter_summary",
+      "evidence_refs",
+      "unsupported_claim_warnings",
+      "required_human_approval_refs",
+      "built_at",
+      "version",
+      "audit_summary"
+    ]
+  },
+  "metadata": {
+    "storageVersion": "50.0.0",
+    "isConversational": false,
+    "showProjectCreationExperience": false,
+    "targetRuntime": "pythonAgent"
+  },
+  "type": "lowCode",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are the Submission Packet Agent for the Treatment Access Command Center. Assemble payer-ready administrative prior authorization packet fields from UiPath-owned case state, evidence mappings, attachments, and completed human approvals.\n\nScope:\n- In scope: packet readiness gating, payer form field assembly, attachment selection, evidence reference traceability, and concise administrative cover summaries.\n- Out of scope: creating new clinical facts, changing live case state directly, submitting to the payer, or giving medical or legal advice.\n\nRules:\n- Treat all data as synthetic demo data.\n- Every clinical assertion must be grounded in an evidence mapping citation or a completed human approval.\n- Set ready_to_submit=false and submission_gate=blocked_missing_evidence when any blocking criterion has missing evidence, null artifact_id, or confidence 0.\n- Set ready_to_submit=false and submission_gate=blocked_clinician_validation when any criterion marked must_be_clinician_attested lacks an approved human approval or reviewer decision.\n- Set ready_to_submit=false and submission_gate=blocked_conflicting_evidence when any blocking mapping is conflicting.\n- Refuse by structured output only: do not invent a workaround, do not mark ready, and list block_reasons and unsupported_claim_warnings.\n- Include evidence_refs for every mapping_id, artifact_id, attachment_id, citation_id, and human approval reference used.\n\nOutput:\n- Return only a JSON object conforming to the output schema.\n- form_fields should include patient_reference, member_reference when available, medication_requested, diagnosis_code, requested_start_date, policy_reference, provider_reference, and urgency.\n- cover_letter_summary must be administrative and source-grounded.\n- audit_summary must be suitable for the write-event API Workflow.",
+      "contentTokens": [
+        {
+          "type": "simpleText",
+          "rawString": "You are the Submission Packet Agent for the Treatment Access Command Center. Assemble payer-ready administrative prior authorization packet fields from UiPath-owned case state, evidence mappings, attachments, and completed human approvals.\n\nScope:\n- In scope: packet readiness gating, payer form field assembly, attachment selection, evidence reference traceability, and concise administrative cover summaries.\n- Out of scope: creating new clinical facts, changing live case state directly, submitting to the payer, or giving medical or legal advice.\n\nRules:\n- Treat all data as synthetic demo data.\n- Every clinical assertion must be grounded in an evidence mapping citation or a completed human approval.\n- Set ready_to_submit=false and submission_gate=blocked_missing_evidence when any blocking criterion has missing evidence, null artifact_id, or confidence 0.\n- Set ready_to_submit=false and submission_gate=blocked_clinician_validation when any criterion marked must_be_clinician_attested lacks an approved human approval or reviewer decision.\n- Set ready_to_submit=false and submission_gate=blocked_conflicting_evidence when any blocking mapping is conflicting.\n- Refuse by structured output only: do not invent a workaround, do not mark ready, and list block_reasons and unsupported_claim_warnings.\n- Include evidence_refs for every mapping_id, artifact_id, attachment_id, citation_id, and human approval reference used.\n\nOutput:\n- Return only a JSON object conforming to the output schema.\n- form_fields should include patient_reference, member_reference when available, medication_requested, diagnosis_code, requested_start_date, policy_reference, provider_reference, and urgency.\n- cover_letter_summary must be administrative and source-grounded.\n- audit_summary must be suitable for the write-event API Workflow."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "Build the submission packet from these UiPath-owned inputs.\n\ncaseSnapshot: {{input.caseSnapshot}}\npatientSnapshot: {{input.patientSnapshot}}\norder: {{input.order}}\npayerPolicy: {{input.payerPolicy}}\ncriteria: {{input.criteria}}\nevidenceMappings: {{input.evidenceMappings}}\nattachments: {{input.attachments}}\nhumanApprovals: {{input.humanApprovals}}\nbuiltAtIso: {{input.builtAtIso}}\n\nReturn the structured packet and gate decision.",
+      "contentTokens": [
+        {
+          "type": "simpleText",
+          "rawString": "Build the submission packet from these UiPath-owned inputs.\n\ncaseSnapshot: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.caseSnapshot"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\npatientSnapshot: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.patientSnapshot"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\norder: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.order"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\npayerPolicy: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.payerPolicy"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\ncriteria: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.criteria"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\nevidenceMappings: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.evidenceMappings"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\nattachments: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.attachments"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\nhumanApprovals: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.humanApprovals"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\nbuiltAtIso: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.builtAtIso"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\nReturn the structured packet and gate decision."
+        }
+      ]
+    }
+  ],
+  "guardrails": [],
+  "projectId": "876bc503-cbcc-422e-ae32-5e8f8f25da78"
+}

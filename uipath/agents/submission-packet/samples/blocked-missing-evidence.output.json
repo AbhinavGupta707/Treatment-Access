@@ -1,0 +1,39 @@
+{
+  "packet_id": "packet-syn-001",
+  "case_id": "case-syn-001",
+  "ready_to_submit": false,
+  "submission_gate": "blocked_missing_evidence",
+  "block_reasons": [
+    "Blocking criterion criterion-safety-screen has no artifact_id and must be supplied before payer submission."
+  ],
+  "form_fields": {
+    "patient_reference": "patient-syn-001",
+    "member_reference": "member-syn-001",
+    "medication_requested": "Fictionalimab",
+    "diagnosis_code": "K50.90",
+    "requested_start_date": "2026-07-03",
+    "policy_reference": "policy-aurora-vale-biologic-2026",
+    "provider_reference": "provider-syn-gi-001",
+    "urgency": "urgent"
+  },
+  "attachment_ids": [
+    "attachment-progress-note",
+    "attachment-policy"
+  ],
+  "cover_letter_summary": "Administrative packet is blocked because required synthetic safety screening evidence is missing.",
+  "evidence_refs": [
+    "mapping-diagnosis",
+    "mapping-step-therapy",
+    "mapping-safety-screen",
+    "policy-citation-safety"
+  ],
+  "unsupported_claim_warnings": [
+    "Do not assert recent TB and hepatitis screening until artifact-safety-labs or clinician-approved substitute evidence is present."
+  ],
+  "required_human_approval_refs": [
+    "human-approval-diagnosis-severity"
+  ],
+  "built_at": "2026-06-29T09:10:00.000Z",
+  "version": "submission-packet.agent.v1",
+  "audit_summary": "Submission Packet Agent blocked synthetic payer submission because safety-screen evidence is missing."
+}

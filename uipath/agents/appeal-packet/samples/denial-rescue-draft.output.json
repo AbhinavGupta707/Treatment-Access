@@ -1,0 +1,49 @@
+{
+  "appeal_id": "appeal-syn-001",
+  "case_id": "case-syn-001",
+  "denial_reason": "Synthetic denial states prior preferred therapy documentation was not clear enough for approval.",
+  "appeal_strategy": "Clarify prior preferred therapy outcomes using mapping-step-therapy, artifact-med-history, and Policy Section 2.4.",
+  "draft_text": "Administrative draft for clinician review; not medical or legal advice.\n\nTo Aurora Vale Fictional Health: Please reconsider the synthetic prior authorization denial for Fictionalimab. The record package includes medication-history evidence that identifies two prior preferred therapy outcomes: inadequate response to Preferred Therapy A and intolerance to Preferred Therapy B [Policy Section 2.4; mapping-step-therapy]. The packet also references the specialist assessment and diagnosis criterion for clinician review [Policy Section 2.1; mapping-diagnosis].\n\nThis draft is prepared for clinician review and must not be submitted until the clinician approves or edits the final language.",
+  "draft_summary": "Administrative appeal draft addresses a step-therapy documentation denial with medication-history evidence and visible clinician signoff requirements.",
+  "evidence_used": [
+    "mapping-step-therapy",
+    "artifact-med-history",
+    "policy-citation-step",
+    "mapping-diagnosis",
+    "artifact-progress-note",
+    "policy-citation-diagnosis",
+    "artifact-denial-step-therapy"
+  ],
+  "citations": [
+    {
+      "citation_id": "policy-citation-step",
+      "label": "Policy Section 2.4",
+      "source_span": {
+        "source_uri": "fixture://policies/aurora-vale-fictionalimab-policy.md",
+        "section_label": "Preferred therapy history",
+        "excerpt": "Fictional policy requires inadequate response or intolerance to two preferred therapies."
+      }
+    },
+    {
+      "citation_id": "policy-citation-diagnosis",
+      "label": "Policy Section 2.1",
+      "source_span": {
+        "source_uri": "fixture://policies/aurora-vale-fictionalimab-policy.md",
+        "section_label": "Diagnosis and severity",
+        "excerpt": "Fictional policy requires a specialist note documenting moderate-to-severe disease activity."
+      }
+    }
+  ],
+  "unsupported_claim_warnings": [
+    "Diagnosis and severity language must remain subject to clinician signoff before appeal submission.",
+    "Do not add independent medical-necessity conclusions beyond the cited synthetic evidence."
+  ],
+  "clinician_review_required": true,
+  "clinician_approved": false,
+  "clinician_gate_status": "requires_signoff",
+  "action_center_task_key": "appeal_signoff",
+  "administrative_label": "Administrative draft for clinician review; not medical or legal advice.",
+  "generated_at": "2026-06-29T09:20:00.000Z",
+  "version": "appeal-packet.agent.v1",
+  "audit_summary": "Appeal Packet Agent drafted a clinician-gated administrative appeal for a step_therapy denial."
+}

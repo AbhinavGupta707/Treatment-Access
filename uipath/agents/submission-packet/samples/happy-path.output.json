@@ -1,0 +1,44 @@
+{
+  "packet_id": "packet-syn-001",
+  "case_id": "case-syn-001",
+  "ready_to_submit": true,
+  "submission_gate": "ready",
+  "block_reasons": [],
+  "form_fields": {
+    "patient_reference": "patient-syn-001",
+    "member_reference": "member-syn-001",
+    "medication_requested": "Fictionalimab",
+    "diagnosis_code": "K50.90",
+    "requested_start_date": "2026-07-03",
+    "policy_reference": "policy-aurora-vale-biologic-2026",
+    "provider_reference": "provider-syn-gi-001",
+    "urgency": "urgent"
+  },
+  "attachment_ids": [
+    "attachment-progress-note",
+    "attachment-safety-labs",
+    "attachment-policy"
+  ],
+  "cover_letter_summary": "Administrative prior authorization packet for Fictionalimab using synthetic specialist note, medication history, safety screening, and clinician-approved severity attestation.",
+  "evidence_refs": [
+    "mapping-diagnosis",
+    "mapping-step-therapy",
+    "mapping-safety-screen",
+    "artifact-progress-note",
+    "artifact-med-history",
+    "artifact-safety-labs",
+    "attachment-progress-note",
+    "attachment-safety-labs",
+    "policy-citation-diagnosis",
+    "policy-citation-step",
+    "policy-citation-safety",
+    "human-approval-diagnosis-severity"
+  ],
+  "unsupported_claim_warnings": [],
+  "required_human_approval_refs": [
+    "human-approval-diagnosis-severity"
+  ],
+  "built_at": "2026-06-29T09:10:00.000Z",
+  "version": "submission-packet.agent.v1",
+  "audit_summary": "Submission Packet Agent assembled a ready synthetic packet with three attachments and clinician-approved blocking assertions."
+}

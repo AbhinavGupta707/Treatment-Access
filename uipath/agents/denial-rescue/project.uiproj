@@ -1,0 +1,6 @@
+{
+  "ProjectType": "Agent",
+  "Name": "denial-rescue",
+  "Description": "Parses synthetic payer denials and selects step therapy, safety screen, or documentation gap rescue strategies.",
+  "MainFile": null
+}

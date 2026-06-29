@@ -1,0 +1,34 @@
+{
+  "appeal_id": "appeal-syn-001",
+  "case_id": "case-syn-001",
+  "denial_reason": "Synthetic denial states prior preferred therapy documentation was not clear enough for approval.",
+  "appeal_strategy": "Clarify prior preferred therapy outcomes using cited medication-history evidence.",
+  "draft_text": "Administrative draft for clinician review; not medical or legal advice.\n\nClinician-edited final administrative appeal text uses synthetic medication-history evidence and approved reviewer wording from the appeal_signoff task.",
+  "draft_summary": "Clinician-approved-with-edits appeal packet is ready for the downstream appeal submission workflow.",
+  "evidence_used": [
+    "mapping-step-therapy",
+    "artifact-med-history",
+    "policy-citation-step",
+    "task-appeal-signoff"
+  ],
+  "citations": [
+    {
+      "citation_id": "policy-citation-step",
+      "label": "Policy Section 2.4",
+      "source_span": {
+        "source_uri": "fixture://policies/aurora-vale-fictionalimab-policy.md",
+        "section_label": "Preferred therapy history",
+        "excerpt": "Fictional policy requires inadequate response or intolerance to two preferred therapies."
+      }
+    }
+  ],
+  "unsupported_claim_warnings": [],
+  "clinician_review_required": false,
+  "clinician_approved": true,
+  "clinician_gate_status": "approved_with_edits",
+  "action_center_task_key": "appeal_signoff",
+  "administrative_label": "Administrative draft for clinician review; not medical or legal advice.",
+  "generated_at": "2026-06-29T09:35:00.000Z",
+  "version": "appeal-packet.agent.v1",
+  "audit_summary": "Appeal Packet Agent incorporated clinician-approved edits and marked the administrative appeal packet approved for downstream submission."
+}
