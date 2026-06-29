@@ -142,6 +142,7 @@ describe("demo data", () => {
       "step_therapy",
       "safety_screen",
       "medical_necessity",
+      "documentation_gap",
     ]);
     expect(appealIngredients.appeal_id).toBe(seedAppealPacket.appeal_id);
     expect(pharmacyHandoffDetails.handoff_id).toBe(

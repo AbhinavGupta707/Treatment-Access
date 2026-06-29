@@ -35,7 +35,7 @@ The agent compiles a final audit-ready packet manifest after care continuity suc
 ## Local Validation
 
 ```bash
-uip agent refresh uipath/agents/audit-packet --output json
+uip agent migrate uipath/agents/audit-packet --output json
 uip agent validate uipath/agents/audit-packet --output json
 ```
 

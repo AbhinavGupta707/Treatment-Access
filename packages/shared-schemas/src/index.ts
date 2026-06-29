@@ -495,7 +495,7 @@ export const SubmissionPacketAgentOutputSchema = z.object({
 export const DenialReasonCategorySchema = z.enum([
   "step_therapy",
   "safety_screen",
-  "medical_necessity",
+  "documentation_gap",
 ]);
 
 export const DenialRescueAgentInputSchema = BaseAgentInputSchema.extend({
@@ -586,7 +586,12 @@ export const DemoTogglesSchema = z.object({
   missing_safety_lab: z.boolean().default(false),
   payer_api_unavailable: z.boolean().default(false),
   denial_reason: z
-    .enum(["step_therapy", "safety_screen", "medical_necessity"])
+    .enum([
+      "step_therapy",
+      "safety_screen",
+      "medical_necessity",
+      "documentation_gap",
+    ])
     .default("step_therapy"),
   clinician_rejects_assertion: z.boolean().default(false),
   force_low_confidence_extraction: z.boolean().default(false),

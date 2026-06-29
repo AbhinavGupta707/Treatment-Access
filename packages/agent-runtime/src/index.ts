@@ -9,6 +9,7 @@ import {
   AgentRuntimeSummarySchema,
   DemoTogglesSchema,
   type AgentId,
+  type DenialReasonCategory,
   type AgentOutput,
   type AgentRuntimeResult,
   type AgentRuntimeSummary,
@@ -296,20 +297,20 @@ function submissionPacketOutput(context: RuntimeContext): AgentOutput {
 }
 
 function denialRescueOutput(context: RuntimeContext): AgentOutput {
-  const category = context.toggles.denial_reason;
-  const strategyByReason: Record<DemoToggles["denial_reason"], string> = {
+  const category = denialReasonCategory(context.toggles.denial_reason);
+  const strategyByReason: Record<DenialReasonCategory, string> = {
     step_therapy:
       "Use the synthetic medication history to clarify two prior preferred therapy outcomes.",
     safety_screen:
       "Attach the synthetic TB and hepatitis screening evidence before requesting reconsideration.",
-    medical_necessity:
-      "Route diagnosis and severity language for clinician attestation before appeal submission.",
+    documentation_gap:
+      "Resolve the documentation gap with cited diagnosis and severity evidence routed for clinician attestation.",
   };
-  const evidenceGapIdsByReason: Record<DemoToggles["denial_reason"], string[]> =
+  const evidenceGapIdsByReason: Record<DenialReasonCategory, string[]> =
     {
       step_therapy: ["mapping-step-therapy"],
       safety_screen: ["mapping-safety-screen"],
-      medical_necessity: ["mapping-diagnosis"],
+      documentation_gap: ["mapping-diagnosis"],
     };
 
   return {
@@ -323,20 +324,26 @@ function denialRescueOutput(context: RuntimeContext): AgentOutput {
       evidenceGapIdsByReason[category],
     ),
     safety_flags:
-      category === "medical_necessity"
+      category === "documentation_gap"
         ? [
             {
-              flag_id: "flag-medical-necessity-human-approval",
+              flag_id: "flag-documentation-gap-human-approval",
               severity: "warning",
               code: "CLINICAL_ASSERTION_REVIEW_REQUIRED",
               message:
-                "Medical necessity appeal strategy depends on clinician-approved clinical assertions.",
+                "Documentation-gap appeal strategy depends on clinician-approved clinical assertions.",
               evidence_refs: ["artifact-progress-note"],
               requires_human_approval: true,
             },
           ]
         : [],
   };
+}
+
+function denialReasonCategory(
+  reason: DemoToggles["denial_reason"],
+): DenialReasonCategory {
+  return reason === "medical_necessity" ? "documentation_gap" : reason;
 }
 
 function appealPacketOutput(context: RuntimeContext): AgentOutput {

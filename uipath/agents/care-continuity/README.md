@@ -38,7 +38,7 @@ When approval is absent, the agent returns `handoff_status: blocked`. When the p
 After editing:
 
 ```bash
-uip agent refresh uipath/agents/care-continuity --output json
+uip agent migrate uipath/agents/care-continuity --output json
 uip agent validate uipath/agents/care-continuity --output json
 ```
 

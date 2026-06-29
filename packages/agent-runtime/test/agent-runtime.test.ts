@@ -80,6 +80,9 @@ describe("agent runtime", () => {
     expect(medicalNecessity.appeal_strategy).toContain(
       "clinician attestation",
     );
+    expect(medicalNecessity.denial_reason_category).toBe(
+      "documentation_gap",
+    );
     expect(
       new Set([
         stepTherapy.denial_reason_category,

@@ -863,6 +863,7 @@ export const denialLetterScenarios = {
   step_therapy: stepTherapyDenialDecision,
   safety_screen: safetyScreenDenialDecision,
   medical_necessity: medicalNecessityDenialDecision,
+  documentation_gap: medicalNecessityDenialDecision,
 } as const;
 
 export const pharmacyHandoffDetails = seedPharmacyHandoff;
