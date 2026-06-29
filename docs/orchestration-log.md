@@ -595,3 +595,40 @@ Action Center task creation, Data Service write, Agent Builder/Maestro debug,
 IXP mutation, or payer submission was performed. Remaining live-readiness work
 is UIA target indication against the synthetic mock payer portal followed by
 approved live smoke.
+
+## 2026-06-29 - Checkpoint 6 Launch
+
+Created prep commit `6e1648f Prepare checkpoint 6 live product plan` with:
+
+- `/Ui References` reference images supplied by the user.
+- `design-system/treatment-access-command-center/MASTER.md`.
+- `docs/live-agentic-product-plan.md`.
+- `docs/checkpoint-6-live-product-orchestrator.md`.
+
+Checkpoint 6 target:
+
+- Premium product UI as the demo-visible surface.
+- Fireworks-backed live agent mode.
+- LangGraph stateful specialist-agent workflow.
+- LangSmith trace metadata/readiness.
+- UiPath live integration hooks with all side effects approval-gated.
+
+Active isolated lanes launched from prep commit `6e1648f`:
+
+| Merge order | Lane                                  | Thread ID                              | Worktree path                                                |
+| ----------- | ------------------------------------- | -------------------------------------- | ------------------------------------------------------------ |
+| 1           | Live Agent Provider & Runtime Schemas | `019f130f-ec37-7e01-9d7b-0efe8670ccda` | `/Users/abhinavgupta/.codex/worktrees/7465/Treatment Access` |
+| 2           | LangGraph Multi-Agent Workflow        | `019f1310-5cbd-7d13-81ad-0a1e4b4171f7` | `/Users/abhinavgupta/.codex/worktrees/64fd/Treatment Access` |
+| 3           | Premium Product UI                    | `019f1310-e132-7e60-9577-31d66b79b61c` | `/Users/abhinavgupta/.codex/worktrees/99a4/Treatment Access` |
+| 4           | UiPath Live Wiring & Safe Hooks       | `019f1311-7436-7503-925a-0a9ac79883fc` | `/Users/abhinavgupta/.codex/worktrees/d3d4/Treatment Access` |
+| 5           | Live Demo QA & Submission Readiness   | `019f1312-0bc3-7b72-98e7-49e743de79d5` | `/Users/abhinavgupta/.codex/worktrees/f649/Treatment Access` |
+
+Launch safety:
+
+- `.env.local` exists locally with Fireworks/LangSmith keys, is ignored by git,
+  and must not be printed.
+- Live provider smoke can run after implementation merge.
+- Live UiPath side effects remain approval-gated: agent debug/run, Maestro
+  run/debug, Action Center task creation, Data Service/Data Fabric writes,
+  Orchestrator job start, RPA run/debug, solution upload/publish/deploy/activate,
+  IXP mutation, and payer submission.

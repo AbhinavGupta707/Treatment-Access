@@ -327,3 +327,45 @@ Runtime safety remains unchanged: live RPA run/debug, Orchestrator job start,
 solution upload/publish/deploy/activate, agent debug, Maestro debug, IXP
 mutation, Action Center task creation, Data Service writes, and payer submission
 require explicit user approval.
+
+## Checkpoint 6 Status
+
+Checkpoint 6 is active under orchestration.
+
+Prep/base commit: `6e1648f`.
+
+Control runbook: `docs/checkpoint-6-live-product-orchestrator.md`.
+
+Checkpoint 6 outcome:
+
+- Redesign the Command Center into a premium customer-facing product UI based on
+  `/Ui References`, with dashboard, case detail, evidence matrix, submission,
+  and appeal surfaces.
+- Add live agentic runtime foundations using Fireworks model calls, LangGraph
+  workflow shape, LangSmith trace metadata, and schema-validated outputs.
+- Keep deterministic mode available for repeatable smoke tests.
+- Keep UiPath as the orchestration/governance layer and custom UI as a
+  visualization surface for governed state.
+- Keep all live UiPath side effects behind explicit user approval.
+
+Active isolated lanes:
+
+| Merge order | Lane                                  | Thread ID                              | Worktree path                                                | Ownership                                  |
+| ----------- | ------------------------------------- | -------------------------------------- | ------------------------------------------------------------ | ------------------------------------------ |
+| 1           | Live Agent Provider & Runtime Schemas | `019f130f-ec37-7e01-9d7b-0efe8670ccda` | `/Users/abhinavgupta/.codex/worktrees/7465/Treatment Access` | `packages/shared-schemas/**`, `packages/agent-runtime/**`, readiness scripts |
+| 2           | LangGraph Multi-Agent Workflow        | `019f1310-5cbd-7d13-81ad-0a1e4b4171f7` | `/Users/abhinavgupta/.codex/worktrees/64fd/Treatment Access` | `packages/agent-runtime/**`, workflow smoke |
+| 3           | Premium Product UI                    | `019f1310-e132-7e60-9577-31d66b79b61c` | `/Users/abhinavgupta/.codex/worktrees/99a4/Treatment Access` | `apps/command-center/**`                  |
+| 4           | UiPath Live Wiring & Safe Hooks       | `019f1311-7436-7503-925a-0a9ac79883fc` | `/Users/abhinavgupta/.codex/worktrees/d3d4/Treatment Access` | `uipath/**`, UiPath readiness docs/scripts |
+| 5           | Live Demo QA & Submission Readiness   | `019f1312-0bc3-7b72-98e7-49e743de79d5` | `/Users/abhinavgupta/.codex/worktrees/f649/Treatment Access` | `scripts/**`, demo/submission/testing docs |
+
+Launch constraints:
+
+- The user has created local `.env.local` with Fireworks and LangSmith keys;
+  the file is ignored by git and must never be printed or committed.
+- Worker worktrees should not require secrets. Live provider testing should be
+  performed in the integration worktree after merge unless a worker explicitly
+  has a safe ignored env file.
+- Do not run live `uip agent debug`, Maestro run/debug, Action Center task
+  creation, Data Service/Data Fabric writes, Orchestrator job start, RPA
+  run/debug, solution upload/publish/deploy/activate, IXP mutation, or payer
+  submission without explicit user approval.
