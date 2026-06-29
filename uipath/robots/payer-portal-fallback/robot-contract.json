@@ -1,0 +1,110 @@
+{
+  "robotId": "payer-portal-fallback",
+  "displayName": "Payer Portal Fallback",
+  "orchestratorFolder": {
+    "name": "TreatmentAccessHackathon",
+    "key": "4fba2fa1-012b-469a-b6aa-e5be3811c173"
+  },
+  "syntheticDataOnly": true,
+  "inputs": {
+    "portalUrl": {
+      "type": "string",
+      "asset": "TACC_PAYER_PORTAL_URL",
+      "example": "http://127.0.0.1:8788"
+    },
+    "apiBaseUrl": {
+      "type": "string",
+      "asset": "TACC_MOCK_API_BASE_URL",
+      "example": "http://127.0.0.1:8787"
+    },
+    "caseId": {
+      "type": "string",
+      "example": "case-demo-001"
+    },
+    "patientId": {
+      "type": "string",
+      "example": "patient-synth-001"
+    },
+    "orderId": {
+      "type": "string",
+      "example": "order-synth-001"
+    },
+    "memberId": {
+      "type": "string",
+      "portalTarget": "member ID field"
+    },
+    "medication": {
+      "type": "string",
+      "portalTarget": "medication field"
+    },
+    "diagnosis": {
+      "type": "string",
+      "portalTarget": "diagnosis field"
+    },
+    "evidenceRefs": {
+      "type": "array",
+      "items": "string"
+    },
+    "demoRunId": {
+      "type": "string"
+    }
+  },
+  "optionalInputs": {
+    "portalUsername": {
+      "type": "string",
+      "asset": "TACC_PAYER_PORTAL_USERNAME",
+      "note": "Synthetic credential only if the mock portal lane adds login."
+    },
+    "portalPassword": {
+      "type": "credential",
+      "asset": "TACC_PAYER_PORTAL_PASSWORD",
+      "note": "Synthetic credential only if the mock portal lane adds login."
+    }
+  },
+  "portalContract": {
+    "form": "prior authorization submission form",
+    "fields": [
+      "member ID",
+      "medication",
+      "diagnosis"
+    ],
+    "submit": "submit button",
+    "confirmation": "confirmation region containing confirmation ID"
+  },
+  "outputs": {
+    "status": {
+      "type": "string",
+      "allowedValues": [
+        "submitted",
+        "needs_capture",
+        "failed"
+      ]
+    },
+    "confirmationId": {
+      "type": "string",
+      "source": "portal confirmation region"
+    },
+    "robotJobId": {
+      "type": "string",
+      "source": "UiPath Orchestrator job ID when invoked as process"
+    },
+    "fallbackEvent": {
+      "type": "object",
+      "action": "payer_portal_fallback_submitted",
+      "actor": "robot",
+      "requiredFields": [
+        "caseId",
+        "confirmationId",
+        "robotJobId",
+        "portalUrl",
+        "demoRunId"
+      ]
+    }
+  },
+  "safetyGates": [
+    "Use synthetic case, patient, payer, provider, credential, and portal data only.",
+    "Do not submit real payer requests.",
+    "Every clinical assertion in the packet must already be supported by CP3 agent evidence, policy citation, or human approval.",
+    "Appeal or medical-necessity text is not generated or adjudicated by this robot."
+  ]
+}
