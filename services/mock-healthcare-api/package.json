@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@fastify/cors": "^10.0.2",
+    "@tacc/agent-runtime": "workspace:*",
     "@tacc/demo-data": "workspace:*",
     "@tacc/shared-schemas": "workspace:*",
     "fastify": "^5.2.1",

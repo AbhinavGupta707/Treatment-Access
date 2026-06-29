@@ -16,6 +16,7 @@ tags:
   - name: Demo
   - name: Cases
   - name: Events
+  - name: LiveProof
   - name: EHR
   - name: Payer
   - name: Pharmacy
@@ -73,6 +74,52 @@ paths:
           description: Updated toggles
         "400":
           $ref: "#/components/responses/ValidationError"
+  /live-proof-runs:
+    get:
+      tags: [LiveProof]
+      summary: List synthetic Checkpoint 7 live proof runs
+      responses:
+        "200":
+          description: Live proof runs
+    post:
+      tags: [LiveProof]
+      summary: Create a synthetic live proof run and mirror visible stage events
+      description: >
+        Creates a synthetic run, validates all seven agent outputs, and appends
+        seven synthetic event mirror records. In AGENT_MODE=live with live keys
+        configured, the runtime can use Fireworks structured model calls. No
+        live UiPath job, Action Center task, Data Service write, or payer
+        submission is started by this endpoint.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LiveProofRunRequest"
+            example:
+              requested_by: Command Center
+              mode: deterministic
+      responses:
+        "200":
+          description: Created live proof run
+        "400":
+          $ref: "#/components/responses/ValidationError"
+  /live-proof-runs/{runId}:
+    get:
+      tags: [LiveProof]
+      summary: Read a synthetic live proof run
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: live-proof-case-syn-001-2026-06-29T12-00-00-000Z
+      responses:
+        "200":
+          description: Live proof run detail
+        "404":
+          $ref: "#/components/responses/NotFound"
   /cases:
     get:
       tags: [Cases]
@@ -404,9 +451,31 @@ components:
           type: boolean
         denial_reason:
           type: string
-          enum: [step_therapy, safety_screen, medical_necessity]
+          enum:
+            [
+              step_therapy,
+              safety_screen,
+              medical_necessity,
+              documentation_gap,
+            ]
         clinician_rejects_assertion:
           type: boolean
+    LiveProofRunRequest:
+      type: object
+      properties:
+        requested_by:
+          type: string
+          default: Command Center live proof
+        mode:
+          type: string
+          enum: [deterministic, live]
+          description: >
+            Omit to use AGENT_MODE. deterministic is the no-secret smoke mode.
+        langsmith_run_url:
+          type: string
+          format: uri
+        toggles:
+          $ref: "#/components/schemas/DemoToggles"
     AuditEventIngest:
       type: object
       required: [case_id, actor_type, actor_name, task_or_agent_name, action]

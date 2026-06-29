@@ -15,6 +15,10 @@ import {
   EvidenceArtifactSchema,
   EvidenceMappingSchema,
   HumanGateSchema,
+  LiveProofApprovalGateSchema,
+  LiveProofRunSchema,
+  LiveProofStepSchema,
+  LiveProofTraceSchema,
   PayerDecisionSchema,
   PharmacyHandoffSchema,
   RobotJobSchema,
@@ -360,5 +364,76 @@ describe("shared schemas", () => {
     expect(snapshot.tool_calls[0]?.synthetic).toBe(true);
     expect(snapshot.human_gates[0]?.decision).toBe("pending");
     expect(snapshot.robot_jobs[0]?.synthetic).toBe(true);
+  });
+
+  it("validates Checkpoint 7 live proof run contracts", () => {
+    const trace = LiveProofTraceSchema.parse({
+      trace_id: "trace-live-proof-001",
+      provider: "langsmith",
+      status: "metadata_only",
+      project_name: "Treatment Access Command Center",
+      metadata: {
+        case_id: "case-001",
+        synthetic: true,
+      },
+      captured_at: "2026-06-29T12:00:00.000Z",
+    });
+    const proofStep = LiveProofStepSchema.parse({
+      step_id: "step-live-proof-policy",
+      run_id: "live-proof-001",
+      case_id: "case-001",
+      stage: "policy_checked",
+      status: "completed",
+      title: "Policy checked",
+      summary: "Synthetic policy criteria were checked.",
+      actor_type: "agent",
+      actor_name: "Coverage Requirement Agent",
+      started_at: "2026-06-29T12:00:00.000Z",
+      completed_at: "2026-06-29T12:00:01.000Z",
+      trace,
+      uipath_evidence_refs: [
+        {
+          evidence_ref_id: "proof-event-mirror",
+          source: "uipath_event_mirror",
+          label: "Synthetic mirror event",
+          captured_at: "2026-06-29T12:00:01.000Z",
+        },
+      ],
+    });
+    const approvalGate = LiveProofApprovalGateSchema.parse({
+      gate_id: "gate-live-proof-clinical",
+      gate_type: "clinical_assertion",
+      status: "pending",
+      assigned_role: "Demo GI Clinician",
+      reason: "Clinician approval required.",
+      source_stage: "human_gate_required",
+      trace,
+    });
+    const liveProof = LiveProofRunSchema.parse({
+      run_id: "live-proof-001",
+      case_id: "case-001",
+      requested_by: "Command Center",
+      mode: "live",
+      status: "waiting_for_approval",
+      current_stage: "live_proof_completed_or_waiting_for_approval",
+      started_at: "2026-06-29T12:00:00.000Z",
+      completed_at: "2026-06-29T12:00:01.000Z",
+      steps: [proofStep],
+      approval_gates: [approvalGate],
+      traces: [trace],
+      agent_run: {
+        run_id: "live-proof-001",
+        case_id: "case-001",
+        mode: "live",
+        orchestrator: "uipath",
+        status: "needs_human",
+        started_at: "2026-06-29T12:00:00.000Z",
+      },
+    });
+
+    expect(liveProof.steps[0]?.stage).toBe("policy_checked");
+    expect(liveProof.approval_gates[0]?.status).toBe("pending");
+    expect(liveProof.no_live_uipath_side_effects).toBe(true);
+    expect(liveProof.no_real_payer_submission).toBe(true);
   });
 });

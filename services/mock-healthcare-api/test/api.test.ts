@@ -243,6 +243,69 @@ describe("mock healthcare api", () => {
     ).toBe(true);
   });
 
+  it("creates a checkpoint 7 live proof run and mirrors visible stage events", async () => {
+    const server = testServer();
+    const response = await server.inject({
+      method: "POST",
+      url: "/live-proof-runs",
+      payload: {
+        requested_by: "Unit test",
+        mode: "deterministic",
+      },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      ok: true,
+      events_written: 7,
+      live_proof_run: {
+        mode: "deterministic",
+        status: "waiting_for_approval",
+        no_live_uipath_side_effects: true,
+        no_real_payer_submission: true,
+      },
+    });
+    expect(
+      response
+        .json()
+        .live_proof_run.steps.map((step: { stage: string }) => step.stage),
+    ).toEqual([
+      "case_live_proof_started",
+      "policy_checked",
+      "evidence_mapped",
+      "human_gate_required",
+      "submission_packet_ready_or_blocked",
+      "payer_api_unavailable_or_not_attempted",
+      "live_proof_completed_or_waiting_for_approval",
+    ]);
+    expect(response.json().live_proof_run.step_runs).toHaveLength(7);
+
+    const eventsResponse = await server.inject({
+      method: "GET",
+      url: "/cases/case-syn-001/events",
+    });
+    expect(eventsResponse.statusCode).toBe(200);
+    expect(
+      eventsResponse
+        .json()
+        .events.some(
+          (event: { action: string }) =>
+            event.action === "live_proof_completed_or_waiting_for_approval",
+        ),
+    ).toBe(true);
+
+    const readResponse = await server.inject({
+      method: "GET",
+      url: `/live-proof-runs/${response.json().live_proof_run.run_id}`,
+    });
+    expect(readResponse.statusCode).toBe(200);
+    expect(readResponse.json()).toMatchObject({
+      live_proof_run: {
+        run_id: response.json().live_proof_run.run_id,
+      },
+    });
+  });
+
   it("submits prior auth, approves appeal after clinician approval, and creates pharmacy handoff", async () => {
     const server = testServer();
     await server.inject({

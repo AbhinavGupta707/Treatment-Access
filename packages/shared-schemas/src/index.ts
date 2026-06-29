@@ -713,6 +713,136 @@ export const AgentStepRunSchema = z.object({
   synthetic: z.literal(true).default(true),
 });
 
+export const LiveProofStageSchema = z.enum([
+  "case_live_proof_started",
+  "policy_checked",
+  "evidence_mapped",
+  "human_gate_required",
+  "submission_packet_ready_or_blocked",
+  "payer_api_unavailable_or_not_attempted",
+  "live_proof_completed_or_waiting_for_approval",
+]);
+
+export const LiveProofStepStatusSchema = z.enum([
+  "pending",
+  "running",
+  "completed",
+  "waiting_for_approval",
+  "blocked",
+  "skipped",
+]);
+
+export const LiveProofRunStatusSchema = z.enum([
+  "created",
+  "running",
+  "completed",
+  "waiting_for_approval",
+  "blocked",
+  "failed",
+]);
+
+export const UiPathEvidenceRefSchema = z.object({
+  evidence_ref_id: z.string(),
+  source: z.enum([
+    "uipath_event_mirror",
+    "uipath_action_center",
+    "uipath_orchestrator",
+    "uipath_data_service",
+    "langsmith",
+    "fireworks",
+    "deterministic_runtime",
+    "mock_healthcare_api",
+  ]),
+  label: z.string(),
+  external_id: z.string().optional(),
+  url: z.string().url().optional(),
+  captured_at: IsoDateTimeSchema,
+  synthetic: z.literal(true).default(true),
+});
+
+export const LiveProofTraceSchema = z.object({
+  trace_id: z.string(),
+  provider: z.enum(["langsmith", "local", "fireworks"]),
+  status: z.enum(["available", "metadata_only", "not_configured"]),
+  project_name: z.string().optional(),
+  url: z.string().url().optional(),
+  metadata: z.record(z.union([z.string(), z.number(), z.boolean()])).default({
+    synthetic: true,
+  }),
+  captured_at: IsoDateTimeSchema,
+  synthetic: z.literal(true).default(true),
+});
+
+export const LiveProofApprovalGateSchema = z.object({
+  gate_id: z.string(),
+  gate_type: z.enum([
+    "clinical_assertion",
+    "missing_evidence",
+    "appeal_signoff",
+    "exception_review",
+  ]),
+  status: z.enum([
+    "not_created",
+    "pending",
+    "approved_for_demo",
+    "blocked",
+  ]),
+  assigned_role: z.string(),
+  reason: z.string(),
+  source_stage: LiveProofStageSchema,
+  uipath_task_id: z.string().optional(),
+  trace: LiveProofTraceSchema.optional(),
+  synthetic: z.literal(true).default(true),
+});
+
+export const LiveProofStepSchema = z.object({
+  step_id: z.string(),
+  run_id: z.string(),
+  case_id: z.string(),
+  stage: LiveProofStageSchema,
+  status: LiveProofStepStatusSchema,
+  title: z.string(),
+  summary: z.string(),
+  actor_type: ActorTypeSchema,
+  actor_name: z.string(),
+  started_at: IsoDateTimeSchema,
+  completed_at: IsoDateTimeSchema.optional(),
+  trace: LiveProofTraceSchema.optional(),
+  evidence_refs: z.array(z.string()).default([]),
+  uipath_evidence_refs: z.array(UiPathEvidenceRefSchema).default([]),
+  output_schema: z.string().optional(),
+  validated: z.boolean().default(true),
+  synthetic: z.literal(true).default(true),
+});
+
+export const LiveProofRunSchema = z.object({
+  run_id: z.string(),
+  case_id: z.string(),
+  requested_by: z.string(),
+  mode: AgentModeSchema,
+  status: LiveProofRunStatusSchema,
+  current_stage: LiveProofStageSchema,
+  started_at: IsoDateTimeSchema,
+  completed_at: IsoDateTimeSchema.optional(),
+  steps: z.array(LiveProofStepSchema),
+  approval_gates: z.array(LiveProofApprovalGateSchema).default([]),
+  traces: z.array(LiveProofTraceSchema).default([]),
+  uipath_evidence_refs: z.array(UiPathEvidenceRefSchema).default([]),
+  agent_run: AgentRunSchema,
+  step_runs: z.array(AgentStepRunSchema).default([]),
+  tool_calls: z.array(ToolCallSchema).default([]),
+  submission_attempts: z.array(SubmissionAttemptSchema).default([]),
+  mirror_events: z.array(AuditEventSchema).default([]),
+  source_labels: z.array(z.string()).default([]),
+  no_live_uipath_side_effects: z.literal(true).default(true),
+  no_real_payer_submission: z.literal(true).default(true),
+  synthetic_data_disclaimer: z
+    .string()
+    .default(
+      "Synthetic live proof run; no real patient, payer, provider, credential, or personal health data.",
+    ),
+});
+
 export const CaseRunSnapshotSchema = z.object({
   case: TreatmentAccessCaseSchema,
   agent_run: AgentRunSchema,
@@ -849,6 +979,16 @@ export type AgentMode = z.infer<typeof AgentModeSchema>;
 export type RuntimeStatus = z.infer<typeof RuntimeStatusSchema>;
 export type AgentRun = z.infer<typeof AgentRunSchema>;
 export type AgentStepRun = z.infer<typeof AgentStepRunSchema>;
+export type LiveProofStage = z.infer<typeof LiveProofStageSchema>;
+export type LiveProofStepStatus = z.infer<typeof LiveProofStepStatusSchema>;
+export type LiveProofRunStatus = z.infer<typeof LiveProofRunStatusSchema>;
+export type UiPathEvidenceRef = z.infer<typeof UiPathEvidenceRefSchema>;
+export type LiveProofTrace = z.infer<typeof LiveProofTraceSchema>;
+export type LiveProofApprovalGate = z.infer<
+  typeof LiveProofApprovalGateSchema
+>;
+export type LiveProofStep = z.infer<typeof LiveProofStepSchema>;
+export type LiveProofRun = z.infer<typeof LiveProofRunSchema>;
 export type CaseRunSnapshot = z.infer<typeof CaseRunSnapshotSchema>;
 export type DemoToggles = z.infer<typeof DemoTogglesSchema>;
 export type DemoFixture = z.infer<typeof DemoFixtureSchema>;
