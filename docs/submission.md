@@ -19,6 +19,15 @@ evidence, block missing evidence, draft packet and appeal materials for human
 review, and coordinate downstream care while UiPath keeps the audit trail across
 agents, APIs, humans, robots, and workflows.
 
+## Healthcare Value First
+
+Treatment Access Command Center is built to deliver less manual chart review,
+fewer preventable denials, faster PA submission, safer appeal prep, auditable
+human gates, and UiPath-governed execution. In the demo, those claims should be
+paired with actual scripts, smoke commands, screenshots, logs, captured
+evidence, or explicit caveats. Do not lead with architecture until the value to
+access teams, clinicians, and patients is clear.
+
 ## Inspiration
 
 Prior authorization is not just a form problem. It is a coordination problem
@@ -295,6 +304,7 @@ CI=true pnpm uipath:readiness -- local
 CI=true pnpm format:check
 CI=true pnpm verify:submission-readiness
 CI=true pnpm smoke:checkpoint6-readiness
+CI=true pnpm smoke:checkpoint7-live-proof
 git diff --check
 ```
 

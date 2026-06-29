@@ -468,6 +468,45 @@ If a live UiPath feature is missing or unavailable, diagnose in layer order:
 confirm command registration, discovery/install state, and official activation
 flow first; only debug permissions or runtime after the feature is present.
 
+## Checkpoint 7 Live Proof And Demo Readiness
+
+Checkpoint 7 adds the final smoke for the live-proof story. The first audience
+promise is healthcare value: less manual chart review, fewer preventable
+denials, faster PA submission, safer appeal prep, auditable human gates, and
+UiPath-governed execution. The technical architecture should support that value,
+not lead the demo.
+
+Run the static live-proof readiness gate before recording or submitting:
+
+```bash
+CI=true pnpm smoke:checkpoint7-live-proof
+```
+
+This smoke checks that the package command is registered, the Checkpoint 7 live
+proof contract is documented, demo/submission language leads with healthcare
+value, and all live claims are backed by actual scripts, smoke commands,
+screenshots, logs, captured evidence, or explicit caveats. It does not start a
+live UiPath agent, Maestro case, Action Center task, Data Service write,
+Orchestrator job, robot run, solution deployment, IXP mutation, or payer
+submission.
+
+Minimum final lane checks:
+
+```bash
+CI=true pnpm verify:setup
+CI=true pnpm format:check
+CI=true pnpm verify:submission-readiness
+CI=true pnpm smoke:checkpoint6-readiness
+CI=true pnpm smoke:checkpoint7-live-proof
+git diff --check
+```
+
+If the integrated live proof implementation is present, pair this static gate
+with the implementation smoke or API script from the live-proof runtime lane.
+Only claim live Fireworks/LangSmith output when provider smoke or trace evidence
+exists. Only claim live UiPath side effects when approved screenshots or logs
+from the `TreatmentAccessHackathon` folder exist.
+
 If the mock API is already running, run the smoke against it directly:
 
 ```bash
