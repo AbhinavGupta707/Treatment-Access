@@ -77,6 +77,14 @@ state contract:
 CI=true pnpm verify:rpa-portal-fallback
 ```
 
+Checkpoint 8 extends that guard with
+`scripts/verify-checkpoint8-rpa-proof.ts`, which verifies the real RPA project,
+the imported solution copy, synthetic portal target attributes, approval-gated
+run/deploy commands, and the confirmation write-back contract. The verifier
+allows the current `Main.xaml` state only because this document and
+`studio-indication-checklist.md` explicitly state that UIA indication is still
+pending.
+
 The guard verifies that the mock portal and `robot-contract.json` both expose
 the same three states and mirror actions:
 

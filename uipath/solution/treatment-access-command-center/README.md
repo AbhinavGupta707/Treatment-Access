@@ -59,6 +59,10 @@ Registered or intended artifacts:
    approved event mirror path:
    `action=payer_portal_fallback_submitted`,
    `actor=robot`, `confirmationId`, `robotJobId`, `caseId`, and `demoRunId`.
+   Current integration note: `uipath/api-workflows/write-event.workflow.json`
+   hardcodes `actor_type=api_workflow`; use `/events` with `actor_type=robot`
+   from an approved UiPath-owned writer, or update that workflow to accept an
+   `actorType` input, before claiming robot-authored write-back.
 5. The Command Center reads the UiPath-written event mirror and displays the
    fallback path. The UI must not synthesize live case state on its own.
 
