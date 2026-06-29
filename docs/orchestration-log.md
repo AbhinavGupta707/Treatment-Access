@@ -841,3 +841,47 @@ Remaining explicit approval gates:
 - The payer portal remains a synthetic local fallback target; no real payer
   system is connected.
 - Clinical evidence remains synthetic and source-bounded by design.
+
+## 2026-06-29 - Checkpoint 8 Final Live UiPath Prep
+
+Created the final checkpoint plan after comparing the Checkpoint 7 product state
+with the UiPath AgentHack submission expectations, the local final build spec,
+and local UiPath skill guidance.
+
+Critical conclusion:
+
+- Checkpoint 7 is a strong local/live-provider product proof, but the hackathon
+  language expects a working UiPath Automation Cloud solution where UiPath is
+  visibly the execution and orchestration layer.
+- Synthetic data, mock EHR, mock payer API, mock payer portal, and deterministic
+  model paths remain acceptable.
+- A UI-only run button, screenshot-only proof, or local-only event mirror is not
+  enough for the final claim.
+
+Checkpoint 8 target:
+
+- Reach at least H1 from `docs/live-uipath-final-execution-plan.md`: a live
+  UiPath-controlled action writes or owns synthetic case/event state that the
+  Command Center displays.
+- Prefer H1 + H2 + H3: UiPath event state, Action Center human gate proof, and
+  Orchestrator/RPA portal fallback proof.
+- Keep solution deploy/activate as stretch only after the narrower live proof
+  works.
+
+Added control docs:
+
+- `docs/live-uipath-final-execution-plan.md`
+- `docs/checkpoint-8-live-uipath-final-orchestrator.md`
+
+Planned Checkpoint 8 lanes:
+
+| Merge order | Lane                                                    |
+| ----------- | ------------------------------------------------------- |
+| 1           | Cloud Discovery, Permissions, and Approval Matrix       |
+| 2           | UiPath Event State and Data Service Bridge              |
+| 3           | Action Center Human Gate Proof                          |
+| 4           | Orchestrator RPA Portal Fallback Proof                  |
+| 5           | Final Demo UX, Evidence Manifest, and Submission Claims |
+
+Safety remains unchanged: no live UiPath side-effect command, payer submission,
+or real health data without explicit user approval.

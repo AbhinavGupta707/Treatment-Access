@@ -536,3 +536,40 @@ Honest remaining limits:
 - The coded-agent artifacts are an authoring packet and governed hook contract,
   not a published live Coded Agent in Studio Web.
 - The payer portal is a synthetic local portal, not a real payer integration.
+
+## Checkpoint 8 Final Live UiPath Prep
+
+Checkpoint 8 is the final checkpoint and should close the remaining hackathon
+alignment gap: make UiPath Automation Cloud visibly execute/govern the live
+synthetic case path.
+
+New docs:
+
+- `docs/live-uipath-final-execution-plan.md`
+- `docs/checkpoint-8-live-uipath-final-orchestrator.md`
+
+Target outcome:
+
+- Minimum final proof: UiPath writes or owns at least one synthetic case/event
+  transition displayed by the Command Center.
+- Preferred final proof: live UiPath event state + Action Center human gate +
+  Orchestrator/RPA portal fallback against the synthetic payer portal.
+- Stretch proof: solution publish/deploy/activate in `TreatmentAccessHackathon`
+  if permissions and runtime allow.
+
+Checkpoint 8 lanes:
+
+| Merge order | Lane                                                    | Planned ownership                                                                                    |
+| ----------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| 1           | Cloud Discovery, Permissions, and Approval Matrix       | `docs/**`, `scripts/**`, read-only `uip` probes                                                      |
+| 2           | UiPath Event State and Data Service Bridge              | `uipath/data-service/**`, `uipath/live-proof/**`, `services/mock-healthcare-api/**`, schemas/scripts |
+| 3           | Action Center Human Gate Proof                          | `uipath/action-center/**`, `uipath/live-proof/**`, Command Center proof UI/scripts/docs              |
+| 4           | Orchestrator RPA Portal Fallback Proof                  | `uipath/robots/**`, `uipath/solution/**`, mock portal/scripts/docs                                   |
+| 5           | Final Demo UX, Evidence Manifest, and Submission Claims | Command Center, README, docs, screenshots manifest, final smoke                                      |
+
+Safety:
+
+- Do not run live UiPath side-effect commands without explicit approval in the
+  orchestrator thread.
+- Keep all work in `TreatmentAccessHackathon`.
+- Keep synthetic data only.
