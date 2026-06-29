@@ -159,3 +159,18 @@ Runtime safety remains unchanged: live UiPath RPA run/debug, Orchestrator job
 start, solution upload/publish/deploy/activate, agent debug, Maestro debug, IXP
 mutation, Action Center task creation, Data Service writes, and payer submission
 require explicit user approval.
+
+Checkpoint 4 merge progress:
+
+- Mock Payer Portal merged into `main` as `c82780b`; `portal_fallback` now
+  succeeds while `payer_api_unavailable=true`, while direct `channel="api"`
+  still returns `PAYER_API_DOWN`.
+- UiPath Robot & Runtime Wiring merged into `main` as `2e9979a`; it includes a
+  solution shell, robot contract, Studio indication checklist, and validation
+  notes. A real RPA project is not yet created because `uip rpa init` is blocked
+  by the local missing .NET SDK/Helm restore prerequisite.
+- Command Center Demo UX remains active in
+  `/Users/abhinavgupta/.codex/worktrees/2a44/Treatment Access`.
+- Integration QA & Demo Proof committed `c1c518b` and is reviewed but not merged
+  yet; merge it after the Command Center UX lane, then rerun the CP4 smoke
+  against integrated `main`.

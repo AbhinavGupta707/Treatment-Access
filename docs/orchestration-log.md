@@ -369,3 +369,30 @@ Runtime safety:
   `uip solution deploy activate`, `uip maestro case debug`, `uip agent debug`,
   IXP mutation, Action Center task creation, Data Service writes, or payer
   submission without explicit user approval.
+
+## 2026-06-29 - Checkpoint 4 Merge Progress
+
+Merged into `main`:
+
+- `c82780b Merge checkpoint 4 mock payer portal fallback`, after validating
+  `7f4c938` with `CI=true pnpm --filter @tacc/mock-payer-portal typecheck`,
+  `CI=true pnpm --filter @tacc/mock-payer-portal build`,
+  `CI=true pnpm build:contracts`,
+  `CI=true pnpm --filter @tacc/mock-healthcare-api test`,
+  `CI=true pnpm --filter @tacc/mock-healthcare-api build`,
+  `CI=true pnpm verify:setup`, and `git diff --check`.
+- `2e9979a Merge checkpoint 4 robot runtime wiring`, after validating `5fa9b23`
+  with `CI=true pnpm verify:setup` and `git diff --check`.
+
+Current lane state:
+
+- Command Center Demo UX is still active in worktree
+  `/Users/abhinavgupta/.codex/worktrees/2a44/Treatment Access` with only
+  `apps/command-center/**` files modified and no lane commit yet.
+- Integration QA & Demo Proof has committed `c1c518b`; the script/docs were
+  reviewed, `CI=true pnpm verify:setup` and `git diff --check` passed in the
+  lane worktree, and merge is held until the Command Center lane lands.
+
+Known runtime note: the robot lane honestly documents that `uip rpa init` is
+blocked by the local UiPath Assistant/Robot `dotnet` runtime lacking a .NET SDK.
+No fake XAML or hand-written RPA project was merged.
