@@ -10,7 +10,8 @@ uip solution init uipath/solution/treatment-access-command-center --output json
 
 The manifest currently has no registered projects because the RPA project could
 not be initialized on this Mac without a .NET SDK for the UiPath headless Studio
-restore.
+restore. This was rechecked during Checkpoint 5 on 2026-06-29; `uip rpa init`
+still returned a nested `success: false` result and created no project files.
 
 `uip solution pack ... --dry-run` is expected to fail until at least one project
 is registered. The observed failure was `Solution definition empty or not
@@ -19,7 +20,8 @@ found`, with no upload, publish, deploy, or activation side effect.
 ## Intended Project Set
 
 When local project creation is unblocked, register these artifacts in this
-solution path:
+solution path using only `uip solution project add` or
+`uip solution project import`:
 
 - `PayerPortalFallback`: RPA process for the mock payer portal fallback.
 - Validated CP3 agent projects: coverage requirement, evidence retrieval,
@@ -58,6 +60,10 @@ step:
 
 - Studio/UIA indication against the running local mock portal.
 - `uip rpa run` or `uip rpa debug start`.
+- `uip or jobs start`.
 - Publishing the RPA package or solution.
 - Starting an Orchestrator job.
 - Writing fallback events or portal submissions, even with synthetic data.
+
+The detailed gated sequence is maintained in
+`../../robots/payer-portal-fallback/live-smoke-approval-gate.md`.
