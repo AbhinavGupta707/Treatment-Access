@@ -1,0 +1,407 @@
+{
+  "version": "1.1.0",
+  "settings": {
+    "model": "gpt-4o-2024-11-20",
+    "maxTokens": 16384,
+    "temperature": 0,
+    "engine": "basic-v2",
+    "maxIterations": 25,
+    "mode": "standard"
+  },
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "caseSnapshot": {
+        "type": "object",
+        "description": "TreatmentAccessCase snapshot at closure/audit stage.",
+        "additionalProperties": true
+      },
+      "criteria": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "evidenceMappings": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "agentTraces": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "auditEvents": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "humanTasks": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "submissionPacket": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "submissionAttempts": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "payerDecisions": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "appealPacket": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "pharmacyHandoff": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "attachments": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "demoToggles": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "required": [
+      "caseSnapshot",
+      "criteria",
+      "evidenceMappings",
+      "agentTraces",
+      "auditEvents",
+      "humanTasks",
+      "submissionPacket",
+      "submissionAttempts",
+      "payerDecisions",
+      "pharmacyHandoff"
+    ]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "packet_status": {
+        "type": "string",
+        "enum": [
+          "audit_ready",
+          "audit_draft_blocked",
+          "needs_human_review"
+        ]
+      },
+      "auditPacketManifest": {
+        "type": "object",
+        "properties": {
+          "packet_id": {
+            "type": "string"
+          },
+          "case_id": {
+            "type": "string"
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "string"
+          },
+          "sections": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "included_record_refs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "approval_refs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "handoff_refs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "disclaimers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "packet_id",
+          "case_id",
+          "generated_at",
+          "version",
+          "sections",
+          "included_record_refs",
+          "disclaimers"
+        ],
+        "additionalProperties": false
+      },
+      "completenessChecks": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "unsupportedClaimFindings": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "humanDecisionLedger": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "eventPayload": {
+        "type": "object",
+        "properties": {
+          "event_id": {
+            "type": "string"
+          },
+          "case_id": {
+            "type": "string"
+          },
+          "maestro_case_id": {
+            "type": "string"
+          },
+          "actor_type": {
+            "type": "string",
+            "enum": [
+              "agent",
+              "api_workflow",
+              "robot",
+              "human",
+              "system"
+            ]
+          },
+          "actor_name": {
+            "type": "string"
+          },
+          "task_or_agent_name": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "input_summary": {
+            "type": "string"
+          },
+          "output_summary": {
+            "type": "string"
+          },
+          "evidence_refs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "trace_id": {
+            "type": "string"
+          },
+          "orchestrator_job_id": {
+            "type": "string"
+          },
+          "payer_status": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "event_id",
+          "case_id",
+          "actor_type",
+          "actor_name",
+          "task_or_agent_name",
+          "action",
+          "input_summary",
+          "output_summary",
+          "timestamp"
+        ],
+        "additionalProperties": false
+      },
+      "traceSummary": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "synthetic_data_disclaimer": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "packet_status",
+      "auditPacketManifest",
+      "completenessChecks",
+      "unsupportedClaimFindings",
+      "humanDecisionLedger",
+      "eventPayload",
+      "traceSummary",
+      "synthetic_data_disclaimer"
+    ]
+  },
+  "metadata": {
+    "storageVersion": "50.0.0",
+    "isConversational": false,
+    "showProjectCreationExperience": false,
+    "targetRuntime": "pythonAgent"
+  },
+  "type": "lowCode",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are the Audit Packet Agent for the Treatment Access Command Center synthetic demo. Compile a final audit-ready packet manifest after care continuity is complete or after the case is cancelled. Your output is a manifest and validation summary, not legal advice and not an autonomous clinical decision.\n\nRules:\n- Use synthetic data only. Flag any payload that appears to contain real patient, payer, provider, credential, contact, or PHI-like data.\n- Every clinical assertion must be tied to source evidence, a policy citation, or a human approval event. Unsupported assertions become findings and must not be presented as verified facts.\n- Appeal language is an administrative draft for clinician review. Mark it final-ready only if a clinician approval event exists.\n- UiPath is the source of record. The packet must reference UiPath agents, API workflows, robot jobs, human tasks, payer events, and event mirror records.\n- Include payer approval or appeal approval references and pharmacy handoff/scheduling references when present.\n- If handoff failed, make the packet audit-draft only and list the open exception path.\n- Return structured JSON only, matching the output schema.",
+      "contentTokens": [
+        {
+          "type": "simpleText",
+          "rawString": "You are the Audit Packet Agent for the Treatment Access Command Center synthetic demo. Compile a final audit-ready packet manifest after care continuity is complete or after the case is cancelled. Your output is a manifest and validation summary, not legal advice and not an autonomous clinical decision.\n\nRules:\n- Use synthetic data only. Flag any payload that appears to contain real patient, payer, provider, credential, contact, or PHI-like data.\n- Every clinical assertion must be tied to source evidence, a policy citation, or a human approval event. Unsupported assertions become findings and must not be presented as verified facts.\n- Appeal language is an administrative draft for clinician review. Mark it final-ready only if a clinician approval event exists.\n- UiPath is the source of record. The packet must reference UiPath agents, API workflows, robot jobs, human tasks, payer events, and event mirror records.\n- Include payer approval or appeal approval references and pharmacy handoff/scheduling references when present.\n- If handoff failed, make the packet audit-draft only and list the open exception path.\n- Return structured JSON only, matching the output schema."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "Case snapshot JSON:\n{{input.caseSnapshot}}\n\nCriteria JSON:\n{{input.criteria}}\n\nEvidence mappings JSON:\n{{input.evidenceMappings}}\n\nAgent traces JSON:\n{{input.agentTraces}}\n\nAudit events JSON:\n{{input.auditEvents}}\n\nHuman tasks JSON:\n{{input.humanTasks}}\n\nSubmission packet JSON:\n{{input.submissionPacket}}\n\nSubmission attempts JSON:\n{{input.submissionAttempts}}\n\nPayer decisions JSON:\n{{input.payerDecisions}}\n\nAppeal packet JSON:\n{{input.appealPacket}}\n\nPharmacy handoff JSON:\n{{input.pharmacyHandoff}}\n\nAttachments JSON:\n{{input.attachments}}",
+      "contentTokens": [
+        {
+          "type": "simpleText",
+          "rawString": "Case snapshot JSON:\n"
+        },
+        {
+          "type": "variable",
+          "rawString": "input.caseSnapshot"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\nCriteria JSON:\n"
+        },
+        {
+          "type": "variable",
+          "rawString": "input.criteria"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\nEvidence mappings JSON:\n"
+        },
+        {
+          "type": "variable",
+          "rawString": "input.evidenceMappings"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\nAgent traces JSON:\n"
+        },
+        {
+          "type": "variable",
+          "rawString": "input.agentTraces"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\nAudit events JSON:\n"
+        },
+        {
+          "type": "variable",
+          "rawString": "input.auditEvents"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\nHuman tasks JSON:\n"
+        },
+        {
+          "type": "variable",
+          "rawString": "input.humanTasks"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\nSubmission packet JSON:\n"
+        },
+        {
+          "type": "variable",
+          "rawString": "input.submissionPacket"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\nSubmission attempts JSON:\n"
+        },
+        {
+          "type": "variable",
+          "rawString": "input.submissionAttempts"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\nPayer decisions JSON:\n"
+        },
+        {
+          "type": "variable",
+          "rawString": "input.payerDecisions"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\nAppeal packet JSON:\n"
+        },
+        {
+          "type": "variable",
+          "rawString": "input.appealPacket"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\nPharmacy handoff JSON:\n"
+        },
+        {
+          "type": "variable",
+          "rawString": "input.pharmacyHandoff"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\nAttachments JSON:\n"
+        },
+        {
+          "type": "variable",
+          "rawString": "input.attachments"
+        }
+      ]
+    }
+  ],
+  "projectId": "68c54af6-f183-4ab5-bd17-2817228d0e68"
+}

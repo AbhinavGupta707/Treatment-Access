@@ -1,0 +1,44 @@
+{
+  "agent": "Care Continuity Agent",
+  "owned_folder": "uipath/agents/care-continuity",
+  "orchestration_folder": "TreatmentAccessHackathon",
+  "primary_tool": {
+    "name": "pharmacy_scheduling_handoff_api_workflow",
+    "artifact": "uipath/api-workflows/pharmacy-scheduling-handoff.workflow.json",
+    "side_effecting": true,
+    "invoke_from": "Maestro Approval & Care Continuity stage after agent prepares workflowInvocation",
+    "input_mapping": {
+      "apiBaseUrl": "Orchestrator asset TACC_MOCK_API_BASE_URL or environment input",
+      "caseId": "case.case_id",
+      "patientId": "case.patient_id",
+      "orderId": "case.order_id",
+      "approvalReference": "payer approval or appeal approval reference",
+      "requestedBy": "Care Continuity Agent",
+      "taskType": "patient_access_coordination"
+    },
+    "success_output_mapping": {
+      "pharmacyHandoff": "response.pharmacyHandoff",
+      "schedulingTask": "response.schedulingTask",
+      "handoffId": "response.handoffId",
+      "schedulingTaskId": "response.schedulingTaskId"
+    },
+    "failure_state": {
+      "handoff_status": "failed",
+      "active_secondary_stage": "human_exception_review",
+      "event_action": "pharmacy_handoff_failed",
+      "retry_owner": "patient-access-coordinator"
+    }
+  },
+  "audit_events": [
+    "care_handoff_ready",
+    "pharmacy_handoff_completed",
+    "pharmacy_handoff_failed"
+  ],
+  "live_steps_not_run_by_this_packet": [
+    "uip agent debug",
+    "uip api-workflow run",
+    "uip solution upload",
+    "uip solution publish",
+    "uip solution deploy"
+  ]
+}

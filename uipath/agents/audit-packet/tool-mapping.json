@@ -1,0 +1,45 @@
+{
+  "agent": "Audit Packet Agent",
+  "owned_folder": "uipath/agents/audit-packet",
+  "orchestration_folder": "TreatmentAccessHackathon",
+  "deterministic_validators": [
+    {
+      "name": "unsupported_claim_checker",
+      "rule": "Every clinical assertion in evidenceMappings, submissionPacket, and appealPacket must have a citation, source span, or completed clinician task."
+    },
+    {
+      "name": "human_decision_ledger_validator",
+      "rule": "All human-gated claims and appeal drafts require completed Action Center task refs before audit_ready."
+    },
+    {
+      "name": "care_handoff_completion_validator",
+      "rule": "Audit is blocked if pharmacyHandoff.status is failed or pending after payer approval."
+    },
+    {
+      "name": "synthetic_data_guard",
+      "rule": "Flag data that lacks synthetic fixture refs or contains real-world contact/credential/PHI-like values."
+    }
+  ],
+  "manifest_inputs": [
+    "caseSnapshot",
+    "criteria",
+    "evidenceMappings",
+    "agentTraces",
+    "auditEvents",
+    "humanTasks",
+    "submissionPacket",
+    "submissionAttempts",
+    "payerDecisions",
+    "appealPacket",
+    "pharmacyHandoff",
+    "attachments"
+  ],
+  "audit_event_action": "audit_packet_generated",
+  "live_steps_not_run_by_this_packet": [
+    "uip agent debug",
+    "uip solution upload",
+    "uip solution publish",
+    "uip solution deploy",
+    "Data Service writes"
+  ]
+}

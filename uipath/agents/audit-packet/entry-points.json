@@ -1,0 +1,285 @@
+{
+  "$schema": "https://cloud.uipath.com/draft/2024-12/entry-point",
+  "$id": "entry-points.json",
+  "entryPoints": [
+    {
+      "filePath": "/content/agent.json",
+      "uniqueId": "054311b8-8c14-46c9-91ba-5a938d78d6c2",
+      "type": "agent",
+      "input": {
+        "type": "object",
+        "properties": {
+          "caseSnapshot": {
+            "type": "object",
+            "description": "TreatmentAccessCase snapshot at closure/audit stage.",
+            "additionalProperties": true
+          },
+          "criteria": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "evidenceMappings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "agentTraces": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "auditEvents": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "humanTasks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "submissionPacket": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "submissionAttempts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "payerDecisions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "appealPacket": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "pharmacyHandoff": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "demoToggles": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "caseSnapshot",
+          "criteria",
+          "evidenceMappings",
+          "agentTraces",
+          "auditEvents",
+          "humanTasks",
+          "submissionPacket",
+          "submissionAttempts",
+          "payerDecisions",
+          "pharmacyHandoff"
+        ]
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "packet_status": {
+            "type": "string",
+            "enum": [
+              "audit_ready",
+              "audit_draft_blocked",
+              "needs_human_review"
+            ]
+          },
+          "auditPacketManifest": {
+            "type": "object",
+            "properties": {
+              "packet_id": {
+                "type": "string"
+              },
+              "case_id": {
+                "type": "string"
+              },
+              "generated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "version": {
+                "type": "string"
+              },
+              "sections": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              },
+              "included_record_refs": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "approval_refs": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "handoff_refs": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "disclaimers": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "packet_id",
+              "case_id",
+              "generated_at",
+              "version",
+              "sections",
+              "included_record_refs",
+              "disclaimers"
+            ],
+            "additionalProperties": false
+          },
+          "completenessChecks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "unsupportedClaimFindings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "humanDecisionLedger": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "eventPayload": {
+            "type": "object",
+            "properties": {
+              "event_id": {
+                "type": "string"
+              },
+              "case_id": {
+                "type": "string"
+              },
+              "maestro_case_id": {
+                "type": "string"
+              },
+              "actor_type": {
+                "type": "string",
+                "enum": [
+                  "agent",
+                  "api_workflow",
+                  "robot",
+                  "human",
+                  "system"
+                ]
+              },
+              "actor_name": {
+                "type": "string"
+              },
+              "task_or_agent_name": {
+                "type": "string"
+              },
+              "action": {
+                "type": "string"
+              },
+              "input_summary": {
+                "type": "string"
+              },
+              "output_summary": {
+                "type": "string"
+              },
+              "evidence_refs": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "trace_id": {
+                "type": "string"
+              },
+              "orchestrator_job_id": {
+                "type": "string"
+              },
+              "payer_status": {
+                "type": "string"
+              },
+              "timestamp": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "event_id",
+              "case_id",
+              "actor_type",
+              "actor_name",
+              "task_or_agent_name",
+              "action",
+              "input_summary",
+              "output_summary",
+              "timestamp"
+            ],
+            "additionalProperties": false
+          },
+          "traceSummary": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "synthetic_data_disclaimer": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "packet_status",
+          "auditPacketManifest",
+          "completenessChecks",
+          "unsupportedClaimFindings",
+          "humanDecisionLedger",
+          "eventPayload",
+          "traceSummary",
+          "synthetic_data_disclaimer"
+        ]
+      }
+    }
+  ]
+}

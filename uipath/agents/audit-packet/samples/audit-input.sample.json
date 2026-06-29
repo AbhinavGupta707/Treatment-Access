@@ -1,0 +1,157 @@
+{
+  "caseSnapshot": {
+    "case_id": "case-syn-001",
+    "external_case_key": "TACC-2026-001",
+    "maestro_case_id": "maestro-case-placeholder-001",
+    "patient_id": "patient-syn-001",
+    "order_id": "order-syn-001",
+    "payer_id": "payer-aurora-vale",
+    "service_type": "specialty_medication",
+    "medication_name": "Fictionalimab",
+    "urgency": "urgent",
+    "status": "Care handoff completed",
+    "current_stage": "closure",
+    "active_secondary_stages": [],
+    "sla_due_at": "2026-07-01T17:00:00.000Z",
+    "sla_state": "on_track",
+    "outcome": "approved_and_handoff_sent",
+    "payer_status": "appeal_approved",
+    "last_event_at": "2026-06-28T22:40:00.000Z",
+    "synthetic_data_disclaimer": "Synthetic fictional demo case; contains no real patient, payer, or provider data."
+  },
+  "criteria": [
+    {
+      "criterion_id": "criterion-diagnosis",
+      "severity": "blocking",
+      "must_be_clinician_attested": true,
+      "policy_citation": "Aurora Vale Fictionalimab Policy 2026, Section 2.1"
+    },
+    {
+      "criterion_id": "criterion-step-therapy",
+      "severity": "blocking",
+      "must_be_clinician_attested": false,
+      "policy_citation": "Aurora Vale Fictionalimab Policy 2026, Section 2.4"
+    }
+  ],
+  "evidenceMappings": [
+    {
+      "mapping_id": "mapping-diagnosis",
+      "criterion_id": "criterion-diagnosis",
+      "status": "needs_human_validation",
+      "evidence_summary": "Specialist note supports diagnosis after clinician review.",
+      "needs_human_review": true,
+      "reviewer_decision": "approved",
+      "reviewed_at": "2026-06-28T22:10:00.000Z",
+      "citations": [
+        {
+          "citation_id": "policy-citation-diagnosis"
+        }
+      ]
+    },
+    {
+      "mapping_id": "mapping-step-therapy",
+      "criterion_id": "criterion-step-therapy",
+      "status": "found",
+      "evidence_summary": "Two synthetic prior therapy outcomes documented.",
+      "needs_human_review": false,
+      "citations": [
+        {
+          "citation_id": "policy-citation-step"
+        }
+      ]
+    }
+  ],
+  "agentTraces": [
+    {
+      "trace_id": "trace-coverage-agent-001",
+      "agent_name": "Coverage Requirement Agent",
+      "status": "completed"
+    },
+    {
+      "trace_id": "trace-care-continuity-agent-001",
+      "agent_name": "Care Continuity Agent",
+      "status": "completed"
+    }
+  ],
+  "auditEvents": [
+    {
+      "event_id": "event-policy-001",
+      "action": "policy_criteria_extracted",
+      "actor_type": "agent",
+      "actor_name": "Coverage Requirement Agent",
+      "timestamp": "2026-06-28T22:02:00.000Z"
+    },
+    {
+      "event_id": "event-care-handoff-completed-001",
+      "action": "pharmacy_handoff_completed",
+      "actor_type": "api_workflow",
+      "actor_name": "pharmacy-scheduling-handoff.workflow.json",
+      "timestamp": "2026-06-28T22:40:00.000Z"
+    }
+  ],
+  "humanTasks": [
+    {
+      "task_id": "task-clinician-evidence-approval",
+      "task_type": "evidence_approval",
+      "status": "completed",
+      "assigned_role": "clinician-reviewer",
+      "completed_at": "2026-06-28T22:10:00.000Z"
+    },
+    {
+      "task_id": "task-appeal-signoff",
+      "task_type": "appeal_signoff",
+      "status": "completed",
+      "assigned_role": "clinician-reviewer",
+      "completed_at": "2026-06-28T22:33:00.000Z"
+    }
+  ],
+  "submissionPacket": {
+    "packet_id": "packet-syn-001",
+    "ready_to_submit": true,
+    "unsupported_claim_warnings": []
+  },
+  "submissionAttempts": [
+    {
+      "attempt_id": "attempt-portal-rpa",
+      "channel": "payer_portal_rpa",
+      "status": "submitted",
+      "orchestrator_job_id": "job-syn-portal-001",
+      "portal_confirmation_id": "AVFH-PORTAL-SYN-001"
+    }
+  ],
+  "payerDecisions": [
+    {
+      "decision_id": "decision-appeal-approved-syn-001",
+      "status": "appeal_approved",
+      "reason": "Synthetic appeal approval."
+    }
+  ],
+  "appealPacket": {
+    "appeal_id": "appeal-syn-001",
+    "clinician_approved": true,
+    "evidence_used": [
+      "mapping-step-therapy",
+      "mapping-diagnosis"
+    ],
+    "unsupported_claim_warnings": []
+  },
+  "pharmacyHandoff": {
+    "handoff_id": "pharmacy-handoff-syn-001",
+    "case_id": "case-syn-001",
+    "status": "accepted",
+    "pharmacy_name": "Demo Specialty Pharmacy",
+    "assigned_coordinator_role": "patient-access-coordinator",
+    "scheduling_task_id": "scheduling-task-syn-001"
+  },
+  "attachments": [
+    {
+      "attachment_id": "attachment-policy",
+      "purpose": "policy",
+      "synthetic": true,
+      "source_uri": "fixture://policies/aurora-vale-fictionalimab-policy.md"
+    }
+  ],
+  "demoToggles": {
+    "pharmacy_handoff_failure": false
+  }
+}

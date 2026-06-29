@@ -1,0 +1,308 @@
+{
+  "$schema": "https://cloud.uipath.com/draft/2024-12/entry-point",
+  "$id": "entry-points.json",
+  "entryPoints": [
+    {
+      "filePath": "/content/agent.json",
+      "uniqueId": "7535966b-2b45-4eb6-b863-73840c816d9d",
+      "type": "agent",
+      "input": {
+        "type": "object",
+        "properties": {
+          "apiBaseUrl": {
+            "type": "string",
+            "description": "Base URL for the synthetic mock healthcare/event API."
+          },
+          "caseId": {
+            "type": "string",
+            "description": "TreatmentAccessCase.case_id."
+          },
+          "patientId": {
+            "type": "string",
+            "description": "PatientSnapshot.patient_id."
+          },
+          "orderId": {
+            "type": "string",
+            "description": "TreatmentOrder.order_id."
+          },
+          "approvalReference": {
+            "type": "string",
+            "description": "Payer or appeal approval reference required for pharmacy handoff."
+          },
+          "approvalDecision": {
+            "type": "object",
+            "description": "PayerDecision-shaped approval or appeal approval payload.",
+            "additionalProperties": true
+          },
+          "treatmentOrder": {
+            "type": "object",
+            "description": "TreatmentOrder-shaped synthetic order.",
+            "additionalProperties": true
+          },
+          "patientSnapshot": {
+            "type": "object",
+            "description": "PatientSnapshot-shaped synthetic patient snapshot.",
+            "additionalProperties": true
+          },
+          "pharmacyRequirements": {
+            "type": "object",
+            "description": "Synthetic pharmacy coordination requirements and selected specialty pharmacy.",
+            "additionalProperties": true
+          },
+          "demoToggles": {
+            "type": "object",
+            "description": "Demo toggles, including pharmacy_handoff_failure.",
+            "additionalProperties": true
+          },
+          "caseTimeline": {
+            "type": "array",
+            "description": "Relevant prior audit events and trace summaries.",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "required": [
+          "apiBaseUrl",
+          "caseId",
+          "patientId",
+          "orderId",
+          "approvalReference",
+          "approvalDecision",
+          "treatmentOrder",
+          "patientSnapshot"
+        ]
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "handoff_status": {
+            "type": "string",
+            "enum": [
+              "blocked",
+              "ready_to_invoke",
+              "completed",
+              "failed"
+            ],
+            "description": "Care continuity outcome for Maestro routing."
+          },
+          "workflowInvocation": {
+            "type": "object",
+            "properties": {
+              "workflow": {
+                "type": "string"
+              },
+              "input": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "side_effecting": {
+                "type": "boolean"
+              },
+              "requires_maestro_or_api_workflow_execution": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "workflow",
+              "input",
+              "side_effecting",
+              "requires_maestro_or_api_workflow_execution"
+            ],
+            "additionalProperties": false
+          },
+          "pharmacyHandoff": {
+            "type": "object",
+            "properties": {
+              "handoff_id": {
+                "type": "string"
+              },
+              "case_id": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "pending",
+                  "sent",
+                  "accepted",
+                  "failed"
+                ]
+              },
+              "pharmacy_name": {
+                "type": "string"
+              },
+              "assigned_coordinator_role": {
+                "type": "string"
+              },
+              "benefits_summary": {
+                "type": "string"
+              },
+              "next_step": {
+                "type": "string"
+              },
+              "scheduling_task_id": {
+                "type": "string"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "handoff_id",
+              "case_id",
+              "status",
+              "pharmacy_name",
+              "assigned_coordinator_role",
+              "benefits_summary",
+              "next_step",
+              "created_at",
+              "updated_at"
+            ],
+            "additionalProperties": false
+          },
+          "schedulingTask": {
+            "type": "object",
+            "description": "Synthetic scheduling task summary returned or expected from the workflow.",
+            "additionalProperties": true
+          },
+          "coordinatorNotification": {
+            "type": "object",
+            "description": "Coordinator-facing notification draft and assignment.",
+            "additionalProperties": true
+          },
+          "handoffFailureState": {
+            "type": "object",
+            "description": "Failure code, retry action, and secondary stage activation when handoff fails.",
+            "additionalProperties": true
+          },
+          "closureReadiness": {
+            "type": "object",
+            "properties": {
+              "closure_ready": {
+                "type": "boolean"
+              },
+              "next_stage": {
+                "type": "string"
+              },
+              "blockers": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "required_events_before_audit": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "closure_ready",
+              "next_stage",
+              "blockers",
+              "required_events_before_audit"
+            ],
+            "additionalProperties": false
+          },
+          "eventPayloads": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "event_id": {
+                  "type": "string"
+                },
+                "case_id": {
+                  "type": "string"
+                },
+                "maestro_case_id": {
+                  "type": "string"
+                },
+                "actor_type": {
+                  "type": "string",
+                  "enum": [
+                    "agent",
+                    "api_workflow",
+                    "robot",
+                    "human",
+                    "system"
+                  ]
+                },
+                "actor_name": {
+                  "type": "string"
+                },
+                "task_or_agent_name": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                },
+                "input_summary": {
+                  "type": "string"
+                },
+                "output_summary": {
+                  "type": "string"
+                },
+                "evidence_refs": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "trace_id": {
+                  "type": "string"
+                },
+                "orchestrator_job_id": {
+                  "type": "string"
+                },
+                "payer_status": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "event_id",
+                "case_id",
+                "actor_type",
+                "actor_name",
+                "task_or_agent_name",
+                "action",
+                "input_summary",
+                "output_summary",
+                "timestamp"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "traceSummary": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "synthetic_data_disclaimer": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "handoff_status",
+          "workflowInvocation",
+          "pharmacyHandoff",
+          "closureReadiness",
+          "eventPayloads",
+          "traceSummary",
+          "synthetic_data_disclaimer"
+        ]
+      }
+    }
+  ]
+}
