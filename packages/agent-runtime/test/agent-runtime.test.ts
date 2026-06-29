@@ -8,7 +8,10 @@ import {
   SubmissionPacketAgentOutputSchema,
 } from "@tacc/shared-schemas";
 import {
+  createFireworksClient,
+  createLangSmithTraceConfig,
   listTreatmentAccessAgents,
+  resolveAgentRuntimeConfig,
   runTreatmentAccessAgent,
   runTreatmentAccessAgents,
 } from "../src/index";
@@ -127,5 +130,72 @@ describe("agent runtime", () => {
       "Policy Section 2.1",
     );
     expect(diagnosisAssertion?.human_approval_required).toBe(true);
+  });
+
+  it("defaults to deterministic runtime config without requiring live keys", () => {
+    const validation = resolveAgentRuntimeConfig({});
+
+    expect(validation.ok).toBe(true);
+    expect(validation.config.mode).toBe("deterministic");
+    expect(validation.safeEnvSummary.FIREWORKS_API_KEY).toBe("missing");
+    expect(validation.safeEnvSummary.LANGSMITH_API_KEY).toBe("missing");
+  });
+
+  it("validates live runtime config without exposing secret values", () => {
+    const validation = resolveAgentRuntimeConfig({
+      AGENT_MODE: "live",
+      AGENT_ORCHESTRATOR: "uipath",
+      FIREWORKS_API_KEY: "fw-secret-not-for-logs",
+      LANGSMITH_TRACING: "true",
+      LANGSMITH_API_KEY: "ls-secret-not-for-logs",
+      LANGSMITH_PROJECT: "Treatment Access Command Center",
+    });
+
+    expect(validation.ok).toBe(true);
+    expect(validation.config.mode).toBe("live");
+    expect(validation.config.orchestrator).toBe("uipath");
+    expect(validation.safeEnvSummary.FIREWORKS_API_KEY).toBe("set");
+    expect(JSON.stringify(validation.safeEnvSummary)).not.toContain(
+      "fw-secret-not-for-logs",
+    );
+    expect(JSON.stringify(validation.safeEnvSummary)).not.toContain(
+      "ls-secret-not-for-logs",
+    );
+  });
+
+  it("fails live runtime config clearly when required keys are missing", () => {
+    const validation = resolveAgentRuntimeConfig({
+      AGENT_MODE: "live",
+      LANGSMITH_TRACING: "true",
+    });
+
+    expect(validation.ok).toBe(false);
+    expect(validation.errors).toContain(
+      "FIREWORKS_API_KEY is required when AGENT_MODE=live.",
+    );
+    expect(validation.errors).toContain(
+      "LANGSMITH_API_KEY is required when LANGSMITH_TRACING=true.",
+    );
+  });
+
+  it("supports provider readiness checks without making a model call", async () => {
+    const validation = resolveAgentRuntimeConfig({
+      AGENT_MODE: "live",
+      FIREWORKS_API_KEY: "fw-secret-not-for-logs",
+      FIREWORKS_FAST_MODEL: "accounts/fireworks/models/deepseek-v3p1",
+      LANGSMITH_TRACING: "false",
+    });
+    const client = createFireworksClient(validation.config);
+    const readiness = await client.checkConnectivity({ callModel: false });
+    const traceConfig = createLangSmithTraceConfig(validation.config, {
+      case_id: "case-synthetic",
+      run_id: "run-synthetic",
+    });
+
+    expect(readiness.status).toBe("configured");
+    expect(readiness.message).toContain("Model call skipped");
+    expect(traceConfig.enabled).toBe(false);
+    expect(traceConfig.metadata.synthetic).toBe(true);
+    expect(traceConfig.metadata.case_id).toBe("case-synthetic");
   });
 });

@@ -2,17 +2,24 @@ import { describe, expect, it } from "vitest";
 import {
   AgentDisplayNameById,
   AgentIdSchema,
+  AgentRunSchema,
   AgentRuntimeResultSchema,
   AppealPacketAgentOutputSchema,
   AgentTraceSchema,
+  AgentStepRunSchema,
   AuditEventSchema,
+  CaseRunSnapshotSchema,
   CoverageRequirementAgentInputSchema,
   DemoFixtureSchema,
   DemoTogglesSchema,
   EvidenceArtifactSchema,
   EvidenceMappingSchema,
+  HumanGateSchema,
   PayerDecisionSchema,
   PharmacyHandoffSchema,
+  RobotJobSchema,
+  ToolCallSchema,
+  TraceLinkSchema,
   TreatmentAccessCaseSchema,
 } from "../src/index";
 
@@ -253,5 +260,105 @@ describe("shared schemas", () => {
         output: appealOutput,
       }),
     ).not.toThrow();
+  });
+
+  it("validates live runtime records for case run snapshots", () => {
+    const traceLink = TraceLinkSchema.parse({
+      trace_id: "trace-live-001",
+      run_id: "run-live-001",
+      provider: "langsmith",
+      project_name: "Treatment Access Command Center",
+      url: "https://smith.langchain.com/public/synthetic/r",
+      metadata: {
+        case_id: "case-001",
+        run_mode: "live",
+        synthetic: true,
+      },
+    });
+    const agentRun = AgentRunSchema.parse({
+      run_id: "run-live-001",
+      case_id: "case-001",
+      maestro_case_id: "maestro-syn-001",
+      mode: "live",
+      orchestrator: "uipath",
+      status: "running",
+      started_at: "2026-06-28T22:00:00.000Z",
+      current_stage: "policy_evidence",
+      trace_link: traceLink,
+    });
+    const stepRun = AgentStepRunSchema.parse({
+      step_run_id: "step-live-coverage",
+      run_id: agentRun.run_id,
+      case_id: agentRun.case_id,
+      agent_id: "coverage-requirement",
+      agent_name: "Coverage Requirement Agent",
+      status: "completed",
+      input_summary: "Synthetic order and policy.",
+      output_summary: "Criteria resolved.",
+      started_at: "2026-06-28T22:00:00.000Z",
+      completed_at: "2026-06-28T22:00:01.000Z",
+      latency_ms: 1000,
+      trace_link: traceLink,
+    });
+    const toolCall = ToolCallSchema.parse({
+      tool_call_id: "tool-live-policy",
+      run_id: agentRun.run_id,
+      step_run_id: stepRun.step_run_id,
+      case_id: agentRun.case_id,
+      tool_name: "retrieve_payer_policy",
+      arguments_hash: "sha256-syn-policy",
+      arguments_summary: "Synthetic payer policy lookup.",
+      result_summary: "Policy criteria returned.",
+      status: "succeeded",
+      started_at: "2026-06-28T22:00:00.000Z",
+      completed_at: "2026-06-28T22:00:01.000Z",
+      trace_link: traceLink,
+    });
+    const humanGate = HumanGateSchema.parse({
+      gate_id: "gate-appeal-signoff",
+      case_id: agentRun.case_id,
+      run_id: agentRun.run_id,
+      gate_type: "appeal_signoff",
+      status: "pending",
+      assigned_role: "clinician-reviewer",
+      prompt_summary: "Review synthetic administrative appeal draft.",
+    });
+    const robotJob = RobotJobSchema.parse({
+      robot_job_id: "robot-portal-fallback",
+      case_id: agentRun.case_id,
+      run_id: agentRun.run_id,
+      process_name: "PayerPortalFallback",
+      status: "not_requested",
+      trigger_reason: "Synthetic payer API unavailable.",
+    });
+
+    const snapshot = CaseRunSnapshotSchema.parse({
+      case: {
+        case_id: "case-001",
+        patient_id: "patient-001",
+        order_id: "order-001",
+        payer_id: "payer-001",
+        service_type: "specialty_medication",
+        medication_name: "Fictionalimab",
+        urgency: "urgent",
+        status: "Evidence assembly",
+        current_stage: "policy_evidence",
+        sla_due_at: "2026-07-01T12:00:00.000Z",
+        sla_state: "on_track",
+        last_event_at: "2026-06-28T22:00:00.000Z",
+      },
+      agent_run: agentRun,
+      step_runs: [stepRun],
+      tool_calls: [toolCall],
+      human_gates: [humanGate],
+      robot_jobs: [robotJob],
+      trace_links: [traceLink],
+      updated_at: "2026-06-28T22:00:01.000Z",
+    });
+
+    expect(snapshot.agent_run.mode).toBe("live");
+    expect(snapshot.tool_calls[0]?.synthetic).toBe(true);
+    expect(snapshot.human_gates[0]?.decision).toBe("pending");
+    expect(snapshot.robot_jobs[0]?.synthetic).toBe(true);
   });
 });
