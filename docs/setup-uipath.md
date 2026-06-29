@@ -113,6 +113,40 @@ Before recording the final RPA demo:
 - if unattended is required, create/assign a project machine with one unattended slot and enable the `Unattended` license;
 - run an Orchestrator job end-to-end and confirm the Command Center receives the portal confirmation event.
 
+## RPA Project Readiness
+
+The RPA command surface is registered locally:
+
+```bash
+uip --version
+uip rpa init --help --output json
+uip solution init --help --output json
+```
+
+Checkpoint 5 re-attempted the real project creation command:
+
+```bash
+uip rpa init --name "PayerPortalFallback" --location "uipath/robots" --template-id "BlankTemplate" --expression-language VisualBasic --target-framework Portable --description "Synthetic payer portal prior authorization fallback robot for Treatment Access Command Center." --output json
+```
+
+The command still cannot create the project on this Mac. The outer CLI envelope
+returns `Result: Success`, but the nested RPA tool result is `success: false`
+because the UiPath Assistant-bundled `dotnet` runtime has no SDK:
+
+```text
+/Applications/UiPath Assistant.app/Contents/Robot/dotnet/dotnet restore failed
+The application 'restore' does not exist.
+No .NET SDKs were found.
+```
+
+Do not hand-write `project.json`, `project.uiproj`, XAML, or solution metadata
+to bypass this. After installing a .NET SDK visible to the Assistant/Robot
+headless Studio restore path, rerun the exact `uip rpa init` command above,
+then follow
+`uipath/robots/payer-portal-fallback/live-smoke-approval-gate.md` before any
+robot execution, Orchestrator job start, solution publish/deploy, event write,
+or portal submission.
+
 ## Orchestrator Assets To Create Later
 
 Create these after the mock services are deployed:
