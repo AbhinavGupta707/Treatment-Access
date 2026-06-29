@@ -263,7 +263,7 @@ export async function startLiveProofRun(
   signal?: AbortSignal,
 ): Promise<LiveProofRun> {
   const apiBaseUrl = getApiBaseUrl();
-  const response = await fetch(`${apiBaseUrl}/live-proof/runs`, {
+  const response = await fetch(`${apiBaseUrl}/live-proof-runs`, {
     method: "POST",
     headers: {
       accept: "application/json",
