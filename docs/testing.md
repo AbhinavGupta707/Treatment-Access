@@ -139,10 +139,13 @@ task ID, job ID, confirmation ID, source labels, timestamp, and safety status
 fields. It also confirms local synthetic proof, live provider proof, and Live
 UiPath Proof are worded separately.
 
-This smoke does not create Action Center tasks, Data Service records,
-Orchestrator jobs, deployments, robot runs, or payer submissions. If no live
-UiPath side-effect has run, the UI and docs must say "ready for live UiPath
-proof" instead of claiming completed live execution.
+This smoke itself does not create Action Center tasks, Data Service records,
+Orchestrator jobs, deployments, robot runs, or payer submissions. The approved
+final live proof is documented separately in
+`docs/live-uipath-proof-closeout.md`: Data Fabric proof records, solution
+publish/deploy/activation, and one successful Orchestrator job. The UI and docs
+must still avoid claiming Action Center task creation, captured portal UI
+automation, real payer submission, or real PHI.
 
 ## Checkpoint 4 Mock Payer Portal
 
@@ -560,9 +563,10 @@ Maestro, API Workflows, Action Center, and Orchestrator into the live runtime.
 
 ## Checkpoint 8 Final UiPath Proof Readiness
 
-Checkpoint 8 is the final integration layer. It prepares the repository for
-live UiPath evidence capture while keeping every side-effecting Cloud action
-approval-gated.
+Checkpoint 8 is the final integration layer. It prepared the repository for
+live UiPath evidence capture and now has an approved live proof closeout for
+Data Fabric, solution lifecycle, and Orchestrator job execution. Any future
+side-effecting Cloud action remains approval-gated.
 
 Run the no-side-effect final readiness gates:
 
@@ -576,17 +580,18 @@ node --import tsx/esm scripts/verify-checkpoint8-event-bridge.ts
 
 These checks verify the final proof manifest, Action Center H2 packet, RPA H3
 preflight, read-only Cloud discovery matrix, and strict UiPath event-state
-bridge. They do not create tasks, write Data Fabric records, start Orchestrator
-jobs, run robots, deploy solutions, or submit payer packets.
+bridge. The checks do not create tasks, write Data Fabric records, start
+Orchestrator jobs, run robots, deploy solutions, or submit payer packets.
 
-Final live claims require visible evidence in `TreatmentAccessHackathon`:
+Final live claims require visible evidence in `TreatmentAccessHackathon`. Current
+approved evidence is recorded in `docs/live-uipath-proof-closeout.md`:
 
-- H1: UiPath-owned event/record ID and timestamp.
-- H2: live Action Center task ID/deep link or an explicitly labeled
-  UiPath-controlled fallback.
-- H3: Orchestrator/Assistant job or robot execution evidence plus portal
-  confirmation write-back.
-- H4: solution package/deploy/activate evidence, if approved and available.
+- H1: UiPath-owned Data Fabric proof records and timestamps.
+- H2: Action Center read surface verified; no live task created because the
+  installed CLI has no task-create command.
+- H3: Orchestrator process/job evidence exists for `PayerPortalFallback`; portal
+  UI automation and confirmation write-back are not claimed.
+- H4: solution package publish, deploy, and activation evidence exists.
 
 UiPath setup checks:
 

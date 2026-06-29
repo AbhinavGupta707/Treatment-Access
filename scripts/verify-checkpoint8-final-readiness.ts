@@ -68,7 +68,7 @@ function assertFinalUxManifest() {
     /Orchestrator job ID/i,
     /Portal confirmation ID|Confirmation ID/i,
     /Safety status/i,
-    /Ready for live UiPath proof/i,
+    /Ready for live UiPath proof|Live UiPath proof recorded/i,
   );
 
   assertMatches(
@@ -97,8 +97,8 @@ function assertDocsSeparateProofTypes() {
     /Local Synthetic Proof/i,
     /live provider proof/i,
     /Live UiPath Proof/i,
-    /ready for live UiPath proof/i,
-    /no live .*claimed|not claimed|not claiming/i,
+    /ready for live UiPath proof|live proof recorded/i,
+    /no live .*claimed|not claimed|not claiming|not created|not completed/i,
   );
 
   assertMatches(

@@ -627,3 +627,41 @@ Live provider smoke result: Fireworks authenticated and completed a live model
 call; LangSmith authenticated/tracing configuration was active. No UiPath,
 payer, Action Center, Data Fabric, Orchestrator, RPA, solution, or IXP side
 effects were executed.
+
+## Final Approved Live UiPath Proof
+
+The user explicitly approved the final live UiPath integration proof for the
+hackathon. Keep the claims precise:
+
+- UiPath org/tenant/folder: `galacticus` / `DefaultTenant` /
+  `TreatmentAccessHackathon`.
+- Parent folder ID/key: `7986316` /
+  `4fba2fa1-012b-469a-b6aa-e5be3811c173`.
+- Deployed solution folder:
+  `TreatmentAccessHackathon/TACCFinalLiveProof20260629`.
+- Data Fabric tool was upgraded to `1.197.0-preview.59`.
+- Live Data Fabric entity: `TreatmentAccessProofEvent`
+  `feea1705-e673-f111-ac9a-002248a16d28`.
+- Primary proof record:
+  `B2501C19-E673-F111-AC9A-0022489A9A06`.
+- Proof run ID: `tacc-live-uipath-proof-20260629-final`.
+- Solution package: `treatment-access-command-center@1.0.20260629`.
+- Solution deployment: `46ec1e63-3b09-4308-8b44-ed4b65e4e7f7`.
+- Pipeline deployment:
+  `ddccb1a1-0781-4a8c-10b0-08ded6011ef2`.
+- Process key: `A9F5CE77-B566-49F0-98C3-CED31D98CA0F`.
+- Orchestrator job:
+  `6d9b9fa9-f582-4983-98fa-167e87d57f2a`, completed successfully on the
+  connected `ABHINAVS-MINI` Development runtime.
+
+Boundaries to preserve in future responses and docs:
+
+- This proves live Data Fabric proof state, solution publish/deploy/activation,
+  process discovery, machine/runtime binding, and Orchestrator job execution.
+- The live job ran the deployed `PayerPortalFallback` process, but
+  `Main.xaml` is scaffold-only. Do not claim browser portal UI automation or a
+  portal confirmation write-back from the live job.
+- Action Center users/tasks were live-readable, but no live task was created
+  because the installed `uip tasks` CLI exposes no create verb.
+- No real payer submission, real PHI, live Maestro run, live Agent Builder run,
+  IXP mutation, or cross-project `AgentFactoryDemo` action was performed.

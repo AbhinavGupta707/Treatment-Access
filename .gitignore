@@ -18,6 +18,7 @@ coverage/
 
 # Deployment/local tooling
 .vercel/
+.artifacts/
 *.log
 
 # UiPath local/generated assets

@@ -993,61 +993,63 @@ function buildLocalProofManifest(
   return [
     {
       label: "UiPath folder",
-      value: "TreatmentAccessHackathon / DefaultTenant / galacticus",
-      status: "ready",
+      value:
+        "TreatmentAccessHackathon / TACCFinalLiveProof20260629 / DefaultTenant / galacticus",
+      status: "available",
       source: "uipath",
       timestamp,
     },
     {
       label: "Run / record ID",
-      value: `ready-for-live-proof-${caseId}`,
-      status: "ready",
+      value: "tacc-live-uipath-proof-20260629-final",
+      status: "available",
       source: "event_mirror",
       timestamp,
     },
     {
       label: "Event record ID",
-      value: state.events.at(-1)?.event_id ?? "Ready for UiPath event",
-      status: state.events.length > 0 ? "available" : "pending",
+      value: "B2501C19-E673-F111-AC9A-0022489A9A06",
+      status: "available",
       source: "event_mirror",
-      timestamp: state.events.at(-1)?.timestamp ?? timestamp,
+      timestamp,
     },
     {
       label: "Action Center task ID",
-      value: "Ready for live Action Center task",
-      status: "pending",
+      value: "No live task created; create surface unavailable",
+      status: "blocked",
       source: "human",
       timestamp,
     },
     {
       label: "Orchestrator job ID",
-      value:
-        portalSubmission?.orchestrator_job_id ??
-        robotEvent?.orchestrator_job_id ??
-        "Ready for live Orchestrator job",
-      status:
-        (portalSubmission?.orchestrator_job_id ??
-        robotEvent?.orchestrator_job_id)
-          ? "available"
-          : "pending",
+      value: "6d9b9fa9-f582-4983-98fa-167e87d57f2a",
+      status: "available",
       source: "orchestrator",
-      timestamp: portalSubmission?.completed_at ?? robotEvent?.timestamp,
+      timestamp,
     },
     {
       label: "Confirmation ID",
       value:
         portalSubmission?.portal_confirmation_id ??
-        "Ready for robot confirmation",
+        "No portal confirmation; scaffold job only",
       status: portalSubmission?.portal_confirmation_id
         ? "available"
-        : "pending",
+        : "blocked",
       source: "orchestrator",
       timestamp: portalSubmission?.completed_at ?? timestamp,
     },
     {
+      label: "Solution deployment ID",
+      value: "46ec1e63-3b09-4308-8b44-ed4b65e4e7f7",
+      status: "available",
+      source: "uipath",
+      timestamp,
+    },
+    {
       label: "Safety status",
-      value: "Ready for live UiPath proof; local synthetic proof only",
-      status: "ready",
+      value:
+        "Live UiPath proof recorded; no real payer submission or PHI. Action Center task creation and portal UIA are not claimed.",
+      status: "available",
       source: "uipath",
       timestamp,
     },

@@ -943,3 +943,45 @@ Live provider note: Fireworks authenticated and completed a live model call;
 LangSmith authenticated, tracing was enabled for the live-agent smoke, and no
 secret values were printed. The provider checks created no UiPath, payer, Action
 Center, Data Fabric, Orchestrator, robot, or solution side effects.
+
+## 2026-06-29 - Final Approved Live UiPath Proof
+
+After explicit user approval for the final hackathon integration proof, ran the
+live UiPath Automation Cloud actions inside `TreatmentAccessHackathon` only.
+No `AgentFactoryDemo` resources were used, and all records used synthetic data.
+
+Live proof achieved:
+
+- Upgraded the local Data Fabric tool to `1.197.0-preview.59` so folder-scoped
+  Data Fabric commands could run.
+- Created the folder-scoped `TreatmentAccessProofEvent` entity
+  `feea1705-e673-f111-ac9a-002248a16d28`.
+- Inserted four synthetic proof records, including primary proof record
+  `B2501C19-E673-F111-AC9A-0022489A9A06` for run
+  `tacc-live-uipath-proof-20260629-final`.
+- Verified Action Center users/tasks read surfaces. One task-eligible user was
+  visible and zero folder tasks existed, but the installed `uip tasks` surface
+  exposes no create verb, so no live Action Center task was created.
+- Packed, published, deployed, and activated
+  `treatment-access-command-center@1.0.20260629`.
+- Deployment `46ec1e63-3b09-4308-8b44-ed4b65e4e7f7` succeeded under
+  `TreatmentAccessHackathon/TACCFinalLiveProof20260629`.
+- Assigned the connected workspace machine to the solution folder and completed
+  Orchestrator job `6d9b9fa9-f582-4983-98fa-167e87d57f2a` for process
+  `PayerPortalFallback`.
+
+Honest boundaries:
+
+- The completed Orchestrator job proves live UiPath solution deployment,
+  process discovery, machine/runtime binding, and job execution, but
+  `uipath/robots/PayerPortalFallback/Main.xaml` is currently scaffold-only.
+  Browser portal UI automation and portal confirmation write-back are not
+  claimed.
+- No real payer submission, real PHI, live Maestro run, live Agent Builder run,
+  IXP mutation, or live Action Center task creation was performed.
+- Added `docs/live-uipath-proof-closeout.md` and updated README/submission/UI
+  proof copy to surface these live IDs without overclaiming.
+- Final read-only tenant recheck succeeded: Data Fabric returned four proof
+  records, solution deployment status returned `DeploymentSucceeded` /
+  `SuccessfulActivate`, and Orchestrator job
+  `6d9b9fa9-f582-4983-98fa-167e87d57f2a` remained `Successful`.
