@@ -180,12 +180,16 @@ const fallbackState: DemoState = {
   ],
   toggles: {
     missing_safety_lab: false,
-    payer_api_unavailable: false,
+    payer_api_unavailable: true,
     denial_reason: "step_therapy",
     clinician_rejects_assertion: false,
     force_low_confidence_extraction: false,
     pharmacy_handoff_failure: false,
   },
+  submissions: [],
+  appeals: [],
+  handoffs: [],
+  schedulingTasks: [],
   events: [
     {
       event_id: "event-local-fallback-001",
@@ -299,6 +303,12 @@ function parseDemoState(value: unknown): DemoState {
       EvidenceMappingSchema.parse(mapping),
     ),
     toggles: DemoTogglesSchema.parse(state.toggles),
+    submissions: Array.isArray(state.submissions) ? state.submissions : [],
+    appeals: Array.isArray(state.appeals) ? state.appeals : [],
+    handoffs: Array.isArray(state.handoffs) ? state.handoffs : [],
+    schedulingTasks: Array.isArray(state.schedulingTasks)
+      ? state.schedulingTasks
+      : [],
     events: state.events.map((event) => AuditEventSchema.parse(event)),
   };
 }
