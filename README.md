@@ -17,10 +17,11 @@ event records.
 
 ## Current Status
 
-This repository is demo-ready for the local synthetic proof path after
-Checkpoints 1-5. Checkpoint 5 added truthful Devpost packaging, local screenshot
-evidence, final QA/readiness gates, a demo script, a deck outline, and updated
-RPA live-readiness documentation.
+This repository is demo-ready for the local synthetic proof path and prepared
+for Checkpoint 8 live UiPath evidence capture. The final Command Center leads
+with healthcare value while keeping task, job, record, confirmation, source, and
+safety evidence in a proof drawer/manifest instead of cluttering the product
+screen.
 
 Already implemented:
 
@@ -31,6 +32,10 @@ Already implemented:
 - Command Center UI that shows the case queue, event mirror state, seven agent
   traces, evidence matrix, Action Center gates, payer API failure, portal robot
   fallback state, denial rescue, appeal/care handoff, and audit timeline.
+- Final proof manifest in the Command Center for UiPath folder
+  `TreatmentAccessHackathon`, folder ID `7986316`, folder key
+  `4fba2fa1-012b-469a-b6aa-e5be3811c173`, event/record ID, task ID, job ID,
+  confirmation ID, source labels, timestamp, and safety status when available.
 - Mock Payer Portal with stable automation selectors and deterministic synthetic
   confirmation IDs such as `AVFH-PORTAL-SYN-001`.
 - UiPath design artifacts for Maestro Case, Data Service/Data Fabric shape, API
@@ -44,11 +49,20 @@ Not claimed as completed:
 
 - No live RPA run/debug, Orchestrator job start, solution upload/publish/deploy,
   Action Center task creation, Data Service write, IXP mutation, live Agent
-  Builder run, Maestro debug run, or real payer submission has been performed.
+  Builder run, Maestro debug run, or real payer submission is claimed unless a
+  final proof manifest row shows the corresponding live ID and timestamp.
 - The real `PayerPortalFallback` UiPath RPA project shell now exists, validates,
   builds with the repo's .NET 8 helper, is imported into the local UiPath
   solution, and passes solution pack dry-run. UIA target capture and live robot
   execution remain approval-gated.
+
+## Proof Types
+
+| Proof type            | What it means                                                                                                    | Current wording rule                                                                                   |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Local Synthetic Proof | Deterministic local apps, mock API, mock portal, event mirror, agent runtime, screenshots, and smoke commands.   | Can be shown as working local proof with synthetic data only.                                          |
+| Live Provider Proof   | Fireworks/LangSmith readiness or traces after provider credentials are configured and the provider smoke passes. | Claimed only after `CI=true pnpm smoke:checkpoint6-live-providers` or equivalent captured evidence.    |
+| Live UiPath Proof     | UiPath Automation Cloud evidence in `TreatmentAccessHackathon`: record/task/job/confirmation IDs and timestamps. | Shows as "ready for live UiPath proof" until the manifest contains live UiPath evidence from approval. |
 
 ## Problem
 
@@ -173,6 +187,7 @@ CI=true pnpm seed
 CI=true pnpm smoke:checkpoint1
 CI=true pnpm smoke:agents
 CI=true pnpm smoke:checkpoint4
+CI=true pnpm smoke:checkpoint8-live-uipath
 ```
 
 Full local verification:

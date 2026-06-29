@@ -123,6 +123,27 @@ real payer submission:
 - denial -> denial rescue and appeal packet with clinician signoff gate;
 - approval -> care continuity handoff.
 
+## Checkpoint 8 Final UiPath Readiness
+
+Run the final no-side-effect readiness smoke before the five-minute recording
+and Devpost submission:
+
+```bash
+CI=true pnpm smoke:checkpoint8-live-uipath
+```
+
+The smoke verifies the final Command Center proof manifest and documentation
+boundaries. It checks for the `TreatmentAccessHackathon` folder, folder ID
+`7986316`, folder key `4fba2fa1-012b-469a-b6aa-e5be3811c173`, event/record ID,
+task ID, job ID, confirmation ID, source labels, timestamp, and safety status
+fields. It also confirms local synthetic proof, live provider proof, and Live
+UiPath Proof are worded separately.
+
+This smoke does not create Action Center tasks, Data Service records,
+Orchestrator jobs, deployments, robot runs, or payer submissions. If no live
+UiPath side-effect has run, the UI and docs must say "ready for live UiPath
+proof" instead of claiming completed live execution.
+
 ## Checkpoint 4 Mock Payer Portal
 
 Run the local mock payer portal for RPA fallback development:

@@ -88,6 +88,9 @@ export type LiveProofSourceKind =
   | "uipath"
   | "human"
   | "event_mirror"
+  | "orchestrator"
+  | "data_service"
+  | "mock_api"
   | "deterministic";
 
 export type LiveProofStepStatus =
@@ -113,7 +116,13 @@ export type LiveProofTrace = {
 export type LiveProofApprovalGate = {
   gate_id: string;
   label: string;
-  status: "not_required" | "required" | "waiting" | "approved" | "rejected";
+  status:
+    | "not_required"
+    | "required"
+    | "waiting"
+    | "approved"
+    | "rejected"
+    | "blocked";
   owner: string;
   reason: string;
   source: LiveProofSourceKind;
@@ -149,7 +158,24 @@ export type LiveProofRun = {
   approval_gate: LiveProofApprovalGate;
   traces: LiveProofTrace[];
   source_label: string;
+  source_labels?: string[];
+  proof_manifest?: UiPathProofManifestItem[];
+  proof_status?:
+    | "ready_for_live_uipath_proof"
+    | "local_synthetic_proof"
+    | "live_uipath_proof_recorded";
+  safety_status?: string;
+  no_live_uipath_side_effects?: boolean;
+  no_real_payer_submission?: boolean;
   synthetic_data_disclaimer: string;
+};
+
+export type UiPathProofManifestItem = {
+  label: string;
+  value: string;
+  status: "available" | "ready" | "pending" | "blocked";
+  source: LiveProofSourceKind;
+  timestamp?: string;
 };
 
 export type RuntimeState = {

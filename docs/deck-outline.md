@@ -85,7 +85,10 @@ Visual: agent trace strip, not a generic agent cloud.
 5. Show clinician/human approval gate.
 6. Force payer API `PAYER_API_DOWN`.
 7. Show portal fallback and `AVFH-PORTAL-SYN-*` confirmation.
-8. Return to robot event, denial rescue, appeal signoff, care handoff, audit.
+8. Open the proof manifest for folder ID `7986316`, folder key
+   `4fba2fa1-012b-469a-b6aa-e5be3811c173`, event/record ID, task ID, job ID,
+   confirmation ID, source labels, timestamp, and safety status.
+9. Return to robot event, denial rescue, appeal signoff, care handoff, audit.
 
 Visual: timeline with exact screen sequence.
 
