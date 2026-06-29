@@ -39,6 +39,18 @@ returns the runtime to a clean seed state:
 CI=true pnpm smoke:checkpoint1
 ```
 
+## Checkpoint 3 Agent Runtime Smoke
+
+Run the deterministic local agent runtime smoke. This does not call live UiPath
+Agent Builder, Maestro, Action Center, Data Service, or payer endpoints. It
+validates the seven shared agent contracts, trace/audit payload envelopes,
+missing-safety-lab submission blocking, denial-reason strategy branching,
+clinician-review appeal constraints, and unsupported-claim warnings:
+
+```bash
+CI=true pnpm smoke:agents
+```
+
 If the mock API is already running, run the smoke against it directly:
 
 ```bash

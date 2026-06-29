@@ -377,6 +377,211 @@ export const AuditEventSchema = z.object({
   timestamp: IsoDateTimeSchema,
 });
 
+export const AgentIdSchema = z.enum([
+  "coverage-requirement",
+  "evidence-retrieval",
+  "missing-evidence",
+  "submission-packet",
+  "denial-rescue",
+  "appeal-packet",
+  "care-continuity",
+]);
+
+export const AgentDisplayNameById = {
+  "coverage-requirement": "Coverage Requirement Agent",
+  "evidence-retrieval": "Evidence Retrieval Agent",
+  "missing-evidence": "Missing Evidence Agent",
+  "submission-packet": "Submission Packet Agent",
+  "denial-rescue": "Denial Rescue Agent",
+  "appeal-packet": "Appeal Packet Agent",
+  "care-continuity": "Care Continuity Agent",
+} as const;
+
+export const SafetyFlagSchema = z.object({
+  flag_id: z.string(),
+  severity: z.enum(["info", "warning", "blocking"]),
+  code: z.string(),
+  message: z.string(),
+  evidence_refs: z.array(z.string()).default([]),
+  requires_human_approval: z.boolean().default(false),
+});
+
+export const ClinicalAssertionReviewSchema = z.object({
+  assertion_id: z.string(),
+  statement: z.string(),
+  status: z.enum(["supported", "needs_human_approval", "unsupported"]),
+  evidence_refs: z.array(z.string()).default([]),
+  policy_citations: z.array(z.string()).default([]),
+  human_approval_required: z.boolean(),
+  warning: z.string().optional(),
+});
+
+const BaseAgentInputSchema = z.object({
+  case: TreatmentAccessCaseSchema,
+  patient: PatientSnapshotSchema,
+  order: TreatmentOrderSchema,
+  demo_toggles: z.lazy(() => DemoTogglesSchema),
+});
+
+export const CoverageRequirementAgentInputSchema =
+  BaseAgentInputSchema.extend({
+    agent_id: z.literal("coverage-requirement"),
+    payer_policy: PayerPolicySchema,
+    criteria: z.array(PolicyCriterionSchema),
+  });
+
+export const CoverageRequirementAgentOutputSchema = z.object({
+  agent_id: z.literal("coverage-requirement"),
+  authorization_required: z.boolean(),
+  policy_id: z.string(),
+  policy_version: z.string(),
+  required_criteria: z.array(PolicyCriterionSchema),
+  required_documents: z.array(z.string()),
+  submission_channels: z.array(SubmissionChannelSchema),
+  evidence_refs: z.array(z.string()).default([]),
+  safety_flags: z.array(SafetyFlagSchema).default([]),
+});
+
+export const EvidenceRetrievalAgentInputSchema = BaseAgentInputSchema.extend({
+  agent_id: z.literal("evidence-retrieval"),
+  criteria: z.array(PolicyCriterionSchema),
+  artifacts: z.array(EvidenceArtifactSchema),
+  labs: z.array(LabResultSchema),
+  medication_history: z.array(MedicationHistoryEntrySchema),
+});
+
+export const EvidenceRetrievalAgentOutputSchema = z.object({
+  agent_id: z.literal("evidence-retrieval"),
+  evidence_mappings: z.array(EvidenceMappingSchema),
+  evidence_refs: z.array(z.string()).default([]),
+  clinical_assertions: z.array(ClinicalAssertionReviewSchema),
+  extraction_methods_used: z.array(ExtractionMethodSchema),
+  safety_flags: z.array(SafetyFlagSchema).default([]),
+});
+
+export const MissingEvidenceAgentInputSchema = BaseAgentInputSchema.extend({
+  agent_id: z.literal("missing-evidence"),
+  criteria: z.array(PolicyCriterionSchema),
+  evidence_mappings: z.array(EvidenceMappingSchema),
+  human_tasks: z.array(HumanTaskSchema),
+});
+
+export const MissingEvidenceAgentOutputSchema = z.object({
+  agent_id: z.literal("missing-evidence"),
+  can_submit: z.boolean(),
+  missing_blocking_criteria: z.array(PolicyCriterionSchema),
+  missing_evidence_mappings: z.array(EvidenceMappingSchema),
+  human_tasks_to_create: z.array(HumanTaskSchema),
+  remediation_summary: z.string(),
+  safety_flags: z.array(SafetyFlagSchema).default([]),
+});
+
+export const SubmissionPacketAgentInputSchema = BaseAgentInputSchema.extend({
+  agent_id: z.literal("submission-packet"),
+  evidence_mappings: z.array(EvidenceMappingSchema),
+  attachments: z.array(AttachmentMetadataSchema),
+  existing_packet: SubmissionPacketSchema,
+});
+
+export const SubmissionPacketAgentOutputSchema = z.object({
+  agent_id: z.literal("submission-packet"),
+  packet: SubmissionPacketSchema,
+  ready_to_submit: z.boolean(),
+  blocked_reasons: z.array(z.string()),
+  next_channel: SubmissionChannelSchema.optional(),
+  safety_flags: z.array(SafetyFlagSchema).default([]),
+});
+
+export const DenialReasonCategorySchema = z.enum([
+  "step_therapy",
+  "safety_screen",
+  "medical_necessity",
+]);
+
+export const DenialRescueAgentInputSchema = BaseAgentInputSchema.extend({
+  agent_id: z.literal("denial-rescue"),
+  payer_decision: PayerDecisionSchema,
+  evidence_mappings: z.array(EvidenceMappingSchema),
+});
+
+export const DenialRescueAgentOutputSchema = z.object({
+  agent_id: z.literal("denial-rescue"),
+  payer_decision: PayerDecisionSchema,
+  denial_reason_category: DenialReasonCategorySchema,
+  appeal_strategy: z.string(),
+  evidence_gap_ids: z.array(z.string()),
+  evidence_refs: z.array(z.string()).default([]),
+  safety_flags: z.array(SafetyFlagSchema).default([]),
+});
+
+export const AppealPacketAgentInputSchema = BaseAgentInputSchema.extend({
+  agent_id: z.literal("appeal-packet"),
+  payer_decision: PayerDecisionSchema,
+  evidence_mappings: z.array(EvidenceMappingSchema),
+  prior_appeal_packet: AppealPacketSchema,
+});
+
+export const AppealPacketAgentOutputSchema = z.object({
+  agent_id: z.literal("appeal-packet"),
+  appeal_packet: AppealPacketSchema,
+  administrative_draft_only: z.literal(true),
+  clinician_review_required: z.boolean(),
+  unsupported_claim_warnings: z.array(z.string()),
+  safety_flags: z.array(SafetyFlagSchema).default([]),
+});
+
+export const CareContinuityAgentInputSchema = BaseAgentInputSchema.extend({
+  agent_id: z.literal("care-continuity"),
+  payer_status: PayerStatusSchema,
+  pharmacy_handoff: PharmacyHandoffSchema,
+});
+
+export const CareContinuityAgentOutputSchema = z.object({
+  agent_id: z.literal("care-continuity"),
+  should_create_handoff: z.boolean(),
+  handoff: PharmacyHandoffSchema,
+  blocked_reason: z.string().optional(),
+  safety_flags: z.array(SafetyFlagSchema).default([]),
+});
+
+export const AgentInputSchema = z.discriminatedUnion("agent_id", [
+  CoverageRequirementAgentInputSchema,
+  EvidenceRetrievalAgentInputSchema,
+  MissingEvidenceAgentInputSchema,
+  SubmissionPacketAgentInputSchema,
+  DenialRescueAgentInputSchema,
+  AppealPacketAgentInputSchema,
+  CareContinuityAgentInputSchema,
+]);
+
+export const AgentOutputSchema = z.discriminatedUnion("agent_id", [
+  CoverageRequirementAgentOutputSchema,
+  EvidenceRetrievalAgentOutputSchema,
+  MissingEvidenceAgentOutputSchema,
+  SubmissionPacketAgentOutputSchema,
+  DenialRescueAgentOutputSchema,
+  AppealPacketAgentOutputSchema,
+  CareContinuityAgentOutputSchema,
+]);
+
+export const AgentRuntimeResultSchema = z.object({
+  agent_id: AgentIdSchema,
+  trace: AgentTraceSchema,
+  audit_event: AuditEventSchema,
+  output: AgentOutputSchema,
+});
+
+export const AgentRuntimeSummarySchema = z.object({
+  case_id: z.string(),
+  generated_at: IsoDateTimeSchema,
+  results: z.array(AgentRuntimeResultSchema),
+  safety_flags: z.array(SafetyFlagSchema).default([]),
+  evidence_refs: z.array(z.string()).default([]),
+  synthetic_data_disclaimer: z
+    .string()
+    .default("Synthetic deterministic agent runtime; no live UiPath execution."),
+});
+
 export const DemoTogglesSchema = z.object({
   missing_safety_lab: z.boolean().default(false),
   payer_api_unavailable: z.boolean().default(false),
@@ -432,5 +637,57 @@ export type PharmacyHandoff = z.infer<typeof PharmacyHandoffSchema>;
 export type HumanTask = z.infer<typeof HumanTaskSchema>;
 export type AgentTrace = z.infer<typeof AgentTraceSchema>;
 export type AuditEvent = z.infer<typeof AuditEventSchema>;
+export type AgentId = z.infer<typeof AgentIdSchema>;
+export type SafetyFlag = z.infer<typeof SafetyFlagSchema>;
+export type ClinicalAssertionReview = z.infer<
+  typeof ClinicalAssertionReviewSchema
+>;
+export type CoverageRequirementAgentInput = z.infer<
+  typeof CoverageRequirementAgentInputSchema
+>;
+export type CoverageRequirementAgentOutput = z.infer<
+  typeof CoverageRequirementAgentOutputSchema
+>;
+export type EvidenceRetrievalAgentInput = z.infer<
+  typeof EvidenceRetrievalAgentInputSchema
+>;
+export type EvidenceRetrievalAgentOutput = z.infer<
+  typeof EvidenceRetrievalAgentOutputSchema
+>;
+export type MissingEvidenceAgentInput = z.infer<
+  typeof MissingEvidenceAgentInputSchema
+>;
+export type MissingEvidenceAgentOutput = z.infer<
+  typeof MissingEvidenceAgentOutputSchema
+>;
+export type SubmissionPacketAgentInput = z.infer<
+  typeof SubmissionPacketAgentInputSchema
+>;
+export type SubmissionPacketAgentOutput = z.infer<
+  typeof SubmissionPacketAgentOutputSchema
+>;
+export type DenialReasonCategory = z.infer<typeof DenialReasonCategorySchema>;
+export type DenialRescueAgentInput = z.infer<
+  typeof DenialRescueAgentInputSchema
+>;
+export type DenialRescueAgentOutput = z.infer<
+  typeof DenialRescueAgentOutputSchema
+>;
+export type AppealPacketAgentInput = z.infer<
+  typeof AppealPacketAgentInputSchema
+>;
+export type AppealPacketAgentOutput = z.infer<
+  typeof AppealPacketAgentOutputSchema
+>;
+export type CareContinuityAgentInput = z.infer<
+  typeof CareContinuityAgentInputSchema
+>;
+export type CareContinuityAgentOutput = z.infer<
+  typeof CareContinuityAgentOutputSchema
+>;
+export type AgentInput = z.infer<typeof AgentInputSchema>;
+export type AgentOutput = z.infer<typeof AgentOutputSchema>;
+export type AgentRuntimeResult = z.infer<typeof AgentRuntimeResultSchema>;
+export type AgentRuntimeSummary = z.infer<typeof AgentRuntimeSummarySchema>;
 export type DemoToggles = z.infer<typeof DemoTogglesSchema>;
 export type DemoFixture = z.infer<typeof DemoFixtureSchema>;

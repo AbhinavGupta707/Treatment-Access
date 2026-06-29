@@ -1,0 +1,24 @@
+{
+  "version": "checkpoint-3-local-runtime-v1",
+  "syntheticDataOnly": true,
+  "liveUiPathExecution": false,
+  "agentIds": [
+    "coverage-requirement",
+    "evidence-retrieval",
+    "missing-evidence",
+    "submission-packet",
+    "denial-rescue",
+    "appeal-packet",
+    "care-continuity"
+  ],
+  "contractSource": "packages/shared-schemas/src/index.ts",
+  "runtimeSource": "packages/agent-runtime/src/index.ts",
+  "smokeCommand": "CI=true pnpm smoke:agents",
+  "requiredBranches": [
+    "missing safety lab blocks submission",
+    "denial reason changes appeal strategy",
+    "appeal text stays administrative draft for clinician review",
+    "unsupported clinical assertions emit warnings",
+    "clinical assertions require evidence, policy citation, or human approval"
+  ]
+}
