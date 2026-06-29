@@ -1,0 +1,6 @@
+{
+  "ProjectType": "Agent",
+  "Name": "appeal-packet",
+  "Description": "Drafts clinician-gated administrative appeal packets with source citations and unsupported-claim warnings.",
+  "MainFile": null
+}

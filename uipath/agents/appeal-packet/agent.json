@@ -1,0 +1,245 @@
+{
+  "version": "1.1.0",
+  "settings": {
+    "model": "gpt-4o-2024-11-20",
+    "maxTokens": 14000,
+    "temperature": 0,
+    "engine": "basic-v2",
+    "maxIterations": 8,
+    "mode": "standard"
+  },
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "caseSnapshot": {
+        "type": "object",
+        "description": "TreatmentAccessCase-shaped case snapshot from UiPath-owned state."
+      },
+      "payerDecision": {
+        "type": "object",
+        "description": "PayerDecision-shaped denial record."
+      },
+      "denialRescue": {
+        "type": "object",
+        "description": "Output from Denial Rescue Agent with selected strategy and evidence refs."
+      },
+      "submissionPacket": {
+        "type": "object",
+        "description": "SubmissionPacket-shaped original packet."
+      },
+      "evidenceMappings": {
+        "type": "array",
+        "description": "EvidenceMapping array available for source-grounded drafting."
+      },
+      "citations": {
+        "type": "array",
+        "description": "Citation array to use in administrative appeal text."
+      },
+      "clinicianReview": {
+        "type": "object",
+        "description": "Current clinician signoff state. Drafting usually starts pending."
+      },
+      "generatedAtIso": {
+        "type": "string",
+        "description": "ISO timestamp supplied by the UiPath workflow."
+      }
+    },
+    "required": [
+      "caseSnapshot",
+      "payerDecision",
+      "denialRescue",
+      "submissionPacket",
+      "evidenceMappings",
+      "citations",
+      "clinicianReview",
+      "generatedAtIso"
+    ]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "appeal_id": {
+        "type": "string",
+        "description": "Deterministic appeal packet identifier."
+      },
+      "case_id": {
+        "type": "string",
+        "description": "Case identifier copied from caseSnapshot.case_id."
+      },
+      "denial_reason": {
+        "type": "string",
+        "description": "Source-grounded denial reason summary."
+      },
+      "appeal_strategy": {
+        "type": "string",
+        "description": "Strategy copied or summarized from Denial Rescue Agent output."
+      },
+      "draft_text": {
+        "type": "string",
+        "description": "Administrative appeal draft labelled for clinician review."
+      },
+      "draft_summary": {
+        "type": "string",
+        "description": "Short summary for Action Center review."
+      },
+      "evidence_used": {
+        "type": "array",
+        "description": "Evidence mapping, artifact, attachment, and denial refs used in the draft."
+      },
+      "citations": {
+        "type": "array",
+        "description": "Citation objects or citation refs used in the draft."
+      },
+      "unsupported_claim_warnings": {
+        "type": "array",
+        "description": "Warnings for unsupported claims or assertions needing clinician signoff."
+      },
+      "clinician_review_required": {
+        "type": "boolean",
+        "description": "Always true unless clinicianReview already documents completed approval."
+      },
+      "clinician_approved": {
+        "type": "boolean",
+        "description": "True only if input clinicianReview explicitly indicates approval; otherwise false."
+      },
+      "clinician_gate_status": {
+        "type": "string",
+        "description": "One of requires_signoff, approved_with_edits, approved, blocked_rework."
+      },
+      "action_center_task_key": {
+        "type": "string",
+        "description": "Action Center contract key to create for review."
+      },
+      "administrative_label": {
+        "type": "string",
+        "description": "Required disclaimer label for the draft."
+      },
+      "generated_at": {
+        "type": "string",
+        "description": "ISO timestamp copied from generatedAtIso."
+      },
+      "version": {
+        "type": "string",
+        "description": "Agent packet contract version."
+      },
+      "audit_summary": {
+        "type": "string",
+        "description": "One-sentence event summary for the write-event API workflow."
+      }
+    },
+    "required": [
+      "appeal_id",
+      "case_id",
+      "denial_reason",
+      "appeal_strategy",
+      "draft_text",
+      "draft_summary",
+      "evidence_used",
+      "citations",
+      "unsupported_claim_warnings",
+      "clinician_review_required",
+      "clinician_approved",
+      "clinician_gate_status",
+      "action_center_task_key",
+      "administrative_label",
+      "generated_at",
+      "version",
+      "audit_summary"
+    ]
+  },
+  "metadata": {
+    "storageVersion": "50.0.0",
+    "isConversational": false,
+    "showProjectCreationExperience": false,
+    "targetRuntime": "pythonAgent"
+  },
+  "type": "lowCode",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are the Appeal Packet Agent for the Treatment Access Command Center. Draft an administrative appeal packet from Denial Rescue Agent output for clinician review and signoff.\n\nScope:\n- In scope: administrative appeal draft text, citation list, evidence refs, unsupported-claim warnings, Action Center signoff routing metadata, and audit summaries.\n- Out of scope: autonomous appeal submission, independent medical judgment, legal advice, inventing clinical facts, or suppressing unsupported-claim warnings.\n\nRules:\n- Treat all data as synthetic demo data.\n- The draft_text must begin with the label: Administrative draft for clinician review; not medical or legal advice.\n- Draft only statements grounded in payerDecision, denialRescue, submissionPacket, evidenceMappings, or citations.\n- If a useful appeal sentence would require a source that is missing, do not write it as fact; add an unsupported_claim_warnings entry instead.\n- Do not set clinician_approved=true unless clinicianReview explicitly says the clinician approved the final draft.\n- Set clinician_review_required=true and action_center_task_key=appeal_signoff for pending drafts.\n- Preserve warnings for clinician-attested severity, diagnosis, necessity, or safety assertions unless the input includes explicit approval.\n- Include citation labels inline in draft_text where practical and also return citations in the citations field.\n\nOutput:\n- Return only a JSON object conforming to the output schema.\n- draft_text must be source-grounded, concise, and clearly administrative.\n- audit_summary must be suitable for the write-event API Workflow.",
+      "contentTokens": [
+        {
+          "type": "simpleText",
+          "rawString": "You are the Appeal Packet Agent for the Treatment Access Command Center. Draft an administrative appeal packet from Denial Rescue Agent output for clinician review and signoff.\n\nScope:\n- In scope: administrative appeal draft text, citation list, evidence refs, unsupported-claim warnings, Action Center signoff routing metadata, and audit summaries.\n- Out of scope: autonomous appeal submission, independent medical judgment, legal advice, inventing clinical facts, or suppressing unsupported-claim warnings.\n\nRules:\n- Treat all data as synthetic demo data.\n- The draft_text must begin with the label: Administrative draft for clinician review; not medical or legal advice.\n- Draft only statements grounded in payerDecision, denialRescue, submissionPacket, evidenceMappings, or citations.\n- If a useful appeal sentence would require a source that is missing, do not write it as fact; add an unsupported_claim_warnings entry instead.\n- Do not set clinician_approved=true unless clinicianReview explicitly says the clinician approved the final draft.\n- Set clinician_review_required=true and action_center_task_key=appeal_signoff for pending drafts.\n- Preserve warnings for clinician-attested severity, diagnosis, necessity, or safety assertions unless the input includes explicit approval.\n- Include citation labels inline in draft_text where practical and also return citations in the citations field.\n\nOutput:\n- Return only a JSON object conforming to the output schema.\n- draft_text must be source-grounded, concise, and clearly administrative.\n- audit_summary must be suitable for the write-event API Workflow."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "Draft the administrative appeal packet for clinician signoff.\n\ncaseSnapshot: {{input.caseSnapshot}}\npayerDecision: {{input.payerDecision}}\ndenialRescue: {{input.denialRescue}}\nsubmissionPacket: {{input.submissionPacket}}\nevidenceMappings: {{input.evidenceMappings}}\ncitations: {{input.citations}}\nclinicianReview: {{input.clinicianReview}}\ngeneratedAtIso: {{input.generatedAtIso}}\n\nReturn the structured appeal packet.",
+      "contentTokens": [
+        {
+          "type": "simpleText",
+          "rawString": "Draft the administrative appeal packet for clinician signoff.\n\ncaseSnapshot: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.caseSnapshot"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\npayerDecision: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.payerDecision"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\ndenialRescue: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.denialRescue"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\nsubmissionPacket: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.submissionPacket"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\nevidenceMappings: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.evidenceMappings"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\ncitations: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.citations"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\nclinicianReview: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.clinicianReview"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\ngeneratedAtIso: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.generatedAtIso"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\nReturn the structured appeal packet."
+        }
+      ]
+    }
+  ],
+  "guardrails": [],
+  "projectId": "a092ce29-3fb2-4d8c-91da-b8e355badc59"
+}

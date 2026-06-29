@@ -1,0 +1,37 @@
+{
+  "case_id": "case-syn-001",
+  "decision_status": "denied",
+  "normalized_denial_reason": "step_therapy",
+  "denial_code": "STEP_THERAPY_INCOMPLETE",
+  "parsed_denial_summary": "Synthetic denial states prior preferred therapy documentation was not clear enough for approval.",
+  "appeal_deadline": "2026-07-12",
+  "rescue_strategy": {
+    "strategy_id": "strategy-step-therapy-clarify",
+    "strategy_label": "Clarify prior preferred therapy outcomes",
+    "rationale": "Policy Section 2.4 requires two preferred therapy outcomes, and mapping-step-therapy references synthetic medication history for two prior therapies.",
+    "required_evidence_refs": [
+      "mapping-step-therapy",
+      "artifact-med-history",
+      "policy-citation-step"
+    ],
+    "requested_actions": [
+      "Attach medication history excerpt showing Preferred Therapy A inadequate response.",
+      "Attach medication history excerpt showing Preferred Therapy B intolerance.",
+      "Ask clinician reviewer to confirm no unsupported severity or necessity statement was added."
+    ],
+    "requires_clinician_review": true
+  },
+  "evidence_refs": [
+    "artifact-denial-step-therapy",
+    "packet-syn-001",
+    "mapping-step-therapy",
+    "artifact-med-history",
+    "policy-citation-step"
+  ],
+  "missing_or_weak_refs": [],
+  "unsupported_claim_warnings": [
+    "Do not state medical necessity beyond the cited synthetic medication history and clinician-approved severity attestation."
+  ],
+  "next_agent": "Appeal Packet Agent",
+  "audit_summary": "Denial Rescue Agent mapped denial STEP_THERAPY_INCOMPLETE to the step_therapy rescue strategy."
+}

@@ -1,0 +1,36 @@
+{
+  "case_id": "case-syn-001",
+  "decision_status": "denied",
+  "normalized_denial_reason": "safety_screen",
+  "denial_code": "SAFETY_SCREEN_MISSING",
+  "parsed_denial_summary": "Synthetic denial states safety screening was not attached to the prior authorization submission.",
+  "appeal_deadline": "2026-07-12",
+  "rescue_strategy": {
+    "strategy_id": "strategy-safety-screen-attach",
+    "strategy_label": "Attach safety screening evidence",
+    "rationale": "Policy Section 3.2 requires recent TB and hepatitis screening before biologic initiation.",
+    "required_evidence_refs": [
+      "mapping-safety-screen",
+      "artifact-safety-labs",
+      "policy-citation-safety"
+    ],
+    "requested_actions": [
+      "If artifact-safety-labs is present, include it in the appeal packet with citation policy-citation-safety.",
+      "If artifact-safety-labs is missing, route to Missing Evidence Agent before drafting."
+    ],
+    "requires_clinician_review": false
+  },
+  "evidence_refs": [
+    "artifact-denial-step-therapy",
+    "packet-syn-001",
+    "mapping-safety-screen",
+    "artifact-safety-labs",
+    "policy-citation-safety"
+  ],
+  "missing_or_weak_refs": [],
+  "unsupported_claim_warnings": [
+    "Do not claim safety screening is recent unless mapping-safety-screen remains found and artifact-safety-labs is attached."
+  ],
+  "next_agent": "Appeal Packet Agent",
+  "audit_summary": "Denial Rescue Agent mapped denial SAFETY_SCREEN_MISSING to the safety_screen rescue strategy."
+}

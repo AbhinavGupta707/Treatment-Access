@@ -1,0 +1,140 @@
+{
+  "$schema": "https://cloud.uipath.com/draft/2024-12/entry-point",
+  "$id": "entry-points.json",
+  "entryPoints": [
+    {
+      "filePath": "/content/agent.json",
+      "uniqueId": "9af29f52-dfed-487d-aaa9-d4996012a802",
+      "type": "agent",
+      "input": {
+        "type": "object",
+        "properties": {
+          "caseSnapshot": {
+            "type": "object",
+            "description": "TreatmentAccessCase-shaped case snapshot from UiPath-owned state."
+          },
+          "patientSnapshot": {
+            "type": "object",
+            "description": "Synthetic PatientSnapshot for payer form fields."
+          },
+          "order": {
+            "type": "object",
+            "description": "Synthetic TreatmentOrder for the requested treatment."
+          },
+          "payerPolicy": {
+            "type": "object",
+            "description": "PayerPolicy output from the Coverage Requirement Agent."
+          },
+          "criteria": {
+            "type": "array",
+            "description": "PolicyCriterion array with severity, attestation, and citation metadata."
+          },
+          "evidenceMappings": {
+            "type": "array",
+            "description": "EvidenceMapping array from the Evidence Retrieval and Missing Evidence agents."
+          },
+          "attachments": {
+            "type": "array",
+            "description": "AttachmentMetadata array for synthetic packet attachments."
+          },
+          "humanApprovals": {
+            "type": "array",
+            "description": "Completed human validation decisions for clinician-attested assertions."
+          },
+          "builtAtIso": {
+            "type": "string",
+            "description": "ISO timestamp supplied by the UiPath workflow."
+          }
+        },
+        "required": [
+          "caseSnapshot",
+          "patientSnapshot",
+          "order",
+          "payerPolicy",
+          "criteria",
+          "evidenceMappings",
+          "attachments",
+          "humanApprovals",
+          "builtAtIso"
+        ]
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "packet_id": {
+            "type": "string",
+            "description": "Deterministic packet identifier for downstream submission."
+          },
+          "case_id": {
+            "type": "string",
+            "description": "Case identifier copied from caseSnapshot.case_id."
+          },
+          "ready_to_submit": {
+            "type": "boolean",
+            "description": "True only when every blocking criterion has evidence and every required clinician validation is approved."
+          },
+          "submission_gate": {
+            "type": "string",
+            "description": "One of ready, blocked_missing_evidence, blocked_clinician_validation, blocked_conflicting_evidence."
+          },
+          "block_reasons": {
+            "type": "array",
+            "description": "Blocking reasons that explain why submission is refused."
+          },
+          "form_fields": {
+            "type": "object",
+            "description": "Payer-ready administrative form field values grounded in the input."
+          },
+          "attachment_ids": {
+            "type": "array",
+            "description": "Synthetic attachment IDs selected for the packet."
+          },
+          "cover_letter_summary": {
+            "type": "string",
+            "description": "Administrative cover summary. No unsupported medical or legal advice."
+          },
+          "evidence_refs": {
+            "type": "array",
+            "description": "Evidence mapping, artifact, attachment, citation, and approval references used in the packet."
+          },
+          "unsupported_claim_warnings": {
+            "type": "array",
+            "description": "Claims that must not be submitted without additional evidence or clinician approval."
+          },
+          "required_human_approval_refs": {
+            "type": "array",
+            "description": "Human approval references checked for clinician-attested criteria."
+          },
+          "built_at": {
+            "type": "string",
+            "description": "ISO timestamp copied from builtAtIso."
+          },
+          "version": {
+            "type": "string",
+            "description": "Agent packet contract version."
+          },
+          "audit_summary": {
+            "type": "string",
+            "description": "One-sentence event summary for the write-event API workflow."
+          }
+        },
+        "required": [
+          "packet_id",
+          "case_id",
+          "ready_to_submit",
+          "submission_gate",
+          "block_reasons",
+          "form_fields",
+          "attachment_ids",
+          "cover_letter_summary",
+          "evidence_refs",
+          "unsupported_claim_warnings",
+          "required_human_approval_refs",
+          "built_at",
+          "version",
+          "audit_summary"
+        ]
+      }
+    }
+  ]
+}

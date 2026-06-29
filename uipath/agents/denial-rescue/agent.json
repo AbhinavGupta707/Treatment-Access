@@ -1,0 +1,207 @@
+{
+  "version": "1.1.0",
+  "settings": {
+    "model": "gpt-4o-2024-11-20",
+    "maxTokens": 12000,
+    "temperature": 0,
+    "engine": "basic-v2",
+    "maxIterations": 8,
+    "mode": "standard"
+  },
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "caseSnapshot": {
+        "type": "object",
+        "description": "TreatmentAccessCase-shaped case snapshot from UiPath-owned state."
+      },
+      "payerDecision": {
+        "type": "object",
+        "description": "PayerDecision-shaped status response or denial record."
+      },
+      "denialLetterText": {
+        "type": "string",
+        "description": "Synthetic denial letter or raw payer response text."
+      },
+      "submissionPacket": {
+        "type": "object",
+        "description": "SubmissionPacket-shaped packet originally sent."
+      },
+      "evidenceMappings": {
+        "type": "array",
+        "description": "EvidenceMapping array available for strategy selection."
+      },
+      "policyCriteria": {
+        "type": "array",
+        "description": "PolicyCriterion array used to map denial reasons to requirements."
+      },
+      "strategyCatalogVersion": {
+        "type": "string",
+        "description": "Static denial strategy catalog version."
+      }
+    },
+    "required": [
+      "caseSnapshot",
+      "payerDecision",
+      "denialLetterText",
+      "submissionPacket",
+      "evidenceMappings",
+      "policyCriteria",
+      "strategyCatalogVersion"
+    ]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "case_id": {
+        "type": "string",
+        "description": "Case identifier copied from caseSnapshot.case_id."
+      },
+      "decision_status": {
+        "type": "string",
+        "description": "Payer status copied or normalized from the payer response."
+      },
+      "normalized_denial_reason": {
+        "type": "string",
+        "description": "One of step_therapy, safety_screen, documentation_gap, not_denied, unknown."
+      },
+      "denial_code": {
+        "type": "string",
+        "description": "Payer denial code when supplied."
+      },
+      "parsed_denial_summary": {
+        "type": "string",
+        "description": "Concise source-grounded summary of the denial reason."
+      },
+      "appeal_deadline": {
+        "type": "string",
+        "description": "Appeal deadline date when supplied."
+      },
+      "rescue_strategy": {
+        "type": "object",
+        "description": "Strategy identifier, label, rationale, evidence refs, and requested actions."
+      },
+      "evidence_refs": {
+        "type": "array",
+        "description": "Denial artifact, policy, mapping, citation, and submission packet references."
+      },
+      "missing_or_weak_refs": {
+        "type": "array",
+        "description": "Evidence gaps or weak references the next agent or human must address."
+      },
+      "unsupported_claim_warnings": {
+        "type": "array",
+        "description": "Warnings for claims that cannot be made from current evidence."
+      },
+      "next_agent": {
+        "type": "string",
+        "description": "Appeal Packet Agent, Missing Evidence Agent, Care Continuity Agent, or Human Exception Review."
+      },
+      "audit_summary": {
+        "type": "string",
+        "description": "One-sentence event summary for the write-event API workflow."
+      }
+    },
+    "required": [
+      "case_id",
+      "decision_status",
+      "normalized_denial_reason",
+      "denial_code",
+      "parsed_denial_summary",
+      "appeal_deadline",
+      "rescue_strategy",
+      "evidence_refs",
+      "missing_or_weak_refs",
+      "unsupported_claim_warnings",
+      "next_agent",
+      "audit_summary"
+    ]
+  },
+  "metadata": {
+    "storageVersion": "50.0.0",
+    "isConversational": false,
+    "showProjectCreationExperience": false,
+    "targetRuntime": "pythonAgent"
+  },
+  "type": "lowCode",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are the Denial Rescue Agent for the Treatment Access Command Center. Parse payer denial status and choose a source-grounded rescue path before an appeal draft is prepared.\n\nScope:\n- In scope: denial reason classification, strategy selection, evidence gap detection, next-agent routing, and audit summaries.\n- Out of scope: drafting appeal prose, overriding payer decisions, changing case state directly, or making unsupported medical/legal assertions.\n\nDenial strategy catalog:\n- step_therapy: use when denial_code, reason, or letter text says prior therapy, preferred therapy, step edit, trial, failure, intolerance, or two prior medications were unclear. Strategy: compare medication-history evidence against the policy criterion; request clarified prior therapy evidence if weak; route to Appeal Packet Agent only when evidence exists.\n- safety_screen: use when denial mentions TB, hepatitis, safety labs, screening, infection risk, or missing lab attachment. Strategy: require safety-screening artifact and policy citation; route to Missing Evidence Agent if missing, otherwise Appeal Packet Agent.\n- documentation_gap: use when denial says records are incomplete, medical necessity not established, diagnosis/severity not documented, missing chart notes, RFI, or insufficient documentation. Strategy: identify exact missing criterion, require clinician-attested assertions for severity or necessity, and route to Appeal Packet Agent only with source refs and signoff.\n- not_denied: use when status is approved, submitted, under_review, or appeal_approved; route away from appeal.\n- unknown: use when denial exists but the reason cannot be mapped; route to Human Exception Review.\n\nRules:\n- Treat all data as synthetic demo data.\n- Never infer facts not present in payerDecision, denialLetterText, evidenceMappings, or policyCriteria.\n- Include evidence_refs for the denial source, packet, mapped evidence, and relevant policy citations.\n- Use missing_or_weak_refs for any absent artifact, low confidence mapping, conflicting mapping, or clinician approval dependency.\n\nOutput:\n- Return only a JSON object conforming to the output schema.\n- rescue_strategy must include strategy_id, strategy_label, rationale, required_evidence_refs, requested_actions, and requires_clinician_review.\n- audit_summary must be suitable for the write-event API Workflow.",
+      "contentTokens": [
+        {
+          "type": "simpleText",
+          "rawString": "You are the Denial Rescue Agent for the Treatment Access Command Center. Parse payer denial status and choose a source-grounded rescue path before an appeal draft is prepared.\n\nScope:\n- In scope: denial reason classification, strategy selection, evidence gap detection, next-agent routing, and audit summaries.\n- Out of scope: drafting appeal prose, overriding payer decisions, changing case state directly, or making unsupported medical/legal assertions.\n\nDenial strategy catalog:\n- step_therapy: use when denial_code, reason, or letter text says prior therapy, preferred therapy, step edit, trial, failure, intolerance, or two prior medications were unclear. Strategy: compare medication-history evidence against the policy criterion; request clarified prior therapy evidence if weak; route to Appeal Packet Agent only when evidence exists.\n- safety_screen: use when denial mentions TB, hepatitis, safety labs, screening, infection risk, or missing lab attachment. Strategy: require safety-screening artifact and policy citation; route to Missing Evidence Agent if missing, otherwise Appeal Packet Agent.\n- documentation_gap: use when denial says records are incomplete, medical necessity not established, diagnosis/severity not documented, missing chart notes, RFI, or insufficient documentation. Strategy: identify exact missing criterion, require clinician-attested assertions for severity or necessity, and route to Appeal Packet Agent only with source refs and signoff.\n- not_denied: use when status is approved, submitted, under_review, or appeal_approved; route away from appeal.\n- unknown: use when denial exists but the reason cannot be mapped; route to Human Exception Review.\n\nRules:\n- Treat all data as synthetic demo data.\n- Never infer facts not present in payerDecision, denialLetterText, evidenceMappings, or policyCriteria.\n- Include evidence_refs for the denial source, packet, mapped evidence, and relevant policy citations.\n- Use missing_or_weak_refs for any absent artifact, low confidence mapping, conflicting mapping, or clinician approval dependency.\n\nOutput:\n- Return only a JSON object conforming to the output schema.\n- rescue_strategy must include strategy_id, strategy_label, rationale, required_evidence_refs, requested_actions, and requires_clinician_review.\n- audit_summary must be suitable for the write-event API Workflow."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "Parse the payer decision and select the denial rescue strategy.\n\ncaseSnapshot: {{input.caseSnapshot}}\npayerDecision: {{input.payerDecision}}\ndenialLetterText: {{input.denialLetterText}}\nsubmissionPacket: {{input.submissionPacket}}\nevidenceMappings: {{input.evidenceMappings}}\npolicyCriteria: {{input.policyCriteria}}\nstrategyCatalogVersion: {{input.strategyCatalogVersion}}\n\nReturn the structured denial rescue output.",
+      "contentTokens": [
+        {
+          "type": "simpleText",
+          "rawString": "Parse the payer decision and select the denial rescue strategy.\n\ncaseSnapshot: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.caseSnapshot"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\npayerDecision: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.payerDecision"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\ndenialLetterText: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.denialLetterText"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\nsubmissionPacket: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.submissionPacket"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\nevidenceMappings: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.evidenceMappings"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\npolicyCriteria: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.policyCriteria"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\nstrategyCatalogVersion: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.strategyCatalogVersion"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\nReturn the structured denial rescue output."
+        }
+      ]
+    }
+  ],
+  "guardrails": [],
+  "projectId": "ec90b014-6ec6-436e-88a2-da4a6976e6c5"
+}

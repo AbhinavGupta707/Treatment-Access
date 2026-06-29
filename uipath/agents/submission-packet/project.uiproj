@@ -1,0 +1,6 @@
+{
+  "ProjectType": "Agent",
+  "Name": "submission-packet",
+  "Description": "Assembles source-grounded synthetic prior authorization submission packets and blocks missing evidence or clinician validation.",
+  "MainFile": null
+}

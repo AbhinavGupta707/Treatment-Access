@@ -1,0 +1,39 @@
+{
+  "case_id": "case-syn-001",
+  "decision_status": "denied",
+  "normalized_denial_reason": "documentation_gap",
+  "denial_code": "DOCUMENTATION_INSUFFICIENT",
+  "parsed_denial_summary": "Synthetic denial says the submitted record does not sufficiently document diagnosis severity for the requested therapy.",
+  "appeal_deadline": "2026-07-12",
+  "rescue_strategy": {
+    "strategy_id": "strategy-documentation-gap-attestation",
+    "strategy_label": "Resolve documentation gap with cited note and clinician signoff",
+    "rationale": "The diagnosis criterion requires clinician-attested documentation, and mapping-diagnosis is marked needs_human_validation.",
+    "required_evidence_refs": [
+      "mapping-diagnosis",
+      "artifact-progress-note",
+      "policy-citation-diagnosis",
+      "human-approval-diagnosis-severity"
+    ],
+    "requested_actions": [
+      "Keep appeal language administrative until clinician signoff is complete.",
+      "Include the source quote from mapping-diagnosis only if reviewer approval is present.",
+      "Route draft to Appeal Signoff before any appeal submission workflow runs."
+    ],
+    "requires_clinician_review": true
+  },
+  "evidence_refs": [
+    "packet-syn-001",
+    "mapping-diagnosis",
+    "artifact-progress-note",
+    "policy-citation-diagnosis"
+  ],
+  "missing_or_weak_refs": [
+    "human-approval-diagnosis-severity"
+  ],
+  "unsupported_claim_warnings": [
+    "Severity or medical-necessity language cannot be submitted until a clinician approves the final draft."
+  ],
+  "next_agent": "Appeal Packet Agent",
+  "audit_summary": "Denial Rescue Agent mapped documentation insufficiency to the documentation_gap rescue strategy with clinician signoff required."
+}

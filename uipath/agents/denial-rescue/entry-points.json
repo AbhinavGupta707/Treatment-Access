@@ -1,0 +1,120 @@
+{
+  "$schema": "https://cloud.uipath.com/draft/2024-12/entry-point",
+  "$id": "entry-points.json",
+  "entryPoints": [
+    {
+      "filePath": "/content/agent.json",
+      "uniqueId": "ff87fe7b-666e-4689-bff6-46e9da7d4e84",
+      "type": "agent",
+      "input": {
+        "type": "object",
+        "properties": {
+          "caseSnapshot": {
+            "type": "object",
+            "description": "TreatmentAccessCase-shaped case snapshot from UiPath-owned state."
+          },
+          "payerDecision": {
+            "type": "object",
+            "description": "PayerDecision-shaped status response or denial record."
+          },
+          "denialLetterText": {
+            "type": "string",
+            "description": "Synthetic denial letter or raw payer response text."
+          },
+          "submissionPacket": {
+            "type": "object",
+            "description": "SubmissionPacket-shaped packet originally sent."
+          },
+          "evidenceMappings": {
+            "type": "array",
+            "description": "EvidenceMapping array available for strategy selection."
+          },
+          "policyCriteria": {
+            "type": "array",
+            "description": "PolicyCriterion array used to map denial reasons to requirements."
+          },
+          "strategyCatalogVersion": {
+            "type": "string",
+            "description": "Static denial strategy catalog version."
+          }
+        },
+        "required": [
+          "caseSnapshot",
+          "payerDecision",
+          "denialLetterText",
+          "submissionPacket",
+          "evidenceMappings",
+          "policyCriteria",
+          "strategyCatalogVersion"
+        ]
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "case_id": {
+            "type": "string",
+            "description": "Case identifier copied from caseSnapshot.case_id."
+          },
+          "decision_status": {
+            "type": "string",
+            "description": "Payer status copied or normalized from the payer response."
+          },
+          "normalized_denial_reason": {
+            "type": "string",
+            "description": "One of step_therapy, safety_screen, documentation_gap, not_denied, unknown."
+          },
+          "denial_code": {
+            "type": "string",
+            "description": "Payer denial code when supplied."
+          },
+          "parsed_denial_summary": {
+            "type": "string",
+            "description": "Concise source-grounded summary of the denial reason."
+          },
+          "appeal_deadline": {
+            "type": "string",
+            "description": "Appeal deadline date when supplied."
+          },
+          "rescue_strategy": {
+            "type": "object",
+            "description": "Strategy identifier, label, rationale, evidence refs, and requested actions."
+          },
+          "evidence_refs": {
+            "type": "array",
+            "description": "Denial artifact, policy, mapping, citation, and submission packet references."
+          },
+          "missing_or_weak_refs": {
+            "type": "array",
+            "description": "Evidence gaps or weak references the next agent or human must address."
+          },
+          "unsupported_claim_warnings": {
+            "type": "array",
+            "description": "Warnings for claims that cannot be made from current evidence."
+          },
+          "next_agent": {
+            "type": "string",
+            "description": "Appeal Packet Agent, Missing Evidence Agent, Care Continuity Agent, or Human Exception Review."
+          },
+          "audit_summary": {
+            "type": "string",
+            "description": "One-sentence event summary for the write-event API workflow."
+          }
+        },
+        "required": [
+          "case_id",
+          "decision_status",
+          "normalized_denial_reason",
+          "denial_code",
+          "parsed_denial_summary",
+          "appeal_deadline",
+          "rescue_strategy",
+          "evidence_refs",
+          "missing_or_weak_refs",
+          "unsupported_claim_warnings",
+          "next_agent",
+          "audit_summary"
+        ]
+      }
+    }
+  ]
+}
