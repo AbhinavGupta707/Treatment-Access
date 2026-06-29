@@ -1,4 +1,10 @@
 import {
+  Annotation,
+  END,
+  START,
+  StateGraph,
+} from "@langchain/langgraph";
+import {
   denialLetterScenarios,
   missingEvidenceMappings,
   missingSafetyLabScenario,
@@ -6,9 +12,11 @@ import {
 } from "@tacc/demo-data";
 import {
   AgentDisplayNameById,
+  AgentOutputSchema,
   AgentRuntimeSummarySchema,
   DemoTogglesSchema,
   type AgentId,
+  type AgentTrace,
   type DenialReasonCategory,
   type AgentOutput,
   type AgentRuntimeResult,
@@ -24,6 +32,7 @@ import {
   type PharmacyHandoff,
   type PolicyCriterion,
   type SafetyFlag,
+  type SubmissionAttempt,
   type SubmissionPacket,
 } from "@tacc/shared-schemas";
 
@@ -53,6 +62,7 @@ type RuntimeContext = {
   toggles: DemoToggles;
   evidenceMappings: EvidenceMapping[];
   payerDecision: PayerDecision;
+  clinicalApproval: "pending" | "approved" | "rejected";
 };
 
 export function listTreatmentAccessAgents(): AgentId[] {
@@ -87,6 +97,1028 @@ export function runTreatmentAccessAgent(
   return runAgent(agentId, createRuntimeContext(options));
 }
 
+export type TreatmentAccessGraphMode = "deterministic" | "live";
+
+export type TreatmentAccessGraphNodeId =
+  | AgentId
+  | "human-gate"
+  | "robot-fallback-request"
+  | "audit-packet";
+
+export type TreatmentAccessGraphBranch =
+  | "complete_evidence_to_submission"
+  | "missing_evidence_to_human_gate"
+  | "clinician_rejection_to_rework"
+  | "payer_api_unavailable_to_robot_fallback"
+  | "denial_to_appeal"
+  | "approval_to_care_handoff";
+
+export type TreatmentAccessTraceMetadata = {
+  trace_id: string;
+  langsmith_trace_id?: string;
+  langsmith_run_url?: string;
+  langsmith_project?: string;
+  metadata: {
+    case_id: string;
+    run_id: string;
+    node_id: TreatmentAccessGraphNodeId;
+    agent_id?: AgentId;
+    maestro_case_id?: string;
+    run_mode: TreatmentAccessGraphMode;
+    synthetic: true;
+  };
+};
+
+export type TreatmentAccessToolResult = {
+  tool_call_id: string;
+  owner_node_id: TreatmentAccessGraphNodeId;
+  tool_name: string;
+  arguments_summary: string;
+  result_summary: string;
+  status: "completed" | "blocked" | "fallback_required";
+  schema_name: string;
+  validated: boolean;
+  trace_metadata: TreatmentAccessTraceMetadata;
+};
+
+export type TreatmentAccessGraphStep = {
+  node_id: TreatmentAccessGraphNodeId;
+  agent_id?: AgentId;
+  status:
+    | "completed"
+    | "needs_human"
+    | "blocked"
+    | "fallback_requested"
+    | "skipped";
+  summary: string;
+  output_schema: string;
+  validated: boolean;
+  trace_metadata: TreatmentAccessTraceMetadata;
+  agent_result?: AgentRuntimeResult;
+  tool_results: TreatmentAccessToolResult[];
+};
+
+export type TreatmentAccessHumanGate = {
+  gate_id: string;
+  gate_type:
+    | "missing_evidence"
+    | "clinical_assertion"
+    | "appeal_signoff"
+    | "exception_review";
+  status: "pending" | "approved" | "rejected";
+  assigned_role: string;
+  reason: string;
+  source_node_id: TreatmentAccessGraphNodeId;
+  trace_metadata: TreatmentAccessTraceMetadata;
+};
+
+export type TreatmentAccessRobotFallbackRequest = {
+  request_id: string;
+  status: "requested_not_started";
+  orchestrator_folder: "TreatmentAccessHackathon";
+  robot_process_name: "PayerPortalFallback";
+  reason_code: "PAYER_API_DOWN";
+  no_live_job_started: true;
+  trace_metadata: TreatmentAccessTraceMetadata;
+};
+
+export type TreatmentAccessGraphEvent = {
+  event_id: string;
+  node_id: TreatmentAccessGraphNodeId;
+  kind:
+    | "node_completed"
+    | "branch_taken"
+    | "human_gate_recorded"
+    | "robot_fallback_requested";
+  summary: string;
+  timestamp: string;
+  trace_metadata: TreatmentAccessTraceMetadata;
+};
+
+export type TreatmentAccessGraphDefinition = {
+  runtime: "langgraph";
+  dependency: "@langchain/langgraph";
+  nodes: TreatmentAccessGraphNodeId[];
+  edges: Array<{
+    from: TreatmentAccessGraphNodeId | typeof START;
+    to: TreatmentAccessGraphNodeId | typeof END;
+    branch?: TreatmentAccessGraphBranch;
+    condition?: string;
+  }>;
+};
+
+export type TreatmentAccessStructuredProvider = {
+  provider_name: "fireworks" | string;
+  invokeAgentNode: (input: {
+    agent_id: AgentId;
+    display_name: string;
+    prompt: string;
+    deterministic_output: AgentOutput;
+    output_schema: string;
+    trace_metadata: TreatmentAccessTraceMetadata;
+  }) => Promise<AgentOutput>;
+};
+
+export type TreatmentAccessGraphOptions = TreatmentAccessAgentRuntimeOptions & {
+  mode?: TreatmentAccessGraphMode;
+  provider?: TreatmentAccessStructuredProvider;
+  langsmith?: {
+    project?: string;
+    trace_id?: string;
+    run_url?: string;
+  };
+};
+
+export type TreatmentAccessGraphRun = {
+  run_id: string;
+  case_id: string;
+  mode: TreatmentAccessGraphMode;
+  status:
+    | "completed"
+    | "waiting_human"
+    | "blocked"
+    | "robot_fallback_requested";
+  graph: TreatmentAccessGraphDefinition;
+  steps: TreatmentAccessGraphStep[];
+  events: TreatmentAccessGraphEvent[];
+  branches_taken: TreatmentAccessGraphBranch[];
+  human_gates: TreatmentAccessHumanGate[];
+  robot_fallback_requests: TreatmentAccessRobotFallbackRequest[];
+  submission_attempts: SubmissionAttempt[];
+  summary: AgentRuntimeSummary;
+  no_live_uipath_side_effects: true;
+  no_real_payer_submission: true;
+  synthetic_data_disclaimer: string;
+};
+
+const treatmentAccessGraphNodes: TreatmentAccessGraphNodeId[] = [
+  "coverage-requirement",
+  "evidence-retrieval",
+  "missing-evidence",
+  "human-gate",
+  "submission-packet",
+  "robot-fallback-request",
+  "denial-rescue",
+  "appeal-packet",
+  "care-continuity",
+  "audit-packet",
+];
+
+const treatmentAccessGraphDefinition: TreatmentAccessGraphDefinition = {
+  runtime: "langgraph",
+  dependency: "@langchain/langgraph",
+  nodes: treatmentAccessGraphNodes,
+  edges: [
+    { from: START, to: "coverage-requirement" },
+    { from: "coverage-requirement", to: "evidence-retrieval" },
+    { from: "evidence-retrieval", to: "missing-evidence" },
+    {
+      from: "missing-evidence",
+      to: "human-gate",
+      branch: "missing_evidence_to_human_gate",
+      condition: "missing blocking evidence exists",
+    },
+    {
+      from: "human-gate",
+      to: "evidence-retrieval",
+      branch: "clinician_rejection_to_rework",
+      condition: "clinician rejects a high-impact clinical assertion",
+    },
+    {
+      from: "missing-evidence",
+      to: "submission-packet",
+      branch: "complete_evidence_to_submission",
+      condition: "evidence is complete and required human approvals are present",
+    },
+    {
+      from: "submission-packet",
+      to: "robot-fallback-request",
+      branch: "payer_api_unavailable_to_robot_fallback",
+      condition: "synthetic payer API returns PAYER_API_DOWN",
+    },
+    {
+      from: "submission-packet",
+      to: "denial-rescue",
+      branch: "denial_to_appeal",
+      condition: "payer decision is denied",
+    },
+    { from: "denial-rescue", to: "appeal-packet" },
+    {
+      from: "submission-packet",
+      to: "care-continuity",
+      branch: "approval_to_care_handoff",
+      condition: "payer decision is approved or appeal approved",
+    },
+    { from: "robot-fallback-request", to: "audit-packet" },
+    { from: "appeal-packet", to: "audit-packet" },
+    { from: "care-continuity", to: "audit-packet" },
+    { from: "audit-packet", to: END },
+  ],
+};
+
+const LangGraphSkeletonState = Annotation.Root({
+  visited: Annotation<TreatmentAccessGraphNodeId[]>({
+    reducer: (left, right) => [...left, ...right],
+    default: () => [],
+  }),
+});
+
+export function getTreatmentAccessGraphDefinition(): TreatmentAccessGraphDefinition {
+  return treatmentAccessGraphDefinition;
+}
+
+export function createTreatmentAccessLangGraph(): unknown {
+  const graph = new StateGraph(LangGraphSkeletonState) as {
+    addNode: (name: TreatmentAccessGraphNodeId, action: () => unknown) => unknown;
+    addEdge: (
+      from: TreatmentAccessGraphNodeId | typeof START,
+      to: TreatmentAccessGraphNodeId | typeof END,
+    ) => unknown;
+    compile: () => unknown;
+  };
+
+  for (const nodeId of treatmentAccessGraphNodes) {
+    graph.addNode(nodeId, () => ({ visited: [nodeId] }));
+  }
+
+  for (const edge of treatmentAccessGraphDefinition.edges) {
+    graph.addEdge(edge.from, edge.to);
+  }
+
+  return graph.compile();
+}
+
+export async function runTreatmentAccessGraph(
+  options: TreatmentAccessGraphOptions = {},
+): Promise<TreatmentAccessGraphRun> {
+  const mode = options.mode ?? modeFromEnvironment();
+  const runContext = createGraphRuntimeContext(options);
+  const runId = `graph-run-${runContext.fixture.case.case_id}`;
+  const steps: TreatmentAccessGraphStep[] = [];
+  const events: TreatmentAccessGraphEvent[] = [];
+  const branchesTaken: TreatmentAccessGraphBranch[] = [];
+  const humanGates: TreatmentAccessHumanGate[] = [];
+  const robotFallbackRequests: TreatmentAccessRobotFallbackRequest[] = [];
+  const submissionAttempts: SubmissionAttempt[] = [];
+  const agentResults: AgentRuntimeResult[] = [];
+
+  const recordStep = (step: TreatmentAccessGraphStep) => {
+    steps.push(step);
+    events.push({
+      event_id: `event-${runId}-${events.length + 1}`,
+      node_id: step.node_id,
+      kind: "node_completed",
+      summary: step.summary,
+      timestamp: generatedAt,
+      trace_metadata: step.trace_metadata,
+    });
+    if (step.agent_result) {
+      agentResults.push(step.agent_result);
+    }
+  };
+  const takeBranch = (
+    branch: TreatmentAccessGraphBranch,
+    nodeId: TreatmentAccessGraphNodeId,
+    summary: string,
+  ) => {
+    branchesTaken.push(branch);
+    events.push({
+      event_id: `event-${runId}-${events.length + 1}`,
+      node_id: nodeId,
+      kind: "branch_taken",
+      summary,
+      timestamp: generatedAt,
+      trace_metadata: traceMetadata(nodeId, runContext, runId, mode, options),
+    });
+  };
+
+  recordStep(
+    await runGraphAgentStep("coverage-requirement", runContext, {
+      mode,
+      provider: options.provider,
+      runId,
+      options,
+    }),
+  );
+  recordStep(
+    await runGraphAgentStep("evidence-retrieval", runContext, {
+      mode,
+      provider: options.provider,
+      runId,
+      options,
+    }),
+  );
+  const missingEvidenceStep = await runGraphAgentStep(
+    "missing-evidence",
+    runContext,
+    {
+      mode,
+      provider: options.provider,
+      runId,
+      options,
+    },
+  );
+  recordStep(missingEvidenceStep);
+
+  if (
+    missingEvidenceStep.agent_result?.output.agent_id === "missing-evidence" &&
+    !missingEvidenceStep.agent_result.output.can_submit
+  ) {
+    takeBranch(
+      "missing_evidence_to_human_gate",
+      "missing-evidence",
+      "Blocking evidence is missing; route to human evidence gate.",
+    );
+    const gate = createHumanGate(
+      "missing_evidence",
+      "pending",
+      "Coordinator must supply missing blocking evidence before submission.",
+      "missing-evidence",
+      runContext,
+      runId,
+      mode,
+      options,
+    );
+    humanGates.push(gate);
+    recordHumanGateEvent(gate, events, runId);
+    recordStep(createAuditStep(runContext, runId, mode, options));
+    return finalizeGraphRun({
+      runId,
+      mode,
+      status: "waiting_human",
+      context: runContext,
+      steps,
+      events,
+      branchesTaken,
+      humanGates,
+      robotFallbackRequests,
+      submissionAttempts,
+      agentResults,
+    });
+  }
+
+  if (runContext.toggles.clinician_rejects_assertion) {
+    const gate = createHumanGate(
+      "clinical_assertion",
+      "rejected",
+      "Clinician rejected the high-impact assertion; evidence must be reworked.",
+      "human-gate",
+      runContext,
+      runId,
+      mode,
+      options,
+    );
+    humanGates.push(gate);
+    recordHumanGateEvent(gate, events, runId);
+    takeBranch(
+      "clinician_rejection_to_rework",
+      "human-gate",
+      "Clinician rejection sends the evidence package back for rework.",
+    );
+    const rejectedContext = createGraphRuntimeContext(options, "rejected");
+    recordStep(
+      await runGraphAgentStep("submission-packet", rejectedContext, {
+        mode,
+        provider: options.provider,
+        runId,
+        options,
+      }),
+    );
+    recordStep(createAuditStep(rejectedContext, runId, mode, options));
+    return finalizeGraphRun({
+      runId,
+      mode,
+      status: "blocked",
+      context: rejectedContext,
+      steps,
+      events,
+      branchesTaken,
+      humanGates,
+      robotFallbackRequests,
+      submissionAttempts,
+      agentResults,
+    });
+  }
+
+  const approvalGate = createHumanGate(
+    "clinical_assertion",
+    "approved",
+    "Clinician approved the high-impact assertion for this synthetic packet.",
+    "human-gate",
+    runContext,
+    runId,
+    mode,
+    options,
+  );
+  humanGates.push(approvalGate);
+  recordHumanGateEvent(approvalGate, events, runId);
+  takeBranch(
+    "complete_evidence_to_submission",
+    "missing-evidence",
+    "Evidence is complete and human assertion gate is approved.",
+  );
+
+  const approvedContext = createGraphRuntimeContext(options, "approved");
+  const submissionStep = await runGraphAgentStep(
+    "submission-packet",
+    approvedContext,
+    {
+      mode,
+      provider: options.provider,
+      runId,
+      options,
+    },
+  );
+  recordStep(submissionStep);
+
+  if (
+    submissionStep.agent_result?.output.agent_id === "submission-packet" &&
+    !submissionStep.agent_result.output.ready_to_submit
+  ) {
+    const gate = createHumanGate(
+      "exception_review",
+      "pending",
+      "Submission packet remained blocked after approval gate.",
+      "submission-packet",
+      approvedContext,
+      runId,
+      mode,
+      options,
+    );
+    humanGates.push(gate);
+    recordHumanGateEvent(gate, events, runId);
+    recordStep(createAuditStep(approvedContext, runId, mode, options));
+    return finalizeGraphRun({
+      runId,
+      mode,
+      status: "waiting_human",
+      context: approvedContext,
+      steps,
+      events,
+      branchesTaken,
+      humanGates,
+      robotFallbackRequests,
+      submissionAttempts,
+      agentResults,
+    });
+  }
+
+  const submissionAttempt = createSubmissionAttempt(
+    approvedContext,
+    runId,
+    approvedContext.toggles.payer_api_unavailable
+      ? "fallback_required"
+      : "submitted",
+  );
+  submissionAttempts.push(submissionAttempt);
+
+  if (approvedContext.toggles.payer_api_unavailable) {
+    takeBranch(
+      "payer_api_unavailable_to_robot_fallback",
+      "submission-packet",
+      "Payer API unavailable; request UiPath robot fallback without starting a live job.",
+    );
+    const fallbackRequest = createRobotFallbackRequest(
+      approvedContext,
+      runId,
+      mode,
+      options,
+    );
+    robotFallbackRequests.push(fallbackRequest);
+    events.push({
+      event_id: `event-${runId}-${events.length + 1}`,
+      node_id: "robot-fallback-request",
+      kind: "robot_fallback_requested",
+      summary:
+        "Prepared Orchestrator robot fallback request; no live UiPath job was started.",
+      timestamp: generatedAt,
+      trace_metadata: fallbackRequest.trace_metadata,
+    });
+    recordStep(createRobotFallbackStep(fallbackRequest));
+    recordStep(createAuditStep(approvedContext, runId, mode, options));
+    return finalizeGraphRun({
+      runId,
+      mode,
+      status: "robot_fallback_requested",
+      context: approvedContext,
+      steps,
+      events,
+      branchesTaken,
+      humanGates,
+      robotFallbackRequests,
+      submissionAttempts,
+      agentResults,
+    });
+  }
+
+  if (
+    approvedContext.payerDecision.status === "approved" ||
+    approvedContext.payerDecision.status === "appeal_approved"
+  ) {
+    takeBranch(
+      "approval_to_care_handoff",
+      "submission-packet",
+      "Payer approval routes to care continuity handoff.",
+    );
+    recordStep(
+      await runGraphAgentStep("care-continuity", approvedContext, {
+        mode,
+        provider: options.provider,
+        runId,
+        options,
+      }),
+    );
+    recordStep(createAuditStep(approvedContext, runId, mode, options));
+    return finalizeGraphRun({
+      runId,
+      mode,
+      status: "completed",
+      context: approvedContext,
+      steps,
+      events,
+      branchesTaken,
+      humanGates,
+      robotFallbackRequests,
+      submissionAttempts,
+      agentResults,
+    });
+  }
+
+  takeBranch(
+    "denial_to_appeal",
+    "submission-packet",
+    "Denied payer decision routes to denial rescue and appeal packet.",
+  );
+  recordStep(
+    await runGraphAgentStep("denial-rescue", approvedContext, {
+      mode,
+      provider: options.provider,
+      runId,
+      options,
+    }),
+  );
+  recordStep(
+    await runGraphAgentStep("appeal-packet", approvedContext, {
+      mode,
+      provider: options.provider,
+      runId,
+      options,
+    }),
+  );
+  const appealGate = createHumanGate(
+    "appeal_signoff",
+    "pending",
+    "Appeal draft requires clinician signoff before any submission.",
+    "appeal-packet",
+    approvedContext,
+    runId,
+    mode,
+    options,
+  );
+  humanGates.push(appealGate);
+  recordHumanGateEvent(appealGate, events, runId);
+  recordStep(createAuditStep(approvedContext, runId, mode, options));
+
+  return finalizeGraphRun({
+    runId,
+    mode,
+    status: "waiting_human",
+    context: approvedContext,
+    steps,
+    events,
+    branchesTaken,
+    humanGates,
+    robotFallbackRequests,
+    submissionAttempts,
+    agentResults,
+  });
+}
+
+type GraphAgentStepOptions = {
+  mode: TreatmentAccessGraphMode;
+  provider?: TreatmentAccessStructuredProvider;
+  runId: string;
+  options: TreatmentAccessGraphOptions;
+};
+
+async function runGraphAgentStep(
+  agentId: AgentId,
+  context: RuntimeContext,
+  stepOptions: GraphAgentStepOptions,
+): Promise<TreatmentAccessGraphStep> {
+  const deterministicResult = runAgent(agentId, context);
+  const trace = traceMetadata(
+    agentId,
+    context,
+    stepOptions.runId,
+    stepOptions.mode,
+    stepOptions.options,
+    agentId,
+  );
+  const output =
+    stepOptions.mode === "live" && stepOptions.provider
+      ? AgentOutputSchema.parse(
+          await stepOptions.provider.invokeAgentNode({
+            agent_id: agentId,
+            display_name: AgentDisplayNameById[agentId],
+            prompt: promptForAgent(agentId),
+            deterministic_output: deterministicResult.output,
+            output_schema: outputSchemaName(agentId),
+            trace_metadata: trace,
+          }),
+        )
+      : AgentOutputSchema.parse(deterministicResult.output);
+  const traceStatus = statusForOutput(output);
+  const stepStatus = graphStepStatusForTraceStatus(traceStatus);
+  const outputSummary = outputSummaryForAgent(agentId, output);
+  const agentResult: AgentRuntimeResult = {
+    ...deterministicResult,
+    trace: {
+      ...deterministicResult.trace,
+      trace_id: trace.trace_id,
+      status: traceStatus,
+      output_summary: outputSummary,
+      tool_calls:
+        stepOptions.mode === "live" && stepOptions.provider
+          ? [
+              ...deterministicResult.trace.tool_calls,
+              `${stepOptions.provider.provider_name}_structured_model`,
+            ]
+          : deterministicResult.trace.tool_calls,
+    },
+    audit_event: {
+      ...deterministicResult.audit_event,
+      trace_id: trace.trace_id,
+      output_summary: outputSummary,
+    },
+    output,
+  };
+
+  return {
+    node_id: agentId,
+    agent_id: agentId,
+    status: stepStatus,
+    summary: outputSummary,
+    output_schema: outputSchemaName(agentId),
+    validated: true,
+    trace_metadata: trace,
+    agent_result: agentResult,
+    tool_results: toolResultsForAgent(agentId, context, trace),
+  };
+}
+
+function finalizeGraphRun(input: {
+  runId: string;
+  mode: TreatmentAccessGraphMode;
+  status: TreatmentAccessGraphRun["status"];
+  context: RuntimeContext;
+  steps: TreatmentAccessGraphStep[];
+  events: TreatmentAccessGraphEvent[];
+  branchesTaken: TreatmentAccessGraphBranch[];
+  humanGates: TreatmentAccessHumanGate[];
+  robotFallbackRequests: TreatmentAccessRobotFallbackRequest[];
+  submissionAttempts: SubmissionAttempt[];
+  agentResults: AgentRuntimeResult[];
+}): TreatmentAccessGraphRun {
+  const safetyFlags = input.agentResults.flatMap(
+    (result) => result.output.safety_flags,
+  );
+  const evidenceRefs = unique(
+    input.agentResults.flatMap((result) => result.trace.evidence_refs),
+  );
+  const summary = AgentRuntimeSummarySchema.parse({
+    case_id: input.context.fixture.case.case_id,
+    generated_at: generatedAt,
+    results: input.agentResults,
+    safety_flags: safetyFlags,
+    evidence_refs: evidenceRefs,
+    synthetic_data_disclaimer:
+      "Synthetic LangGraph workflow runtime; no live UiPath execution or real payer submission.",
+  });
+
+  return {
+    run_id: input.runId,
+    case_id: input.context.fixture.case.case_id,
+    mode: input.mode,
+    status: input.status,
+    graph: treatmentAccessGraphDefinition,
+    steps: input.steps,
+    events: input.events,
+    branches_taken: input.branchesTaken,
+    human_gates: input.humanGates,
+    robot_fallback_requests: input.robotFallbackRequests,
+    submission_attempts: input.submissionAttempts,
+    summary,
+    no_live_uipath_side_effects: true,
+    no_real_payer_submission: true,
+    synthetic_data_disclaimer:
+      "Synthetic LangGraph workflow runtime; no live UiPath execution or real payer submission.",
+  };
+}
+
+function createHumanGate(
+  gateType: TreatmentAccessHumanGate["gate_type"],
+  status: TreatmentAccessHumanGate["status"],
+  reason: string,
+  sourceNodeId: TreatmentAccessGraphNodeId,
+  context: RuntimeContext,
+  runId: string,
+  mode: TreatmentAccessGraphMode,
+  options: TreatmentAccessGraphOptions,
+): TreatmentAccessHumanGate {
+  return {
+    gate_id: `gate-${runId}-${gateType}-${status}`,
+    gate_type: gateType,
+    status,
+    assigned_role:
+      gateType === "appeal_signoff"
+        ? "Demo GI Clinician"
+        : "Treatment Access Coordinator",
+    reason,
+    source_node_id: sourceNodeId,
+    trace_metadata: traceMetadata(
+      "human-gate",
+      context,
+      runId,
+      mode,
+      options,
+    ),
+  };
+}
+
+function recordHumanGateEvent(
+  gate: TreatmentAccessHumanGate,
+  events: TreatmentAccessGraphEvent[],
+  runId: string,
+): void {
+  events.push({
+    event_id: `event-${runId}-${events.length + 1}`,
+    node_id: "human-gate",
+    kind: "human_gate_recorded",
+    summary: `${gate.gate_type} gate is ${gate.status}: ${gate.reason}`,
+    timestamp: generatedAt,
+    trace_metadata: gate.trace_metadata,
+  });
+}
+
+function createRobotFallbackRequest(
+  context: RuntimeContext,
+  runId: string,
+  mode: TreatmentAccessGraphMode,
+  options: TreatmentAccessGraphOptions,
+): TreatmentAccessRobotFallbackRequest {
+  return {
+    request_id: `robot-request-${runId}`,
+    status: "requested_not_started",
+    orchestrator_folder: "TreatmentAccessHackathon",
+    robot_process_name: "PayerPortalFallback",
+    reason_code: "PAYER_API_DOWN",
+    no_live_job_started: true,
+    trace_metadata: traceMetadata(
+      "robot-fallback-request",
+      context,
+      runId,
+      mode,
+      options,
+    ),
+  };
+}
+
+function createRobotFallbackStep(
+  request: TreatmentAccessRobotFallbackRequest,
+): TreatmentAccessGraphStep {
+  return {
+    node_id: "robot-fallback-request",
+    status: "fallback_requested",
+    summary:
+      "Robot fallback request prepared for UiPath Orchestrator; no live job started.",
+    output_schema: "RobotFallbackRequest",
+    validated: true,
+    trace_metadata: request.trace_metadata,
+    tool_results: [
+      {
+        tool_call_id: `${request.request_id}-tool`,
+        owner_node_id: "robot-fallback-request",
+        tool_name: "request_portal_robot_fallback",
+        arguments_summary:
+          "Prepare PayerPortalFallback request for TreatmentAccessHackathon folder.",
+        result_summary:
+          "Structured request created in no-side-effect mode; Orchestrator job start remains approval-gated.",
+        status: "fallback_required",
+        schema_name: "RobotJob",
+        validated: true,
+        trace_metadata: request.trace_metadata,
+      },
+    ],
+  };
+}
+
+function createAuditStep(
+  context: RuntimeContext,
+  runId: string,
+  mode: TreatmentAccessGraphMode,
+  options: TreatmentAccessGraphOptions,
+): TreatmentAccessGraphStep {
+  const trace = traceMetadata("audit-packet", context, runId, mode, options);
+  return {
+    node_id: "audit-packet",
+    status: "completed",
+    summary:
+      "Cross-cutting audit packet assembled from validated graph steps and governed branch records.",
+    output_schema: "AuditPacket",
+    validated: true,
+    trace_metadata: trace,
+    tool_results: [
+      {
+        tool_call_id: `tool-${runId}-audit-event`,
+        owner_node_id: "audit-packet",
+        tool_name: "write_audit_event",
+        arguments_summary:
+          "Collect graph steps, human gates, submission attempts, and fallback requests.",
+        result_summary:
+          "Audit packet returned locally; no Data Service/Data Fabric write performed.",
+        status: "completed",
+        schema_name: "AuditPacket",
+        validated: true,
+        trace_metadata: trace,
+      },
+    ],
+  };
+}
+
+function createSubmissionAttempt(
+  context: RuntimeContext,
+  runId: string,
+  status: "submitted" | "fallback_required",
+): SubmissionAttempt {
+  return {
+    attempt_id: `attempt-${runId}-payer-api`,
+    case_id: context.fixture.case.case_id,
+    packet_id: context.fixture.submissionPacket.packet_id,
+    channel: "payer_api",
+    status,
+    started_at: generatedAt,
+    completed_at: generatedAt,
+    payload_summary:
+      "Validated synthetic prior authorization packet staged for payer API workflow.",
+    response_summary:
+      status === "fallback_required"
+        ? "Synthetic payer API unavailable; robot fallback request required."
+        : "Synthetic no-side-effect payer API attempt recorded locally.",
+    error_code: status === "fallback_required" ? "PAYER_API_DOWN" : undefined,
+    retry_count: status === "fallback_required" ? 1 : 0,
+  };
+}
+
+function traceMetadata(
+  nodeId: TreatmentAccessGraphNodeId,
+  context: RuntimeContext,
+  runId: string,
+  mode: TreatmentAccessGraphMode,
+  options: TreatmentAccessGraphOptions,
+  agentId?: AgentId,
+): TreatmentAccessTraceMetadata {
+  return {
+    trace_id: `trace-${runId}-${nodeId}`,
+    langsmith_trace_id: options.langsmith?.trace_id,
+    langsmith_run_url: options.langsmith?.run_url,
+    langsmith_project:
+      options.langsmith?.project ?? "Treatment Access Command Center",
+    metadata: {
+      case_id: context.fixture.case.case_id,
+      run_id: runId,
+      node_id: nodeId,
+      agent_id: agentId,
+      maestro_case_id: context.fixture.case.maestro_case_id,
+      run_mode: mode,
+      synthetic: true,
+    },
+  };
+}
+
+function toolResultsForAgent(
+  agentId: AgentId,
+  context: RuntimeContext,
+  trace: TreatmentAccessTraceMetadata,
+): TreatmentAccessToolResult[] {
+  return toolCallsForAgent(agentId).map((toolName, index) => ({
+    tool_call_id: `tool-${trace.metadata.run_id}-${agentId}-${index + 1}`,
+    owner_node_id: agentId,
+    tool_name: graphToolName(agentId, index, toolName),
+    arguments_summary: inputSummaryForAgent(agentId, context),
+    result_summary: outputSummaryForAgent(
+      agentId,
+      runAgent(agentId, context).output,
+    ),
+    status: "completed",
+    schema_name: toolSchemaName(agentId),
+    validated: true,
+    trace_metadata: trace,
+  }));
+}
+
+function graphToolName(
+  agentId: AgentId,
+  index: number,
+  fallbackName: string,
+): string {
+  const toolNames: Partial<Record<AgentId, string[]>> = {
+    "coverage-requirement": ["retrieve_payer_policy"],
+    "evidence-retrieval": [
+      "retrieve_chart_artifacts",
+      "search_evidence_spans",
+      "write_evidence_matrix",
+    ],
+    "missing-evidence": ["create_clinician_validation_task"],
+    "submission-packet": [
+      "build_submission_packet",
+      "attempt_payer_api_submission",
+    ],
+    "denial-rescue": ["classify_denial"],
+    "appeal-packet": ["draft_appeal_packet", "create_appeal_signoff_task"],
+    "care-continuity": ["create_care_handoff"],
+  };
+  return toolNames[agentId]?.[index] ?? fallbackName;
+}
+
+function toolSchemaName(agentId: AgentId): string {
+  const schemaNames: Record<AgentId, string> = {
+    "coverage-requirement": "CoverageRequirementAgentOutput",
+    "evidence-retrieval": "EvidenceRetrievalAgentOutput",
+    "missing-evidence": "HumanGate",
+    "submission-packet": "SubmissionAttempt",
+    "denial-rescue": "DenialRescueAgentOutput",
+    "appeal-packet": "AppealPacketAgentOutput",
+    "care-continuity": "PharmacyHandoff",
+  };
+  return schemaNames[agentId];
+}
+
+function outputSchemaName(agentId: AgentId): string {
+  const schemaNames: Record<AgentId, string> = {
+    "coverage-requirement": "CoverageRequirementAgentOutputSchema",
+    "evidence-retrieval": "EvidenceRetrievalAgentOutputSchema",
+    "missing-evidence": "MissingEvidenceAgentOutputSchema",
+    "submission-packet": "SubmissionPacketAgentOutputSchema",
+    "denial-rescue": "DenialRescueAgentOutputSchema",
+    "appeal-packet": "AppealPacketAgentOutputSchema",
+    "care-continuity": "CareContinuityAgentOutputSchema",
+  };
+  return schemaNames[agentId];
+}
+
+function promptForAgent(agentId: AgentId): string {
+  const prompts: Record<AgentId, string> = {
+    "coverage-requirement":
+      "Resolve payer authorization requirements with policy citations only.",
+    "evidence-retrieval":
+      "Map synthetic chart artifacts to payer criteria and flag unsupported clinical claims.",
+    "missing-evidence":
+      "Find blocking evidence gaps and create human gate requests instead of bypassing them.",
+    "submission-packet":
+      "Build a source-backed administrative packet only after evidence and human gates pass.",
+    "denial-rescue":
+      "Classify the denial and select a source-grounded rescue strategy.",
+    "appeal-packet":
+      "Draft administrative appeal language for clinician review, not medical or legal advice.",
+    "care-continuity":
+      "Prepare post-approval pharmacy and scheduling handoff state.",
+  };
+  return prompts[agentId];
+}
+
+function statusForOutput(output: AgentOutput): AgentTrace["status"] {
+  const hasBlockingFlag = output.safety_flags.some(
+    (flag) => flag.severity === "blocking",
+  );
+  const needsHuman = output.safety_flags.some(
+    (flag) => flag.requires_human_approval,
+  );
+  if (hasBlockingFlag) {
+    return "failed";
+  }
+  if (needsHuman) {
+    return "needs_human";
+  }
+  return "completed";
+}
+
+function graphStepStatusForTraceStatus(
+  status: AgentTrace["status"],
+): TreatmentAccessGraphStep["status"] {
+  if (status === "failed") {
+    return "blocked";
+  }
+  if (status === "running" || status === "not_started") {
+    return "skipped";
+  }
+  return status;
+}
+
+function modeFromEnvironment(): TreatmentAccessGraphMode {
+  return process.env.AGENT_MODE === "live" ? "live" : "deterministic";
+}
+
 function createRuntimeContext(
   options: TreatmentAccessAgentRuntimeOptions,
 ): RuntimeContext {
@@ -101,6 +1133,20 @@ function createRuntimeContext(
     toggles,
     evidenceMappings: evidenceMappingsForToggles(fixture, toggles),
     payerDecision: payerDecisionForToggles(fixture, toggles),
+    clinicalApproval: toggles.clinician_rejects_assertion
+      ? "rejected"
+      : "pending",
+  };
+}
+
+function createGraphRuntimeContext(
+  options: TreatmentAccessAgentRuntimeOptions,
+  clinicalApproval: RuntimeContext["clinicalApproval"] = "pending",
+): RuntimeContext {
+  const context = createRuntimeContext(options);
+  return {
+    ...context,
+    clinicalApproval,
   };
 }
 
@@ -205,6 +1251,7 @@ function evidenceRetrievalOutput(context: RuntimeContext): AgentOutput {
   const clinicalAssertions = clinicalAssertionsForMappings(
     context.evidenceMappings,
     context.toggles,
+    context.clinicalApproval,
   );
   const safetyFlags = [
     ...missingSafetyFlags(context.evidenceMappings),
@@ -265,6 +1312,7 @@ function submissionPacketOutput(context: RuntimeContext): AgentOutput {
   const clinicalAssertions = clinicalAssertionsForMappings(
     context.evidenceMappings,
     context.toggles,
+    context.clinicalApproval,
   );
   const unsupportedClaimWarnings = unsupportedWarnings(clinicalAssertions);
   const blockedReasons = [
@@ -351,6 +1399,7 @@ function appealPacketOutput(context: RuntimeContext): AgentOutput {
   const clinicalAssertions = clinicalAssertionsForMappings(
     context.evidenceMappings,
     context.toggles,
+    context.clinicalApproval,
   );
   const warnings = unique([
     ...unsupportedWarnings(clinicalAssertions),
@@ -456,6 +1505,26 @@ function payerDecisionForToggles(
   fixture: DemoFixture,
   toggles: DemoToggles,
 ): PayerDecision {
+  if (
+    fixture.case.payer_status === "approved" ||
+    fixture.case.payer_status === "appeal_approved"
+  ) {
+    const baseDecision = fixture.payerDecisions[0];
+    if (baseDecision) {
+      return {
+        ...baseDecision,
+        decision_id: `decision-${fixture.case.payer_status}`,
+        status: fixture.case.payer_status,
+        reason:
+          "Synthetic approval decision supplied by fixture for graph branch verification.",
+        denial_code: undefined,
+        appeal_deadline: undefined,
+        raw_response:
+          "Synthetic approval response for deterministic graph mode only.",
+      };
+    }
+  }
+
   return (
     denialLetterScenarios[toggles.denial_reason] ?? fixture.payerDecisions[0]
   );
@@ -464,6 +1533,9 @@ function payerDecisionForToggles(
 function clinicalAssertionsForMappings(
   mappings: EvidenceMapping[],
   toggles: DemoToggles,
+  clinicalApproval: RuntimeContext["clinicalApproval"] = toggles.clinician_rejects_assertion
+    ? "rejected"
+    : "pending",
 ): ClinicalAssertionReview[] {
   const diagnosisMapping = mappings.find(
     (mapping) => mapping.criterion_id === "criterion-diagnosis",
@@ -477,17 +1549,23 @@ function clinicalAssertionsForMappings(
       assertion_id: "assertion-diagnosis-severity",
       statement:
         "Synthetic record supports diagnosis and moderate-to-severe disease activity.",
-      status: toggles.clinician_rejects_assertion
-        ? "unsupported"
-        : "needs_human_approval",
+      status:
+        clinicalApproval === "approved"
+          ? "supported"
+          : clinicalApproval === "rejected"
+            ? "unsupported"
+            : "needs_human_approval",
       evidence_refs: artifactIdsFromMappings([diagnosisMapping]),
       policy_citations: diagnosisMapping.citations.map(
         (citation) => citation.label,
       ),
-      human_approval_required: true,
-      warning: toggles.clinician_rejects_assertion
-        ? "Clinician rejected this assertion; do not include in payer-facing language."
-        : "High-impact clinical assertion requires clinician approval before submission.",
+      human_approval_required: clinicalApproval !== "approved",
+      warning:
+        clinicalApproval === "approved"
+          ? undefined
+          : clinicalApproval === "rejected"
+            ? "Clinician rejected this assertion; do not include in payer-facing language."
+            : "High-impact clinical assertion requires clinician approval before submission.",
     },
   ];
 }

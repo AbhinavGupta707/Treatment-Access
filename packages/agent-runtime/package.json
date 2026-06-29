@@ -17,6 +17,7 @@
     "typecheck": "CI=true pnpm --filter @tacc/shared-schemas build && CI=true pnpm --filter @tacc/demo-data build && tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@langchain/langgraph": "1.4.7",
     "@tacc/demo-data": "workspace:*",
     "@tacc/shared-schemas": "workspace:*"
   },

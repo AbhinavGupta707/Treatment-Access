@@ -1,17 +1,21 @@
 import { describe, expect, it } from "vitest";
+import { treatmentAccessDemoFixture } from "@tacc/demo-data";
 import {
   AgentRuntimeSummarySchema,
   AppealPacketAgentOutputSchema,
   DenialRescueAgentOutputSchema,
   EvidenceRetrievalAgentOutputSchema,
   MissingEvidenceAgentOutputSchema,
+  type DemoFixture,
   SubmissionPacketAgentOutputSchema,
 } from "@tacc/shared-schemas";
 import {
   createFireworksClient,
   createLangSmithTraceConfig,
+  getTreatmentAccessGraphDefinition,
   listTreatmentAccessAgents,
   resolveAgentRuntimeConfig,
+  runTreatmentAccessGraph,
   runTreatmentAccessAgent,
   runTreatmentAccessAgents,
 } from "../src/index";
@@ -197,5 +201,168 @@ describe("agent runtime", () => {
     expect(traceConfig.enabled).toBe(false);
     expect(traceConfig.metadata.synthetic).toBe(true);
     expect(traceConfig.metadata.case_id).toBe("case-synthetic");
+  });
+
+  it("exposes the LangGraph workflow definition with governed branch edges", () => {
+    const graph = getTreatmentAccessGraphDefinition();
+
+    expect(graph.runtime).toBe("langgraph");
+    expect(graph.dependency).toBe("@langchain/langgraph");
+    expect(graph.nodes).toEqual(
+      expect.arrayContaining([
+        "coverage-requirement",
+        "evidence-retrieval",
+        "missing-evidence",
+        "submission-packet",
+        "denial-rescue",
+        "appeal-packet",
+        "care-continuity",
+        "audit-packet",
+      ]),
+    );
+    expect(graph.edges.map((edge) => edge.branch).filter(Boolean)).toEqual(
+      expect.arrayContaining([
+        "missing_evidence_to_human_gate",
+        "clinician_rejection_to_rework",
+        "payer_api_unavailable_to_robot_fallback",
+        "denial_to_appeal",
+        "approval_to_care_handoff",
+      ]),
+    );
+  });
+
+  it("runs the deterministic graph through denial rescue and appeal signoff", async () => {
+    const run = await runTreatmentAccessGraph({ mode: "deterministic" });
+
+    expect(AgentRuntimeSummarySchema.parse(run.summary).results.length).toBe(6);
+    expect(run.status).toBe("waiting_human");
+    expect(run.branches_taken).toEqual(
+      expect.arrayContaining([
+        "complete_evidence_to_submission",
+        "denial_to_appeal",
+      ]),
+    );
+    expect(run.human_gates).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          gate_type: "clinical_assertion",
+          status: "approved",
+        }),
+        expect.objectContaining({
+          gate_type: "appeal_signoff",
+          status: "pending",
+        }),
+      ]),
+    );
+    expect(
+      run.steps.every((step) => step.validated && step.trace_metadata),
+    ).toBe(true);
+    expect(run.no_live_uipath_side_effects).toBe(true);
+    expect(run.no_real_payer_submission).toBe(true);
+  });
+
+  it("routes missing evidence to a human gate before submission", async () => {
+    const run = await runTreatmentAccessGraph({
+      mode: "deterministic",
+      toggles: { missing_safety_lab: true },
+    });
+
+    expect(run.status).toBe("waiting_human");
+    expect(run.branches_taken).toContain("missing_evidence_to_human_gate");
+    expect(run.steps.map((step) => step.node_id)).not.toContain(
+      "submission-packet",
+    );
+    expect(run.human_gates).toContainEqual(
+      expect.objectContaining({
+        gate_type: "missing_evidence",
+        status: "pending",
+      }),
+    );
+  });
+
+  it("routes clinician rejection to rework and blocks unsupported claims", async () => {
+    const run = await runTreatmentAccessGraph({
+      mode: "deterministic",
+      toggles: { clinician_rejects_assertion: true },
+    });
+    const submission = SubmissionPacketAgentOutputSchema.parse(
+      run.steps.find((step) => step.node_id === "submission-packet")
+        ?.agent_result?.output,
+    );
+
+    expect(run.status).toBe("blocked");
+    expect(run.branches_taken).toContain("clinician_rejection_to_rework");
+    expect(submission.ready_to_submit).toBe(false);
+    expect(
+      submission.safety_flags.some(
+        (flag) => flag.code === "UNSUPPORTED_CLINICAL_ASSERTION",
+      ),
+    ).toBe(true);
+  });
+
+  it("requests robot fallback without starting a live UiPath job when payer API is unavailable", async () => {
+    const run = await runTreatmentAccessGraph({
+      mode: "deterministic",
+      toggles: { payer_api_unavailable: true },
+    });
+
+    expect(run.status).toBe("robot_fallback_requested");
+    expect(run.branches_taken).toContain(
+      "payer_api_unavailable_to_robot_fallback",
+    );
+    expect(run.submission_attempts[0]).toEqual(
+      expect.objectContaining({
+        status: "fallback_required",
+        error_code: "PAYER_API_DOWN",
+      }),
+    );
+    expect(run.robot_fallback_requests[0]).toEqual(
+      expect.objectContaining({
+        orchestrator_folder: "TreatmentAccessHackathon",
+        no_live_job_started: true,
+      }),
+    );
+  });
+
+  it("routes approvals to care continuity handoff", async () => {
+    const approvedFixture = structuredClone(
+      treatmentAccessDemoFixture,
+    ) as DemoFixture;
+    approvedFixture.case.payer_status = "approved";
+    const run = await runTreatmentAccessGraph({
+      mode: "deterministic",
+      fixture: approvedFixture,
+    });
+
+    expect(run.status).toBe("completed");
+    expect(run.branches_taken).toContain("approval_to_care_handoff");
+    expect(run.steps.map((step) => step.node_id)).toContain(
+      "care-continuity",
+    );
+  });
+
+  it("uses the live provider adapter interface when supplied and keeps outputs validated", async () => {
+    const calls: string[] = [];
+    const run = await runTreatmentAccessGraph({
+      mode: "live",
+      provider: {
+        provider_name: "fireworks",
+        async invokeAgentNode(input) {
+          calls.push(`${input.agent_id}:${input.output_schema}`);
+          expect(input.trace_metadata.metadata.run_mode).toBe("live");
+          expect(input.trace_metadata.metadata.synthetic).toBe(true);
+          return input.deterministic_output;
+        },
+      },
+    });
+
+    expect(calls).toEqual(
+      expect.arrayContaining([
+        "coverage-requirement:CoverageRequirementAgentOutputSchema",
+        "submission-packet:SubmissionPacketAgentOutputSchema",
+      ]),
+    );
+    expect(run.mode).toBe("live");
+    expect(run.steps.every((step) => step.validated)).toBe(true);
   });
 });
