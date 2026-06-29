@@ -27,6 +27,10 @@ import {
   type SubmissionPacket,
 } from "@tacc/shared-schemas";
 
+export * from "./config.js";
+export * from "./fireworks.js";
+export * from "./langsmith.js";
+
 const generatedAt = "2026-06-28T22:40:00.000Z";
 
 const agentOrder: AgentId[] = [

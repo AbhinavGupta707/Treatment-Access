@@ -88,6 +88,17 @@ export const HumanReviewDecisionSchema = z.enum([
   "rejected",
 ]);
 
+export const AgentModeSchema = z.enum(["deterministic", "live"]);
+
+export const RuntimeStatusSchema = z.enum([
+  "not_started",
+  "running",
+  "completed",
+  "needs_human",
+  "failed",
+  "cancelled",
+]);
+
 export const TreatmentAccessCaseSchema = z.object({
   case_id: z.string(),
   external_case_key: z.string().optional(),
@@ -282,6 +293,89 @@ export const SubmissionAttemptSchema = z.object({
   portal_confirmation_id: z.string().optional(),
   error_code: z.string().optional(),
   retry_count: z.number().int().nonnegative().default(0),
+});
+
+export const TraceLinkSchema = z.object({
+  trace_id: z.string().optional(),
+  run_id: z.string().optional(),
+  provider: z.enum(["langsmith", "local", "uipath"]).default("langsmith"),
+  project_name: z.string().optional(),
+  url: z.string().url().optional(),
+  metadata: z.record(z.union([z.string(), z.number(), z.boolean()])).default({
+    synthetic: true,
+  }),
+});
+
+export const ToolCallSchema = z.object({
+  tool_call_id: z.string(),
+  case_id: z.string(),
+  run_id: z.string(),
+  step_run_id: z.string().optional(),
+  tool_name: z.string(),
+  tool_owner: ActorTypeSchema.default("agent"),
+  arguments_hash: z.string(),
+  arguments_summary: z.string(),
+  result_summary: z.string().optional(),
+  status: z.enum(["queued", "running", "succeeded", "failed", "skipped"]),
+  started_at: IsoDateTimeSchema,
+  completed_at: IsoDateTimeSchema.optional(),
+  latency_ms: z.number().int().nonnegative().optional(),
+  trace_link: TraceLinkSchema.optional(),
+  synthetic: z.literal(true).default(true),
+});
+
+export const HumanGateSchema = z.object({
+  gate_id: z.string(),
+  case_id: z.string(),
+  run_id: z.string().optional(),
+  task_id: z.string().optional(),
+  gate_type: z.enum([
+    "evidence_approval",
+    "missing_evidence",
+    "appeal_signoff",
+    "exception_review",
+  ]),
+  status: z.enum([
+    "not_created",
+    "pending",
+    "approved",
+    "edited",
+    "rejected",
+    "cancelled",
+  ]),
+  assigned_role: z.string(),
+  prompt_summary: z.string(),
+  decision: HumanReviewDecisionSchema.default("pending"),
+  decision_summary: z.string().optional(),
+  due_at: IsoDateTimeSchema.optional(),
+  created_at: IsoDateTimeSchema.optional(),
+  completed_at: IsoDateTimeSchema.optional(),
+  trace_link: TraceLinkSchema.optional(),
+  synthetic: z.literal(true).default(true),
+});
+
+export const RobotJobSchema = z.object({
+  robot_job_id: z.string(),
+  case_id: z.string(),
+  run_id: z.string().optional(),
+  orchestrator_job_key: z.string().optional(),
+  folder_key: z.string().optional(),
+  process_name: z.string(),
+  status: z.enum([
+    "not_requested",
+    "queued",
+    "running",
+    "successful",
+    "failed",
+    "cancelled",
+  ]),
+  trigger_reason: z.string(),
+  portal_confirmation_id: z.string().optional(),
+  error_code: z.string().optional(),
+  started_at: IsoDateTimeSchema.optional(),
+  completed_at: IsoDateTimeSchema.optional(),
+  trace_link: TraceLinkSchema.optional(),
+  synthetic: z.literal(true).default(true),
 });
 
 export const PayerDecisionSchema = z.object({
@@ -583,6 +677,58 @@ export const AgentRuntimeSummarySchema = z.object({
     ),
 });
 
+export const AgentRunSchema = z.object({
+  run_id: z.string(),
+  case_id: z.string(),
+  maestro_case_id: z.string().optional(),
+  mode: AgentModeSchema,
+  orchestrator: z.enum(["local", "uipath", "langgraph"]).default("local"),
+  status: RuntimeStatusSchema,
+  started_at: IsoDateTimeSchema,
+  completed_at: IsoDateTimeSchema.optional(),
+  requested_by: z.string().optional(),
+  current_stage: CaseStageSchema.optional(),
+  active_secondary_stages: z.array(SecondaryStageSchema).default([]),
+  trace_link: TraceLinkSchema.optional(),
+  synthetic: z.literal(true).default(true),
+  safety_summary: z.string().optional(),
+});
+
+export const AgentStepRunSchema = z.object({
+  step_run_id: z.string(),
+  run_id: z.string(),
+  case_id: z.string(),
+  agent_id: AgentIdSchema,
+  agent_name: z.string(),
+  status: RuntimeStatusSchema,
+  input_summary: z.string(),
+  output_summary: z.string().optional(),
+  started_at: IsoDateTimeSchema,
+  completed_at: IsoDateTimeSchema.optional(),
+  latency_ms: z.number().int().nonnegative().optional(),
+  tool_call_ids: z.array(z.string()).default([]),
+  evidence_refs: z.array(z.string()).default([]),
+  safety_flags: z.array(SafetyFlagSchema).default([]),
+  trace_link: TraceLinkSchema.optional(),
+  synthetic: z.literal(true).default(true),
+});
+
+export const CaseRunSnapshotSchema = z.object({
+  case: TreatmentAccessCaseSchema,
+  agent_run: AgentRunSchema,
+  step_runs: z.array(AgentStepRunSchema).default([]),
+  tool_calls: z.array(ToolCallSchema).default([]),
+  human_gates: z.array(HumanGateSchema).default([]),
+  robot_jobs: z.array(RobotJobSchema).default([]),
+  submission_attempts: z.array(SubmissionAttemptSchema).default([]),
+  trace_links: z.array(TraceLinkSchema).default([]),
+  audit_events: z.array(AuditEventSchema).default([]),
+  updated_at: IsoDateTimeSchema,
+  synthetic_data_disclaimer: z
+    .string()
+    .default("Synthetic case run snapshot; no real patient or payer data."),
+});
+
 export const DemoTogglesSchema = z.object({
   missing_safety_lab: z.boolean().default(false),
   payer_api_unavailable: z.boolean().default(false),
@@ -637,6 +783,10 @@ export type MedicationHistoryEntry = z.infer<
 >;
 export type SubmissionPacket = z.infer<typeof SubmissionPacketSchema>;
 export type SubmissionAttempt = z.infer<typeof SubmissionAttemptSchema>;
+export type TraceLink = z.infer<typeof TraceLinkSchema>;
+export type ToolCall = z.infer<typeof ToolCallSchema>;
+export type HumanGate = z.infer<typeof HumanGateSchema>;
+export type RobotJob = z.infer<typeof RobotJobSchema>;
 export type PayerDecision = z.infer<typeof PayerDecisionSchema>;
 export type AppealPacket = z.infer<typeof AppealPacketSchema>;
 export type PharmacyHandoff = z.infer<typeof PharmacyHandoffSchema>;
@@ -695,5 +845,10 @@ export type AgentInput = z.infer<typeof AgentInputSchema>;
 export type AgentOutput = z.infer<typeof AgentOutputSchema>;
 export type AgentRuntimeResult = z.infer<typeof AgentRuntimeResultSchema>;
 export type AgentRuntimeSummary = z.infer<typeof AgentRuntimeSummarySchema>;
+export type AgentMode = z.infer<typeof AgentModeSchema>;
+export type RuntimeStatus = z.infer<typeof RuntimeStatusSchema>;
+export type AgentRun = z.infer<typeof AgentRunSchema>;
+export type AgentStepRun = z.infer<typeof AgentStepRunSchema>;
+export type CaseRunSnapshot = z.infer<typeof CaseRunSnapshotSchema>;
 export type DemoToggles = z.infer<typeof DemoTogglesSchema>;
 export type DemoFixture = z.infer<typeof DemoFixtureSchema>;

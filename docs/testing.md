@@ -51,6 +51,38 @@ clinician-review appeal constraints, and unsupported-claim warnings:
 CI=true pnpm smoke:agents
 ```
 
+## Checkpoint 6 Live Agent Readiness
+
+The runtime now supports `AGENT_MODE=deterministic|live`. Deterministic mode is
+the default and does not require provider keys. Live mode validates provider
+configuration without printing raw secret values:
+
+```bash
+AGENT_MODE=live \
+FIREWORKS_API_KEY=... \
+LANGSMITH_TRACING=true \
+LANGSMITH_API_KEY=... \
+CI=true pnpm smoke:live-agents
+```
+
+By default this readiness smoke has no external side effects and does not call a
+model. To additionally make a tiny Fireworks chat-completions call, opt in
+explicitly:
+
+```bash
+AGENT_MODE=live LIVE_AGENT_READINESS_CALL_MODEL=true CI=true pnpm smoke:live-agents
+```
+
+or:
+
+```bash
+AGENT_MODE=live CI=true pnpm smoke:live-agents -- --call-model
+```
+
+The command never calls live UiPath, payer, Action Center, Orchestrator, Data
+Service, or robot APIs. It only checks local env/config state unless the
+Fireworks model call is explicitly enabled.
+
 ## Checkpoint 4 Mock Payer Portal
 
 Run the local mock payer portal for RPA fallback development:
