@@ -11,7 +11,18 @@ side-effecting action. All data must remain synthetic.
    imported into `uipath/solution/treatment-access-command-center`.
 3. Use UiPath UI Automation target capture or Studio Indicate for every portal
    control listed in `studio-indication-checklist.md`.
-4. Run static local validation only:
+4. Confirm the local fallback event semantics before any live action:
+
+```text
+api_unavailable -> payer_prior_auth_unavailable -> actor_type=api_workflow
+robot_requested -> robot_fallback_requested -> actor_type=robot
+confirmation_received -> payer_portal_fallback_submitted -> actor_type=robot
+```
+
+`robot_requested` is request/preparation state only. It must not be treated as a
+portal confirmation, payer submission, or completed Orchestrator job.
+
+5. Run static local validation only:
 
 ```bash
 cd "uipath/robots/PayerPortalFallback"
@@ -30,6 +41,12 @@ Equivalent one-command safe readiness wrapper:
 CI=true pnpm uipath:readiness -- local
 ```
 
+Checkpoint 7 local semantic guard:
+
+```bash
+CI=true pnpm verify:rpa-portal-fallback
+```
+
 ## Approval Required Before Live Smoke
 
 Ask for explicit approval before each action below:
@@ -46,7 +63,11 @@ Ask for explicit approval before each action below:
 
 - The RPA run/debug or Orchestrator job ID.
 - The synthetic portal confirmation ID.
-- The UiPath-written event mirror record with
-  `action=payer_portal_fallback_submitted` and `actor=robot`.
+- The UiPath-written request event mirror record with
+  `action=robot_fallback_requested`, `actor=robot`, and
+  `status=robot_requested`.
+- The UiPath-written confirmation event mirror record with
+  `action=payer_portal_fallback_submitted`, `actor=robot`, and
+  `status=confirmation_received`.
 - The Command Center timeline showing the robot/fallback event sourced from the
   UiPath-written event record.

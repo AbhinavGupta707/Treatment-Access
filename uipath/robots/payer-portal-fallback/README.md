@@ -55,6 +55,23 @@ the local mock payer portal, submits synthetic prior authorization fields throug
 UiPath UI Automation activities, reads the confirmation region, and returns the
 confirmation ID for UiPath event recording.
 
+Checkpoint 7 uses three explicit fallback semantics:
+
+1. `api_unavailable` / `payer_prior_auth_unavailable`: an API workflow or mock
+   API record has established that direct payer API submission is unavailable.
+2. `robot_requested` / `robot_fallback_requested`: UiPath has prepared the
+   `PayerPortalFallback` request, but no live robot job or portal submission has
+   run by default.
+3. `confirmation_received` / `payer_portal_fallback_submitted`: after explicit
+   live-smoke approval, the robot has read the deterministic local mock portal
+   confirmation ID.
+
+The Command Center/runtime can consume these exact stage IDs and mirror actions
+from `robot-contract.json` and the mock portal `data-stage-id` /
+`data-mirror-action` attributes. Do not collapse `robot_requested` into
+`confirmation_received`; the former is safe local request state, while the
+latter requires an approved portal submission even in the synthetic portal.
+
 The custom Command Center may display the fallback state, but live case state
 must be produced by UiPath workflows, agents, robots, human actions, or
 UiPath-written event records.

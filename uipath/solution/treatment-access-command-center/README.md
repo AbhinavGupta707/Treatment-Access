@@ -48,16 +48,27 @@ Registered or intended artifacts:
 
 1. Maestro or API workflow attempts `payer-prior-auth-submit.workflow.json`.
 2. If the response has `fallbackRequired=true` or the API unavailable path is
-   selected for demo, UiPath invokes the `PayerPortalFallback` process in the
-   `TreatmentAccessHackathon` folder.
-3. The robot opens `TACC_PAYER_PORTAL_URL`, fills the synthetic member ID,
-   medication, and diagnosis fields, submits, and reads the confirmation region.
-4. UiPath writes a fallback event through `write-event.workflow.json` or the
+   selected for demo, UiPath writes or prepares
+   `action=robot_fallback_requested` for `PayerPortalFallback` in the
+   `TreatmentAccessHackathon` folder. This is request state, not a completed
+   portal submission.
+3. After explicit live-smoke approval, the robot opens `TACC_PAYER_PORTAL_URL`,
+   fills the synthetic member ID, medication, and diagnosis fields, submits, and
+   reads the confirmation region.
+4. UiPath writes a confirmation event through `write-event.workflow.json` or the
    approved event mirror path:
    `action=payer_portal_fallback_submitted`,
    `actor=robot`, `confirmationId`, `robotJobId`, `caseId`, and `demoRunId`.
 5. The Command Center reads the UiPath-written event mirror and displays the
    fallback path. The UI must not synthesize live case state on its own.
+
+Fallback state labels for Checkpoint 7 consumers:
+
+| State                   | Mirror action                     | Actor        | Meaning                                                       |
+| ----------------------- | --------------------------------- | ------------ | ------------------------------------------------------------- |
+| `api_unavailable`       | `payer_prior_auth_unavailable`    | API workflow | Direct API path is unavailable.                               |
+| `robot_requested`       | `robot_fallback_requested`        | UiPath robot | Robot fallback prepared; no live job by default.              |
+| `confirmation_received` | `payer_portal_fallback_submitted` | UiPath robot | Approved synthetic portal submission produced a confirmation. |
 
 ## Required Assets
 
