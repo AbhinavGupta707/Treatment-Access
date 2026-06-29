@@ -12,8 +12,8 @@ pharmacy handoff, and audit packaging.
 
 UiPath is the orchestration and governance layer. The custom apps are
 judge-facing visual surfaces; live proof state is now also recorded in UiPath
-Data Fabric, Solution, and Orchestrator under the `TreatmentAccessHackathon`
-folder.
+Data Fabric, Action Center, Solution, Orchestrator, and Maestro debug records
+under the `TreatmentAccessHackathon` folder.
 
 ## Current Status
 
@@ -108,7 +108,7 @@ governance, approvals, and auditability:
 | Maestro Case               | Outer treatment-access lifecycle with stages and secondary exception paths.             | SDD and case design documented under `uipath/maestro`.                                                                              |
 | Agent Builder              | Seven domain agents with distinct inputs, outputs, trace summaries, and audit payloads. | Local Agent Builder packets exist and were statically validated during Checkpoint 3.                                                |
 | API Workflows              | EHR hydration, payer submission/status, pharmacy handoff, and event writes.             | Workflow JSON artifacts and validation notes exist under `uipath/api-workflows`.                                                    |
-| Action Center              | Clinician evidence approval, appeal signoff, and exception review gates.                | Live users/tasks surface verified; no task created because this CLI has no `tasks create` command.                                  |
+| Action Center              | Clinician evidence approval, appeal signoff, and exception review gates.                | Live ExternalTask `4401667` was created, assigned, completed, and read back with synthetic clinician-attestation output.            |
 | Data Service/Data Fabric   | Case, evidence, decision, human task, and audit data model.                             | Live folder-scoped `TreatmentAccessProofEvent` entity and proof records created under `TreatmentAccessHackathon`.                   |
 | Orchestrator               | Folder, assets, logs, job launch, and robot runtime governance.                         | Solution folder, process, machine assignment, and successful Development-runtime job are recorded.                                  |
 | Assistant/Robot            | Mock payer portal fallback when payer API is unavailable.                               | `PayerPortalFallback` is deployed and job-runnable; current XAML is scaffold-only, so portal UIA capture/submission is not claimed. |
