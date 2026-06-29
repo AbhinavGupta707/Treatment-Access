@@ -757,3 +757,20 @@ Planned Checkpoint 7 lanes:
 
 Safety remains unchanged: no live UiPath side-effect commands, payer
 submission, or real health data without explicit user approval.
+
+## 2026-06-29 - Checkpoint 7 Lanes Launched
+
+Committed Checkpoint 7 prep docs at `02ddaf0` and launched five Codex-managed
+worktree lanes from `main`.
+
+| Merge order | Lane                                       | Thread ID                              | Worktree path                                                |
+| ----------- | ------------------------------------------ | -------------------------------------- | ------------------------------------------------------------ |
+| 1           | Live Proof Schemas, API, and Agent Runtime | `019f1416-f3a2-7fe3-b026-975286bded43` | `/Users/abhinavgupta/.codex/worktrees/4428/Treatment Access` |
+| 2           | UiPath Coded Agent and Governed Hooks      | `019f1417-4829-74f3-a071-8e45f0887c1a` | `/Users/abhinavgupta/.codex/worktrees/be2c/Treatment Access` |
+| 3           | RPA Portal Fallback Live-Smoke Hardening   | `019f1417-a274-7321-b8cf-f68151f7b2a9` | `/Users/abhinavgupta/.codex/worktrees/460e/Treatment Access` |
+| 4           | Command Center Live Proof UX               | `019f1417-fcf6-7e41-851c-fc5e2fd9c4ca` | `/Users/abhinavgupta/.codex/worktrees/8c4d/Treatment Access` |
+| 5           | Checkpoint 7 QA, Demo, and Submission      | `019f1418-4f58-72c3-ad1c-8f73e27d8189` | `/Users/abhinavgupta/.codex/worktrees/8790/Treatment Access` |
+
+Initial orchestration stance: leave active workers alone unless blocked. Merge
+only after handoff review, lane-specific checks, `CI=true pnpm verify:setup`,
+and `git diff --check`.

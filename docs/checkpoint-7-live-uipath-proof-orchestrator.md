@@ -17,6 +17,7 @@ Build a narrow live proof slice for the Treatment Access Command Center:
 - Workspace: `/Users/abhinavgupta/Desktop/UiPath/Treatment Access`
 - Integration branch: `main`
 - Planning base before Checkpoint 7 docs: `ee13d47`
+- Checkpoint 7 prep commit: `02ddaf0`
 - Project memory: `docs/AGENT_MEMORY.md`
 - Orchestration log: `docs/orchestration-log.md`
 - Live proof plan: `docs/live-uipath-proof-plan.md`
@@ -26,13 +27,13 @@ Build a narrow live proof slice for the Treatment Access Command Center:
 
 ## Lane Plan
 
-| Merge order | Lane                                       | Ownership                                                                                                     | Goal                                                                                                                                   |
-| ----------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| 1           | Live Proof Schemas, API, and Agent Runtime | `packages/shared-schemas/**`, `packages/agent-runtime/**`, `services/mock-healthcare-api/**`, focused scripts | Add the live proof run contract, backend runner, event writes, live Fireworks execution, LangSmith metadata capture, and smoke script. |
-| 2           | UiPath Coded Agent and Governed Hooks      | `uipath/coded-agents/**`, `uipath/live-proof/**`, UiPath hook docs/scripts                                    | Add safe wrappers and authoring artifacts for UiPath-owned live proof state without running side effects by default.                   |
-| 3           | RPA Portal Fallback Live-Smoke Hardening   | `uipath/robots/**`, `apps/mock-payer-portal/**`, RPA readiness docs/scripts                                   | Harden the synthetic portal fallback proof, local validation, and mirror event contract.                                               |
-| 4           | Command Center Live Proof UX               | `apps/command-center/**`                                                                                      | Add a product-clear live proof action, progress view, trace/evidence detail surfaces, and no-overclaim wording.                        |
-| 5           | Checkpoint 7 QA, Demo, and Submission      | `scripts/**`, `docs/**`, final smoke/readiness documentation                                                  | Add final smoke/readiness gates and demo language that explains healthcare value before technical mechanics.                           |
+| Merge order | Lane                                       | Thread ID                              | Worktree path                                                | Ownership                                                                                                     | Goal                                                                                                                                   |
+| ----------- | ------------------------------------------ | -------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| 1           | Live Proof Schemas, API, and Agent Runtime | `019f1416-f3a2-7fe3-b026-975286bded43` | `/Users/abhinavgupta/.codex/worktrees/4428/Treatment Access` | `packages/shared-schemas/**`, `packages/agent-runtime/**`, `services/mock-healthcare-api/**`, focused scripts | Add the live proof run contract, backend runner, event writes, live Fireworks execution, LangSmith metadata capture, and smoke script. |
+| 2           | UiPath Coded Agent and Governed Hooks      | `019f1417-4829-74f3-a071-8e45f0887c1a` | `/Users/abhinavgupta/.codex/worktrees/be2c/Treatment Access` | `uipath/coded-agents/**`, `uipath/live-proof/**`, UiPath hook docs/scripts                                    | Add safe wrappers and authoring artifacts for UiPath-owned live proof state without running side effects by default.                   |
+| 3           | RPA Portal Fallback Live-Smoke Hardening   | `019f1417-a274-7321-b8cf-f68151f7b2a9` | `/Users/abhinavgupta/.codex/worktrees/460e/Treatment Access` | `uipath/robots/**`, `apps/mock-payer-portal/**`, RPA readiness docs/scripts                                   | Harden the synthetic portal fallback proof, local validation, and mirror event contract.                                               |
+| 4           | Command Center Live Proof UX               | `019f1417-fcf6-7e41-851c-fc5e2fd9c4ca` | `/Users/abhinavgupta/.codex/worktrees/8c4d/Treatment Access` | `apps/command-center/**`                                                                                      | Add a product-clear live proof action, progress view, trace/evidence detail surfaces, and no-overclaim wording.                        |
+| 5           | Checkpoint 7 QA, Demo, and Submission      | `019f1418-4f58-72c3-ad1c-8f73e27d8189` | `/Users/abhinavgupta/.codex/worktrees/8790/Treatment Access` | `scripts/**`, `docs/**`, final smoke/readiness documentation                                                  | Add final smoke/readiness gates and demo language that explains healthcare value before technical mechanics.                           |
 
 ## Lane Requirements
 
@@ -172,7 +173,7 @@ Stop and ask the user before proceeding if:
 
 ## Launch Checklist
 
-- [ ] Commit Checkpoint 7 planning and control docs.
-- [ ] Spawn the five lane worktree sessions from the prep commit.
-- [ ] Record thread IDs and worktree paths in this runbook and project memory.
+- [x] Commit Checkpoint 7 planning and control docs.
+- [x] Spawn the five lane worktree sessions from the prep commit.
+- [x] Record thread IDs and worktree paths in this runbook and project memory.
 - [ ] Begin heartbeat monitoring and merge only after lane review.

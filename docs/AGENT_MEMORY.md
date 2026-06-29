@@ -444,15 +444,17 @@ New control docs:
 - `docs/live-uipath-proof-plan.md`
 - `docs/checkpoint-7-live-uipath-proof-orchestrator.md`
 
-Planned lanes:
+Prep commit: `02ddaf0`.
 
-| Merge order | Lane                                       | Ownership                                                                                                     |
-| ----------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
-| 1           | Live Proof Schemas, API, and Agent Runtime | `packages/shared-schemas/**`, `packages/agent-runtime/**`, `services/mock-healthcare-api/**`, focused scripts |
-| 2           | UiPath Coded Agent and Governed Hooks      | `uipath/coded-agents/**`, `uipath/live-proof/**`, UiPath hook docs/scripts                                    |
-| 3           | RPA Portal Fallback Live-Smoke Hardening   | `uipath/robots/**`, `apps/mock-payer-portal/**`, RPA readiness docs/scripts                                   |
-| 4           | Command Center Live Proof UX               | `apps/command-center/**`                                                                                      |
-| 5           | Checkpoint 7 QA, Demo, and Submission      | `scripts/**`, `docs/**`, final smoke/readiness documentation                                                  |
+Active Checkpoint 7 lanes:
+
+| Merge order | Lane                                       | Thread ID                              | Worktree path                                                | Ownership                                                                                                     |
+| ----------- | ------------------------------------------ | -------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| 1           | Live Proof Schemas, API, and Agent Runtime | `019f1416-f3a2-7fe3-b026-975286bded43` | `/Users/abhinavgupta/.codex/worktrees/4428/Treatment Access` | `packages/shared-schemas/**`, `packages/agent-runtime/**`, `services/mock-healthcare-api/**`, focused scripts |
+| 2           | UiPath Coded Agent and Governed Hooks      | `019f1417-4829-74f3-a071-8e45f0887c1a` | `/Users/abhinavgupta/.codex/worktrees/be2c/Treatment Access` | `uipath/coded-agents/**`, `uipath/live-proof/**`, UiPath hook docs/scripts                                    |
+| 3           | RPA Portal Fallback Live-Smoke Hardening   | `019f1417-a274-7321-b8cf-f68151f7b2a9` | `/Users/abhinavgupta/.codex/worktrees/460e/Treatment Access` | `uipath/robots/**`, `apps/mock-payer-portal/**`, RPA readiness docs/scripts                                   |
+| 4           | Command Center Live Proof UX               | `019f1417-fcf6-7e41-851c-fc5e2fd9c4ca` | `/Users/abhinavgupta/.codex/worktrees/8c4d/Treatment Access` | `apps/command-center/**`                                                                                      |
+| 5           | Checkpoint 7 QA, Demo, and Submission      | `019f1418-4f58-72c3-ad1c-8f73e27d8189` | `/Users/abhinavgupta/.codex/worktrees/8790/Treatment Access` | `scripts/**`, `docs/**`, final smoke/readiness documentation                                                  |
 
 Critical product framing:
 
