@@ -344,6 +344,76 @@ default.
 - Add a submission disclosure that clearly distinguishes live model/tool traces
   from approval-gated UiPath side effects.
 
+## Checkpoint 6 Readiness Plan
+
+Checkpoint 6 proof should run in layer order.
+
+### 1. Deterministic Local Smoke
+
+Run on every integrated build:
+
+```bash
+CI=true pnpm verify:checkpoint6
+CI=true pnpm smoke:agents
+CI=true pnpm smoke:checkpoint4 -- --port 8894
+git diff --check
+```
+
+This proves local contracts, safety wording, submission disclosures, no-secret
+scan, demo readiness, deterministic seven-agent behavior, and local
+API-down-to-portal-fallback semantics. It uses synthetic data only and does not
+call live provider or UiPath side-effecting systems.
+
+### 2. Fireworks/LangSmith No-Side-Effect Smoke
+
+After `.env.local` contains live provider credentials, run:
+
+```bash
+CI=true pnpm smoke:checkpoint6-live-providers
+```
+
+This checks the live provider layer before any runtime claims are made:
+
+- Fireworks authentication through the OpenAI-compatible `/models` endpoint;
+- LangSmith authentication through a read-only project/session query;
+- presence of required live variables without printing `.env.local` values.
+
+Passing this smoke supports a claim that the environment can reach Fireworks and
+LangSmith. It does not by itself prove a live agent graph run, a LangSmith trace
+created by the product, or any UiPath side effect.
+
+### 3. UI Page Smoke
+
+After the redesigned Command Center is running:
+
+```bash
+CI=true pnpm smoke:checkpoint6-ui
+```
+
+This checks that the app shell responds for the product dashboard, cases, and
+analytics routes. It is a page availability smoke, not a browser visual QA
+replacement. For final evidence, still capture screenshots at 375, 768, 1024,
+and 1440 widths after the Product UI lane lands.
+
+### 4. Approval-Gated UiPath Live Side Effects
+
+These remain hard gates until the orchestrator explicitly approves the exact
+live action and evidence capture path:
+
+- Agent Builder/Coded Agent debug or run;
+- Maestro case debug or run;
+- Action Center task creation;
+- Data Service/Data Fabric writes;
+- Orchestrator robot job start or Assistant robot execution;
+- RPA run/debug;
+- solution upload, publish, deploy, or activation;
+- any payer submission outside the local synthetic mock.
+
+If a live UiPath feature is missing, unavailable, or not listed, diagnose in
+layer order: confirm registration/discovery/install state and official
+activation flow first; only debug permissions/runtime after the feature is
+actually present.
+
 ## Manual Setup Needed Later
 
 Before executing live mode, the user will provide:
