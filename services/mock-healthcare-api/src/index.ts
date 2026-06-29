@@ -91,6 +91,7 @@ type PriorAuthSubmission = {
   denial_reason?: DemoToggles["denial_reason"];
   fallback_required: boolean;
   error_code?: string;
+  portal_confirmation_id?: string;
 };
 
 type AppealSubmission = {
@@ -526,7 +527,10 @@ export function createServer(): FastifyInstance {
     const priorAuthRequest = PriorAuthRequestSchema.parse(request.body ?? {});
     const submittedAt = new Date().toISOString();
 
-    if (state.toggles.payer_api_unavailable) {
+    if (
+      state.toggles.payer_api_unavailable &&
+      priorAuthRequest.channel === "api"
+    ) {
       const submission: PriorAuthSubmission = {
         submission_id: nextId(state, "submission", "pa-submission"),
         case_id: priorAuthRequest.case_id,
@@ -556,9 +560,14 @@ export function createServer(): FastifyInstance {
       };
     }
 
+    const submissionId = nextId(state, "submission", "pa-submission");
+    const portalConfirmationId =
+      priorAuthRequest.channel === "portal_fallback"
+        ? portalConfirmationForSubmission(submissionId)
+        : undefined;
     const denialCode = denialCodeForReason(state.toggles.denial_reason);
     const submission: PriorAuthSubmission = {
-      submission_id: nextId(state, "submission", "pa-submission"),
+      submission_id: submissionId,
       case_id: priorAuthRequest.case_id,
       status: "submitted",
       channel: priorAuthRequest.channel,
@@ -567,21 +576,37 @@ export function createServer(): FastifyInstance {
       denial_code: denialCode,
       denial_reason: state.toggles.denial_reason,
       fallback_required: false,
+      portal_confirmation_id: portalConfirmationId,
     };
     state.submissions = [...state.submissions, submission];
-    recordApiEvent(
-      state,
-      priorAuthRequest.case_id,
-      "payer_prior_auth_submitted",
-      "Prior authorization API submission accepted.",
-      `Submission ${submission.submission_id} queued; demo decision is denied for ${state.toggles.denial_reason}.`,
-      priorAuthRequest.submitted_by,
-      priorAuthRequest.evidence_refs,
-    );
+
+    if (priorAuthRequest.channel === "portal_fallback") {
+      recordRobotEvent(
+        state,
+        priorAuthRequest.case_id,
+        "payer_portal_fallback_submitted",
+        "UiPath robot submitted synthetic prior authorization through mock payer portal.",
+        `Portal confirmation ${portalConfirmationId} recorded; demo decision is denied for ${state.toggles.denial_reason}.`,
+        priorAuthRequest.submitted_by,
+        priorAuthRequest.evidence_refs,
+      );
+    } else {
+      recordApiEvent(
+        state,
+        priorAuthRequest.case_id,
+        "payer_prior_auth_submitted",
+        "Prior authorization API submission accepted.",
+        `Submission ${submission.submission_id} queued; demo decision is denied for ${state.toggles.denial_reason}.`,
+        priorAuthRequest.submitted_by,
+        priorAuthRequest.evidence_refs,
+      );
+    }
 
     return {
       status: "submitted",
       submission_id: submission.submission_id,
+      channel: submission.channel,
+      portal_confirmation_id: submission.portal_confirmation_id,
       decision_hint: "denial_expected_for_demo",
       syntheticDataOnly: true,
     };
@@ -614,6 +639,8 @@ export function createServer(): FastifyInstance {
       return {
         submission_id: submission.submission_id,
         status: submission.decision_status,
+        channel: submission.channel,
+        portal_confirmation_id: submission.portal_confirmation_id,
         denial_code: submission.denial_code,
         reason: submission.denial_reason,
         appeal_deadline: "2026-07-12",
@@ -902,6 +929,11 @@ function nextId(
   return `${prefix}-syn-${state.counters[key].toString().padStart(3, "0")}`;
 }
 
+function portalConfirmationForSubmission(submissionId: string): string {
+  const suffix = submissionId.match(/(\d+)$/)?.[1] ?? "001";
+  return `AVFH-PORTAL-SYN-${suffix}`;
+}
+
 function recordSystemEvent(
   state: MockState,
   action: string,
@@ -943,6 +975,32 @@ function recordApiEvent(
       actor_type: "api_workflow",
       actor_name: actorName,
       task_or_agent_name: "Mock Healthcare API",
+      action,
+      input_summary: inputSummary,
+      output_summary: outputSummary,
+      evidence_refs: evidenceRefs,
+      timestamp: new Date().toISOString(),
+    },
+  ];
+}
+
+function recordRobotEvent(
+  state: MockState,
+  caseId: string,
+  action: string,
+  inputSummary: string,
+  outputSummary: string,
+  actorName: string,
+  evidenceRefs: string[] = [],
+) {
+  state.auditEvents = [
+    ...state.auditEvents,
+    {
+      event_id: nextId(state, "event", "event-live"),
+      case_id: caseId,
+      actor_type: "robot",
+      actor_name: actorName,
+      task_or_agent_name: "Mock Payer Portal Robot",
       action,
       input_summary: inputSummary,
       output_summary: outputSummary,

@@ -253,9 +253,11 @@ paths:
       tags: [Payer]
       summary: Submit a synthetic prior authorization request
       description: >
-        Returns unavailable with PAYER_API_DOWN when payer_api_unavailable is
-        true. Otherwise returns a submitted ID whose demo status resolves to a
-        deterministic denial reason.
+        The api channel returns unavailable with PAYER_API_DOWN when
+        payer_api_unavailable is true. The portal_fallback channel remains
+        available under that toggle so a UiPath robot can record a deterministic
+        mock portal confirmation. Submitted requests resolve to a deterministic
+        denial reason for the demo.
       requestBody:
         required: false
         content:
@@ -470,6 +472,9 @@ components:
         channel:
           type: string
           enum: [api, portal_fallback]
+          description: >
+            Use api for direct payer API attempts and portal_fallback for the
+            UiPath robot path after PAYER_API_DOWN.
         submitted_by:
           type: string
         evidence_refs:

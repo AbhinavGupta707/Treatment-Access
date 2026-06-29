@@ -174,6 +174,75 @@ describe("mock healthcare api", () => {
     });
   });
 
+  it("allows portal fallback submission when payer api is unavailable", async () => {
+    const server = testServer();
+    await server.inject({
+      method: "POST",
+      url: "/demo/toggles",
+      payload: { payer_api_unavailable: true },
+    });
+
+    const apiResponse = await server.inject({
+      method: "POST",
+      url: "/payer/prior-auth",
+      payload: {
+        case_id: "case-syn-001",
+        channel: "api",
+        evidence_refs: ["artifact-progress-note"],
+      },
+    });
+    expect(apiResponse.statusCode).toBe(200);
+    expect(apiResponse.json()).toMatchObject({
+      status: "unavailable",
+      error_code: "PAYER_API_DOWN",
+      fallback_required: true,
+    });
+
+    const fallbackResponse = await server.inject({
+      method: "POST",
+      url: "/payer/prior-auth",
+      payload: {
+        case_id: "case-syn-001",
+        channel: "portal_fallback",
+        submitted_by: "UiPath Mock Payer Portal Robot",
+        evidence_refs: ["artifact-progress-note", "artifact-med-history"],
+      },
+    });
+    expect(fallbackResponse.statusCode).toBe(200);
+    expect(fallbackResponse.json()).toMatchObject({
+      status: "submitted",
+      channel: "portal_fallback",
+      portal_confirmation_id: "AVFH-PORTAL-SYN-002",
+      decision_hint: "denial_expected_for_demo",
+    });
+
+    const fallbackStatusResponse = await server.inject({
+      method: "GET",
+      url: `/payer/prior-auth/${fallbackResponse.json().submission_id}/status`,
+    });
+    expect(fallbackStatusResponse.statusCode).toBe(200);
+    expect(fallbackStatusResponse.json()).toMatchObject({
+      status: "denied",
+      channel: "portal_fallback",
+      portal_confirmation_id: "AVFH-PORTAL-SYN-002",
+    });
+
+    const eventsResponse = await server.inject({
+      method: "GET",
+      url: "/cases/case-syn-001/events",
+    });
+    expect(eventsResponse.statusCode).toBe(200);
+    expect(
+      eventsResponse
+        .json()
+        .events.some(
+          (event: { actor_type: string; action: string }) =>
+            event.actor_type === "robot" &&
+            event.action === "payer_portal_fallback_submitted",
+        ),
+    ).toBe(true);
+  });
+
   it("submits prior auth, approves appeal after clinician approval, and creates pharmacy handoff", async () => {
     const server = testServer();
     await server.inject({
