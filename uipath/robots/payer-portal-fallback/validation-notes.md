@@ -70,6 +70,24 @@ Successful static checks after the fix:
 - `scripts/uipath-with-dotnet8.sh uip solution pack ... --dry-run --output json`
   returned `Status: Valid`.
 
+Checkpoint 7 semantic hardening added a local guard for the portal fallback
+state contract:
+
+```bash
+CI=true pnpm verify:rpa-portal-fallback
+```
+
+The guard verifies that the mock portal and `robot-contract.json` both expose
+the same three states and mirror actions:
+
+- `api_unavailable` / `payer_prior_auth_unavailable`
+- `robot_requested` / `robot_fallback_requested`
+- `confirmation_received` / `payer_portal_fallback_submitted`
+
+The transition from `robot_requested` to `confirmation_received` remains
+approval-gated because it represents portal submission and confirmation capture,
+even for the synthetic local portal.
+
 Remaining implementation path:
 
 1. Follow `studio-indication-checklist.md` to add/capture the real UiPath UI

@@ -13,6 +13,17 @@ type PriorAuthFormValues = {
   evidenceSummary: string;
 };
 
+type FallbackStageId =
+  "api_unavailable" | "robot_requested" | "confirmation_received";
+
+type MirrorEventSemantic = {
+  stageId: FallbackStageId;
+  action: string;
+  actorType: "api_workflow" | "robot";
+  source: "mock_api_event_mirror" | "uipath_robot_event";
+  summary: string;
+};
+
 const syntheticSubmissionDefaults: PriorAuthFormValues = {
   caseId: "case-syn-001",
   orderId: "order-syn-001",
@@ -31,6 +42,30 @@ const portalReceipt = {
   status: "Submitted - pending payer review",
   submittedAt: "2026-06-29T09:00:00.000Z",
   robotRunId: "robot-fallback-demo-001",
+};
+
+const apiUnavailableEvent: MirrorEventSemantic = {
+  stageId: "api_unavailable",
+  action: "payer_prior_auth_unavailable",
+  actorType: "api_workflow",
+  source: "mock_api_event_mirror",
+  summary: "Payer API is unavailable; portal fallback is required.",
+};
+
+const robotRequestedEvent: MirrorEventSemantic = {
+  stageId: "robot_requested",
+  action: "robot_fallback_requested",
+  actorType: "robot",
+  source: "uipath_robot_event",
+  summary: "UiPath robot fallback request prepared; no live job started.",
+};
+
+const confirmationReceivedEvent: MirrorEventSemantic = {
+  stageId: "confirmation_received",
+  action: "payer_portal_fallback_submitted",
+  actorType: "robot",
+  source: "uipath_robot_event",
+  summary: "Synthetic portal confirmation received for the fallback path.",
 };
 
 function readFormValues(form: HTMLFormElement): PriorAuthFormValues {
@@ -93,22 +128,47 @@ function Field({
   );
 }
 
+function StageBadge({ submitted }: { submitted: boolean }) {
+  const stage = submitted ? confirmationReceivedEvent : robotRequestedEvent;
+
+  return (
+    <section
+      className="stage-badge"
+      data-testid="fallback-stage"
+      data-uipath="fallback-stage"
+      data-stage-id={stage.stageId}
+      data-mirror-action={stage.action}
+      data-actor-type={stage.actorType}
+      aria-label="Current portal fallback stage"
+    >
+      <span>{submitted ? "Confirmation received" : "Robot requested"}</span>
+      <strong>{stage.action}</strong>
+      <p>{stage.summary}</p>
+    </section>
+  );
+}
+
 function StatusRail({ submitted }: { submitted: boolean }) {
   const steps = [
     {
       label: "API unavailable",
-      value: "PAYER_API_DOWN",
+      value: "payer_prior_auth_unavailable",
       state: "complete",
+      event: apiUnavailableEvent,
     },
     {
-      label: "Robot fallback",
-      value: "UiPath portal entry",
+      label: "Robot requested",
+      value: "robot_fallback_requested",
       state: submitted ? "complete" : "current",
+      event: robotRequestedEvent,
     },
     {
-      label: "Confirmation",
-      value: submitted ? portalReceipt.confirmationId : "Awaiting submit",
+      label: "Confirmation received",
+      value: submitted
+        ? portalReceipt.confirmationId
+        : "Awaiting portal submit",
       state: submitted ? "complete" : "pending",
+      event: confirmationReceivedEvent,
     },
   ];
 
@@ -120,7 +180,16 @@ function StatusRail({ submitted }: { submitted: boolean }) {
       </div>
       <ol>
         {steps.map((step) => (
-          <li className={step.state} key={step.label}>
+          <li
+            className={step.state}
+            key={step.event.stageId}
+            data-testid={`stage-${step.event.stageId}`}
+            data-uipath={`stage-${step.event.stageId}`}
+            data-stage-id={step.event.stageId}
+            data-mirror-action={step.event.action}
+            data-actor-type={step.event.actorType}
+            data-source={step.event.source}
+          >
             <span aria-hidden="true" />
             <div>
               <strong>{step.label}</strong>
@@ -138,15 +207,20 @@ function StatusRail({ submitted }: { submitted: boolean }) {
 }
 
 function Confirmation({ values }: { values: PriorAuthFormValues }) {
+  const confirmationEvent = confirmationReceivedEvent;
+
   return (
     <section
       className="confirmation"
       data-testid="portal-confirmation"
       data-uipath="portal-confirmation"
+      data-stage-id={confirmationEvent.stageId}
+      data-mirror-action={confirmationEvent.action}
+      data-confirmation-id={portalReceipt.confirmationId}
       aria-labelledby="confirmation-title"
     >
       <div className="receipt-banner">
-        <span>Submission received</span>
+        <span>Confirmation received</span>
         <strong data-testid="submission-status" data-uipath="submission-status">
           {portalReceipt.status}
         </strong>
@@ -169,7 +243,18 @@ function Confirmation({ values }: { values: PriorAuthFormValues }) {
         </div>
         <div>
           <dt>Robot run</dt>
-          <dd>{portalReceipt.robotRunId}</dd>
+          <dd data-testid="robot-run-id" data-uipath="robot-run-id">
+            {portalReceipt.robotRunId}
+          </dd>
+        </div>
+        <div>
+          <dt>Mirror event</dt>
+          <dd
+            data-testid="mirror-event-action"
+            data-uipath="mirror-event-action"
+          >
+            {confirmationEvent.action}
+          </dd>
         </div>
       </dl>
       <div className="receipt-summary">
@@ -178,7 +263,8 @@ function Confirmation({ values }: { values: PriorAuthFormValues }) {
         <small>{values.evidenceAttachment}</small>
       </div>
       <p className="receipt-footnote">
-        Deterministic local confirmation for UiPath RPA fallback testing.
+        Deterministic local confirmation for UiPath RPA fallback testing. This
+        is not a real payer submission.
       </p>
     </section>
   );
@@ -212,6 +298,8 @@ function App() {
               className="prior-auth-form"
               data-testid="prior-auth-form"
               data-uipath="prior-auth-form"
+              data-stage-id="robot_requested"
+              data-mirror-action="robot_fallback_requested"
               onSubmit={(event) => {
                 event.preventDefault();
                 setSubmittedValues(readFormValues(event.currentTarget));
@@ -222,8 +310,10 @@ function App() {
                   <span>Portal fallback entry</span>
                   <h1>Synthetic prior authorization</h1>
                 </div>
-                <strong>Ready for robot capture</strong>
+                <strong>Robot requested</strong>
               </div>
+
+              <StageBadge submitted={false} />
 
               <div className="form-grid">
                 <Field
@@ -289,7 +379,8 @@ function App() {
 
               <div className="action-bar">
                 <span>
-                  Local deterministic receipt: {portalReceipt.confirmationId}
+                  Confirmation is created only after portal submit:
+                  {" " + portalReceipt.confirmationId}
                 </span>
                 <button
                   type="submit"

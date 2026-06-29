@@ -67,18 +67,81 @@
     "submit": "submit button",
     "confirmation": "confirmation region containing confirmation ID"
   },
+  "fallbackStateMachine": {
+    "description": "Synthetic portal fallback proof states. These distinguish API failure, robot request preparation, and portal confirmation without implying a real payer submission.",
+    "states": [
+      {
+        "state": "api_unavailable",
+        "mirrorAction": "payer_prior_auth_unavailable",
+        "actorType": "api_workflow",
+        "source": "mock_api_event_mirror",
+        "terminal": false,
+        "summary": "Payer API returned PAYER_API_DOWN; portal fallback is required."
+      },
+      {
+        "state": "robot_requested",
+        "mirrorAction": "robot_fallback_requested",
+        "actorType": "robot",
+        "source": "uipath_robot_event",
+        "terminal": false,
+        "summary": "UiPath robot fallback request was prepared; no live robot job has started by default."
+      },
+      {
+        "state": "confirmation_received",
+        "mirrorAction": "payer_portal_fallback_submitted",
+        "actorType": "robot",
+        "source": "uipath_robot_event",
+        "terminal": true,
+        "summary": "Synthetic portal confirmation was read from the local mock portal after approved portal submission."
+      }
+    ],
+    "transitions": [
+      {
+        "from": "api_unavailable",
+        "to": "robot_requested",
+        "requiresApproval": false,
+        "sideEffect": false
+      },
+      {
+        "from": "robot_requested",
+        "to": "confirmation_received",
+        "requiresApproval": true,
+        "sideEffect": true,
+        "approvalGate": "live-smoke-approval-gate.md"
+      }
+    ]
+  },
   "outputs": {
     "status": {
       "type": "string",
-      "allowedValues": ["submitted", "needs_capture", "failed"]
+      "allowedValues": [
+        "api_unavailable",
+        "robot_requested",
+        "confirmation_received",
+        "failed"
+      ]
     },
     "confirmationId": {
       "type": "string",
-      "source": "portal confirmation region"
+      "source": "portal confirmation region",
+      "availableWhen": "status=confirmation_received"
     },
     "robotJobId": {
       "type": "string",
-      "source": "UiPath Orchestrator job ID when invoked as process"
+      "source": "UiPath Orchestrator job ID when invoked as process",
+      "availableWhen": "approved live RPA run/debug or Orchestrator job start has occurred"
+    },
+    "fallbackRequestEvent": {
+      "type": "object",
+      "action": "robot_fallback_requested",
+      "actor": "robot",
+      "requiredFields": [
+        "caseId",
+        "robotProcessName",
+        "orchestratorFolder",
+        "reasonCode",
+        "demoRunId"
+      ]
     },
     "fallbackEvent": {
       "type": "object",
