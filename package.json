@@ -19,6 +19,7 @@
     "seed:apply": "CI=true pnpm build:contracts && node --import tsx/esm scripts/seed-demo-data.ts --apply",
     "reset": "node --import tsx/esm scripts/reset-demo.ts",
     "smoke:checkpoint1": "CI=true pnpm build:contracts && CI=true pnpm --filter @tacc/mock-healthcare-api build && node --import tsx/esm scripts/verify-demo.ts --start-api",
+    "smoke:checkpoint4": "CI=true pnpm build:contracts && CI=true pnpm --filter @tacc/mock-healthcare-api build && CI=true pnpm --filter @tacc/command-center build && CI=true pnpm --filter @tacc/mock-payer-portal build && node --import tsx/esm scripts/verify-checkpoint4.ts --start-api",
     "smoke:agents": "CI=true pnpm build:contracts && node --import tsx/esm scripts/verify-agents.ts",
     "test": "CI=true pnpm build:contracts && CI=true vitest run scripts/*.test.ts && CI=true pnpm -r --if-present test",
     "typecheck": "CI=true pnpm build:contracts && CI=true pnpm -r --if-present typecheck",

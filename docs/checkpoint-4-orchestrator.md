@@ -72,6 +72,18 @@ Then run any new Checkpoint 4 smoke or browser verification command added by
 the QA lane. If a local browser/dev-server smoke is added, run it against both
 the Command Center and mock payer portal.
 
+QA lane smoke command:
+
+```bash
+CI=true pnpm smoke:checkpoint4
+```
+
+This command is local and deterministic. It builds the mock API plus both
+frontend apps, verifies payer API unavailable behavior, accepts the
+`portal_fallback` success path if the merged API supports it, writes a synthetic
+robot fallback event, checks Command Center-visible state, and resets the mock
+runtime after the smoke.
+
 ## UiPath Run/Publish Safety
 
 - Static validation, local file validation, command-surface probing, registry
