@@ -24,6 +24,12 @@ uip solution resource refresh --solution-folder uipath/solution/treatment-access
 scripts/uipath-with-dotnet8.sh uip solution pack uipath/solution/treatment-access-command-center --dry-run --output json
 ```
 
+Equivalent one-command safe readiness wrapper:
+
+```bash
+CI=true pnpm uipath:readiness -- local
+```
+
 ## Approval Required Before Live Smoke
 
 Ask for explicit approval before each action below:

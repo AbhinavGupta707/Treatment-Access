@@ -181,6 +181,30 @@ the orchestrator or user before running:
 - Payer submission: any live workflow step that submits a prior authorization,
   appeal, or portal packet outside the local synthetic mock.
 
+## Checkpoint 6 UiPath Live Readiness
+
+Run the safe UiPath readiness wrapper before requesting live smoke approval:
+
+```bash
+CI=true pnpm uipath:readiness
+```
+
+This performs command-surface discovery, read-only cloud discovery, RPA
+validate/build, and solution pack dry-run. It does not run Agent Builder/Coded
+Agent jobs, Maestro debug/run, Action Center task creation, Data Service writes,
+Orchestrator job starts, RPA run/debug, solution upload/publish/deploy/activate,
+or payer submission.
+
+If cloud access is unavailable, run the local subset and document the cloud
+dependency:
+
+```bash
+CI=true pnpm uipath:readiness -- local
+```
+
+The approval-gated live command blocks are maintained in
+`uipath/live-wiring-runbook.md`.
+
 ## Checkpoint 5 Final QA
 
 Run the final non-live setup and repository checks from a clean worktree:

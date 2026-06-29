@@ -82,6 +82,20 @@ uip skills install --agent codex --local
 
 ## Useful Verification Commands
 
+Checkpoint 6 adds a safe wrapper for the no-side-effect live readiness sweep:
+
+```bash
+CI=true pnpm uipath:readiness
+```
+
+Use `CI=true pnpm uipath:readiness -- local` when cloud login or tenant access
+is unavailable. The command follows layer-order diagnosis: command
+registration/discovery first, then folder/runtime discovery, then RPA
+validate/build and solution pack dry-run. Cloud-backed refresh/discovery checks
+may report an auth or tool-version prerequisite while narrower local checks
+continue. It does not run live UiPath jobs, create Action Center tasks, write
+Data Service records, or deploy solutions.
+
 ```bash
 uip user --output table
 uip tools list --output table
