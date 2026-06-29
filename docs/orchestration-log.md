@@ -465,3 +465,39 @@ Next checkpoint:
 - Checkpoint 5 should resolve the local RPA SDK/Studio prerequisite, create the
   real `PayerPortalFallback` UiPath project with indicated UIA targets, import
   it into the solution shell, and prepare an approval-gated live robot smoke.
+
+## Checkpoint 5 Launch
+
+Launch time: `2026-06-29T01:46:15Z`
+Base branch: `main`
+Base commit: `2142714`
+Control runbook: `docs/checkpoint-5-orchestrator.md`
+
+Checkpoint 5 outcome:
+
+- Make the repo truthful and Devpost-ready: README, submission checklist, demo
+  script, deck outline, evidence capture, final QA, and coding-agent proof.
+- Resolve or precisely document the live RPA project prerequisite from
+  Checkpoint 4.
+- Keep UiPath as the orchestration/governance layer and keep all live
+  side-effecting actions approval-gated.
+
+Planned isolated lanes:
+
+| Merge order | Lane                          | Thread ID | Worktree path | Ownership                                                              |
+| ----------- | ----------------------------- | --------- | ------------- | ---------------------------------------------------------------------- |
+| 1           | RPA Runtime & Solution Import | pending   | pending       | `uipath/robots/**`, `uipath/solution/**`, RPA setup notes              |
+| 2           | Evidence Capture & Final QA   | pending   | pending       | `uipath/screenshots/**`, `docs/testing.md`, final QA scripts/docs      |
+| 3           | README & Submission Package   | pending   | pending       | `README.md`, `docs/submission.md`, license/submission checklist        |
+| 4           | Demo Script & Deck Outline    | pending   | pending       | `docs/demo-script.md`, `docs/architecture.md`, deck/video outline docs |
+
+Launch constraints:
+
+- Do not run live `uip rpa run/debug`, `uip or jobs start`, solution
+  upload/publish/deploy/activate, agent debug, Maestro debug, IXP mutation,
+  Action Center task creation, Data Service writes, or payer submission without
+  explicit user approval.
+- RPA lane must use `uip rpa init` for a real project if the local prerequisite
+  is fixed. It must not hand-write fake XAML or fake UiPath project metadata.
+- Submission/docs lanes must clearly separate local synthetic proof from live
+  UiPath actions that have not run.

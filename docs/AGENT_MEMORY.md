@@ -229,3 +229,34 @@ Known remaining blocker:
   `uip rpa init` fails on this Mac with no .NET SDK available to the local
   UiPath Assistant/Robot restore path. This is a setup prerequisite for
   Checkpoint 5, not hidden demo behavior.
+
+## Checkpoint 5 Status
+
+Checkpoint 5 orchestration is active on `main`.
+
+Launch base commit: `2142714`.
+
+Control runbook: `docs/checkpoint-5-orchestrator.md`.
+
+Checkpoint 5 outcome:
+
+- Resolve or precisely document the local RPA SDK/Studio prerequisite.
+- Create/import the real `PayerPortalFallback` UiPath project if safe and
+  available, without faking RPA artifacts.
+- Prepare Devpost-ready README/submission materials, demo script, deck outline,
+  screenshots/evidence, and final QA proof.
+- Keep all live UiPath side effects behind explicit approval.
+
+Active isolated lanes:
+
+| Merge order | Lane                          | Thread ID | Worktree path | Ownership                                                              |
+| ----------- | ----------------------------- | --------- | ------------- | ---------------------------------------------------------------------- |
+| 1           | RPA Runtime & Solution Import | pending   | pending       | `uipath/robots/**`, `uipath/solution/**`, RPA setup notes              |
+| 2           | Evidence Capture & Final QA   | pending   | pending       | `uipath/screenshots/**`, `docs/testing.md`, final QA scripts/docs      |
+| 3           | README & Submission Package   | pending   | pending       | `README.md`, `docs/submission.md`, license/submission checklist        |
+| 4           | Demo Script & Deck Outline    | pending   | pending       | `docs/demo-script.md`, `docs/architecture.md`, deck/video outline docs |
+
+Runtime safety remains unchanged: live RPA run/debug, Orchestrator job start,
+solution upload/publish/deploy/activate, agent debug, Maestro debug, IXP
+mutation, Action Center task creation, Data Service writes, and payer submission
+require explicit user approval.
