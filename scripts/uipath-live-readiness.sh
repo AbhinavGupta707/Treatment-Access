@@ -66,6 +66,9 @@ esac
 cd "$ROOT_DIR"
 
 if [[ "$MODE" == "all" || "$MODE" == "local" ]]; then
+  echo "== UiPath live proof hook readiness =="
+  run pnpm uipath:live-proof:readiness
+
   echo "== UiPath command-surface discovery =="
   run uip --version
   run uip tools list --output json
