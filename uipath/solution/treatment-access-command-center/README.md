@@ -1,6 +1,6 @@
 # Treatment Access Command Center Solution
 
-Local UiPath solution shell for the Checkpoint 4 runtime path.
+Local UiPath solution shell for the portal fallback runtime path.
 
 This solution was created with:
 
@@ -8,22 +8,29 @@ This solution was created with:
 uip solution init uipath/solution/treatment-access-command-center --output json
 ```
 
-The manifest currently has no registered projects because the RPA project could
-not be initialized on this Mac without a .NET SDK for the UiPath headless Studio
-restore. This was rechecked during Checkpoint 5 on 2026-06-29; `uip rpa init`
-still returned a nested `success: false` result and created no project files.
+The manifest now registers the real `PayerPortalFallback` UiPath RPA project as
+a `Process`. The source project was created under
+`uipath/robots/PayerPortalFallback` with `uip rpa init`, then copied into this
+solution with `uip solution project import`.
 
-`uip solution pack ... --dry-run` is expected to fail until at least one project
-is registered. The observed failure was `Solution definition empty or not
-found`, with no upload, publish, deploy, or activation side effect.
+Local verification on 2026-06-29:
+
+```bash
+uip solution project list --solution-folder "uipath/solution/treatment-access-command-center" --output json
+uip solution resource refresh --solution-folder "uipath/solution/treatment-access-command-center" --output json
+scripts/uipath-with-dotnet8.sh uip solution pack "uipath/solution/treatment-access-command-center" --dry-run --output json
+```
+
+Results: `PayerPortalFallback` is listed as a `Process`, resource refresh
+reported no warnings, and solution pack dry-run returned `Status: Valid`. No
+upload, publish, deploy, or activation side effect was performed.
 
 ## Intended Project Set
 
-When local project creation is unblocked, register these artifacts in this
-solution path using only `uip solution project add` or
-`uip solution project import`:
+Registered or intended artifacts:
 
-- `PayerPortalFallback`: RPA process for the mock payer portal fallback.
+- `PayerPortalFallback`: RPA process shell for the mock payer portal fallback
+  is registered.
 - Validated CP3 agent projects: coverage requirement, evidence retrieval,
   missing evidence, submission packet, denial rescue, appeal packet, care
   continuity, and audit packet, after the orchestrator chooses the final

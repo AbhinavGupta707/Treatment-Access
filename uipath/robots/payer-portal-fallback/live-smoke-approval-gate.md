@@ -5,24 +5,23 @@ side-effecting action. All data must remain synthetic.
 
 ## Preconditions
 
-1. Install a .NET SDK visible to the UiPath Assistant/Robot headless Studio
-   restore path, or configure `HELM_NUGET_SOURCE` to a working local feed that
-   does not require `dotnet restore` from the Assistant runtime alone.
-2. Create the real project with `uip rpa init`; do not hand-write RPA
-   scaffolding.
-3. Register the real project into
-   `uipath/solution/treatment-access-command-center` through
-   `uip solution project add` or `uip solution project import`.
-4. Use UiPath UI Automation target capture or Studio Indicate for every portal
+1. .NET 8 is available through Homebrew `dotnet@8`; use
+   `scripts/uipath-with-dotnet8.sh` for local build/pack checks.
+2. The real project exists at `uipath/robots/PayerPortalFallback` and is
+   imported into `uipath/solution/treatment-access-command-center`.
+3. Use UiPath UI Automation target capture or Studio Indicate for every portal
    control listed in `studio-indication-checklist.md`.
-5. Run static local validation only:
+4. Run static local validation only:
 
 ```bash
-uip rpa analyzer-rules list --project-dir "uipath/robots/PayerPortalFallback" --output json
-uip rpa validate --file-path "Main.xaml" --project-dir "uipath/robots/PayerPortalFallback" --output json
-uip rpa build "uipath/robots/PayerPortalFallback" --log-level Warn --output json
+cd "uipath/robots/PayerPortalFallback"
+uip rpa analyzer-rules list --scope Workflow --output json
+uip rpa validate --file-path "Main.xaml" --output json
+cd ../../..
+scripts/uipath-with-dotnet8.sh uip rpa build "uipath/robots/PayerPortalFallback" --log-level Warn --output json
 uip solution project list --solution-folder uipath/solution/treatment-access-command-center --output json
-uip solution pack uipath/solution/treatment-access-command-center --dry-run --output json
+uip solution resource refresh --solution-folder uipath/solution/treatment-access-command-center --output json
+scripts/uipath-with-dotnet8.sh uip solution pack uipath/solution/treatment-access-command-center --dry-run --output json
 ```
 
 ## Approval Required Before Live Smoke

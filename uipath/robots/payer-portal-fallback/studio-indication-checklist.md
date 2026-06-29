@@ -1,9 +1,9 @@
 # Studio Indication Checklist
 
-Live target capture was not performed in this lane. When the local RPA project
-can be created, author the XAML workflow with real UiPath UI Automation
-activities and these `TODO Indicate` display names. Do not replace UI actions
-with log-only stubs.
+Live target capture has not been performed yet. The local RPA project shell now
+exists, so the next robot implementation step is to author the XAML workflow
+with real UiPath UI Automation activities and these `TODO Indicate` display
+names. Do not replace UI actions with log-only stubs.
 
 ## Required UIA Activity Shape
 
@@ -46,10 +46,17 @@ raw browser scripts.
 After indication is complete, run:
 
 ```bash
-uip rpa analyzer-rules list --project-dir "uipath/robots/PayerPortalFallback" --output json
-uip rpa validate --file-path "Main.xaml" --project-dir "uipath/robots/PayerPortalFallback" --output json
-uip rpa build "uipath/robots/PayerPortalFallback" --log-level Warn --output json
+cd "uipath/robots/PayerPortalFallback"
+uip rpa analyzer-rules list --scope Workflow --output json
+uip rpa validate --file-path "Main.xaml" --output json
+cd ../../..
+scripts/uipath-with-dotnet8.sh uip rpa build "uipath/robots/PayerPortalFallback" --log-level Warn --output json
+scripts/uipath-with-dotnet8.sh uip solution pack "uipath/solution/treatment-access-command-center" --dry-run --output json
 ```
+
+If the source project under `uipath/robots/PayerPortalFallback` changes, mirror
+the same workflow changes into the imported solution copy before running the
+solution pack dry-run.
 
 Do not run `uip rpa run`, `uip rpa debug start`, or any Orchestrator job until
 the orchestrator explicitly approves live smoke against the synthetic portal.

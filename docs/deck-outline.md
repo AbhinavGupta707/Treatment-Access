@@ -109,7 +109,7 @@ Visual: gate icons for evidence, clinician approval, robot handback, audit.
 
 **Title:** From hackathon proof to governed deployment
 
-- Resolve local Studio/.NET prerequisite and import the real
+- Complete UIA target indication and approved live robot smoke for the real
   `PayerPortalFallback` RPA project.
 - Run approved live smoke for Maestro, Agent Builder, Action Center, Data
   Service, Orchestrator, and solution deployment.

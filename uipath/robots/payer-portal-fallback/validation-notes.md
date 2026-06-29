@@ -10,87 +10,76 @@ uip --version
 uip rpa init --help --output json
 uip rpa init --name "PayerPortalFallback" --location "uipath/robots" --template-id "BlankTemplate" --expression-language VisualBasic --target-framework Portable --description "Synthetic payer portal prior authorization fallback robot for Treatment Access Command Center." --output json
 dotnet --list-sdks
-/Applications/UiPath\ Assistant.app/Contents/Robot/dotnet/dotnet --info
+brew install dotnet@8
+scripts/uipath-with-dotnet8.sh dotnet --info
+uip rpa analyzer-rules list --scope Workflow --output json
+uip rpa validate --file-path Main.xaml --output json
+scripts/uipath-with-dotnet8.sh uip rpa build "uipath/robots/PayerPortalFallback" --log-level Warn --output json
 uip solution init --help --output json
 uip solution init uipath/solution/treatment-access-command-center --output json
+uip solution project import --source "uipath/robots/PayerPortalFallback" --solutionFile "uipath/solution/treatment-access-command-center/treatment-access-command-center.uipx" --output json
 uip solution project list --solution-folder uipath/solution/treatment-access-command-center --output json
+uip solution resource refresh --solution-folder uipath/solution/treatment-access-command-center --output json
 uip login status --output json
 uip or folders get "TreatmentAccessHackathon" --output json
 uip or folders runtimes TreatmentAccessHackathon --output json
-uip solution pack uipath/solution/treatment-access-command-center --dry-run --output json
+scripts/uipath-with-dotnet8.sh uip solution pack uipath/solution/treatment-access-command-center --dry-run --output json
 node -e "for (const f of ['uipath/robots/payer-portal-fallback/robot-contract.json','uipath/solution/treatment-access-command-center/treatment-access-command-center.uipx']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('json ok')"
 CI=true pnpm verify:setup
 git diff --check
 ```
 
-## Local RPA Hard Stop
+## Local RPA Runtime Fix
 
-`uip rpa init` was re-attempted on 2026-06-29 with the explicit
+`uip rpa init` was rerun on 2026-06-29 with the explicit
 `--target-framework Portable` and `--expression-language VisualBasic` flags. It
-returned a JSON envelope with `Result: Success`, but the nested tool result was
-`success: false` and no project directory was created.
-
-Blocking error:
+returned `success: true` and created:
 
 ```text
-/Applications/UiPath Assistant.app/Contents/Robot/dotnet/dotnet restore failed
-The application 'restore' does not exist.
-No .NET SDKs were found.
+uipath/robots/PayerPortalFallback/project.json
+uipath/robots/PayerPortalFallback/project.uiproj
+uipath/robots/PayerPortalFallback/Main.xaml
 ```
 
-Additional command output confirms the SDK layer is missing:
+The first build attempt exposed that the compiler specifically needs .NET 8:
 
 ```text
-dotnet: command not found
-/Applications/UiPath Assistant.app/Contents/Robot/dotnet/dotnet --info
-.NET SDKs installed:
-  No SDKs were found.
+Framework: 'Microsoft.NETCore.App', version '8.0.0' (arm64)
+The following frameworks were found:
+  10.0.9 at [/usr/local/share/dotnet/shared/Microsoft.NETCore.App]
 ```
 
-Closest successful static checks:
+Homebrew `dotnet@8` was installed side-by-side under
+`/opt/homebrew/opt/dotnet@8/libexec`. Use
+`scripts/uipath-with-dotnet8.sh` for local RPA build and solution pack commands
+so UiPath's workflow compiler runs with the required .NET 8 runtime/SDK.
 
-- Local UiPath skills installed successfully after network approval.
-- `uip rpa init --help --output json` confirmed the required `init` surface and
-  explicit `--target-framework` / `--expression-language` flags.
-- `uip solution init --help --output json` confirmed the post-rename solution
-  CLI surface.
-- `uip solution project list` confirmed the local solution shell is valid and
-  currently has no registered projects.
-- JSON parsing passed for `robot-contract.json` and the generated `.uipx`
-  manifest.
-- `uip login status --output json` succeeded with live read-only discovery after
-  escalation and confirmed org `galacticus`, tenant `DefaultTenant`.
-- `CI=true pnpm verify:setup` passed after rerunning with network approval for
-  npm registry access. The first sandboxed attempt failed with npm registry
-  `ENOTFOUND`.
-- `git diff --check` passed.
-- Read-only Orchestrator discovery confirmed `TreatmentAccessHackathon` exists
-  with folder key `4fba2fa1-012b-469a-b6aa-e5be3811c173`.
-- Read-only runtime discovery reported `Development` runtime total `1`,
-  connected `1`, available `1`.
+Successful static checks after the fix:
 
-Expected solution dry-run status:
+- `uip rpa analyzer-rules list --scope Workflow --output json` returned enabled
+  workflow analyzer rules.
+- `uip rpa validate --file-path Main.xaml --output json` from the project folder
+  returned `No diagnostics found`.
+- `scripts/uipath-with-dotnet8.sh uip rpa build ...` returned
+  `Result: Success` and `Data.Success=true`.
+- `uip solution project import ...` imported the project as
+  `PayerPortalFallback/project.uiproj`.
+- `uip solution project list ...` lists `PayerPortalFallback` as a `Process`.
+- `uip solution resource refresh ...` returned `Warnings: []` and no external
+  resource bindings.
+- `scripts/uipath-with-dotnet8.sh uip solution pack ... --dry-run --output json`
+  returned `Status: Valid`.
 
-- `uip solution pack ... --dry-run` failed with
-  `Solution definition empty or not found` because the solution manifest has no
-  registered projects until the RPA init blocker is resolved. No publish,
-  upload, deploy, or activation was attempted.
+Remaining implementation path:
 
-## Manual Remediation Path
-
-1. Install a .NET SDK that is visible to the UiPath Assistant/Robot headless
-   Studio restore path, or configure `HELM_NUGET_SOURCE` to a working local feed
-   that avoids the missing-SDK restore failure.
-2. Rerun the exact `uip rpa init` command above.
-3. Confirm `uipath/robots/PayerPortalFallback/project.json` and `Main.xaml`
-   exist.
-4. Follow `studio-indication-checklist.md` to replace every `TODO Indicate`
-   portal target through UiPath Object Repository capture or Studio Indicate.
-5. Register the real project into the solution with `uip solution project add`
-   if created inside the solution folder, or `uip solution project import` if
-   created under `uipath/robots`.
-6. Run local validation/build commands only. Do not execute the robot or start a
-   job until approval is granted per `live-smoke-approval-gate.md`.
+1. Follow `studio-indication-checklist.md` to add/capture the real UiPath UI
+   Automation activities against the synthetic mock payer portal.
+2. Re-run RPA validate/build through `scripts/uipath-with-dotnet8.sh`.
+3. Re-import or sync the solution copy if the source project changes.
+4. Re-run `uip solution project list`, `uip solution resource refresh`, and
+   solution pack dry-run.
+5. Do not execute the robot or start a job until approval is granted per
+   `live-smoke-approval-gate.md`.
 
 ## Not Run
 

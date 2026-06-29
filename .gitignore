@@ -23,6 +23,7 @@ coverage/
 # UiPath local/generated assets
 .uipath/.skills/
 .agents/skills/
+uipath/**/.local/
 UiPath Assistant*.dmg
 *.nupkg
 *.uipx

@@ -13,30 +13,33 @@ Allowed creation command:
 uip rpa init --name "PayerPortalFallback" --location "uipath/robots" --template-id "BlankTemplate" --expression-language VisualBasic --target-framework Portable --description "Synthetic payer portal prior authorization fallback robot for Treatment Access Command Center." --output json
 ```
 
-The command was re-attempted on 2026-06-29 in the Checkpoint 5 RPA lane and did
-not create a project because the local UiPath Assistant Robot bundled `dotnet`
-runtime still cannot run `dotnet restore` without a .NET SDK.
+The command was rerun successfully on 2026-06-29 after installing .NET 8 via
+Homebrew. It created the real UiPath project shell at
+`uipath/robots/PayerPortalFallback`.
 
-Blocked error excerpt:
+Verified local checks:
 
-```text
-The application 'restore' does not exist.
-No .NET SDKs were found.
+```bash
+cd "uipath/robots/PayerPortalFallback"
+uip rpa validate --file-path Main.xaml --output json
+cd ../../..
+scripts/uipath-with-dotnet8.sh uip rpa build "uipath/robots/PayerPortalFallback" --log-level Warn --output json
+uip solution project import --source "uipath/robots/PayerPortalFallback" --solutionFile "uipath/solution/treatment-access-command-center/treatment-access-command-center.uipx" --output json
+uip solution project list --solution-folder "uipath/solution/treatment-access-command-center" --output json
+uip solution resource refresh --solution-folder "uipath/solution/treatment-access-command-center" --output json
+scripts/uipath-with-dotnet8.sh uip solution pack "uipath/solution/treatment-access-command-center" --dry-run --output json
 ```
 
-Do not hand-write `project.json`, `project.uiproj`, or a fake solution project
-entry to bypass this. Once the SDK/Helm restore prerequisite is fixed, first
-rerun the command above. If it creates the project directly under the solution
-folder, register it in the local solution with:
+The source project is copied into the local solution by `uip solution project
+import`. If future work creates a project directly under the solution folder,
+register it with:
 
 ```bash
 uip solution project add uipath/solution/treatment-access-command-center/PayerPortalFallback uipath/solution/treatment-access-command-center/treatment-access-command-center.uipx --output json
 ```
 
-If the project is created under `uipath/robots/PayerPortalFallback` instead,
-use `uip solution project import --source uipath/robots/PayerPortalFallback`
-from the solution folder so the project is copied into the solution before
-registration.
+If future work edits the source project under `uipath/robots/PayerPortalFallback`,
+re-import or sync the solution copy before pack/deploy validation.
 
 After any successful `project add` or `project import`, verify membership with:
 
@@ -62,7 +65,8 @@ UiPath-written event records.
   shape.
 - `studio-indication-checklist.md` lists the UIA activities and portal targets
   that must be indicated in Studio.
-- `validation-notes.md` records the local CLI evidence and hard stop.
+- `validation-notes.md` records the local CLI evidence, .NET 8 fix, validation,
+  build, import, resource refresh, and solution pack dry-run.
 - `live-smoke-approval-gate.md` lists the exact approval gates before any live
   robot execution, Orchestrator job start, solution publish/deploy, event write,
   or payer portal submission.

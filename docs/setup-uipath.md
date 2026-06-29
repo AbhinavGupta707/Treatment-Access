@@ -123,26 +123,44 @@ uip rpa init --help --output json
 uip solution init --help --output json
 ```
 
-Checkpoint 5 re-attempted the real project creation command:
+The real project creation command was successfully rerun on 2026-06-29 after
+installing .NET 8 side-by-side with the existing .NET 10 install:
 
 ```bash
 uip rpa init --name "PayerPortalFallback" --location "uipath/robots" --template-id "BlankTemplate" --expression-language VisualBasic --target-framework Portable --description "Synthetic payer portal prior authorization fallback robot for Treatment Access Command Center." --output json
 ```
 
-The command still cannot create the project on this Mac. The outer CLI envelope
-returns `Result: Success`, but the nested RPA tool result is `success: false`
-because the UiPath Assistant-bundled `dotnet` runtime has no SDK:
+Project shell now exists at:
 
 ```text
-/Applications/UiPath Assistant.app/Contents/Robot/dotnet/dotnet restore failed
-The application 'restore' does not exist.
-No .NET SDKs were found.
+uipath/robots/PayerPortalFallback
+uipath/solution/treatment-access-command-center/PayerPortalFallback
 ```
 
-Do not hand-write `project.json`, `project.uiproj`, XAML, or solution metadata
-to bypass this. After installing a .NET SDK visible to the Assistant/Robot
-headless Studio restore path, rerun the exact `uip rpa init` command above,
-then follow
+Use the repo helper when running UiPath RPA build/pack commands locally. It
+selects Homebrew's .NET 8 install when present:
+
+```bash
+scripts/uipath-with-dotnet8.sh uip rpa build "uipath/robots/PayerPortalFallback" --log-level Warn --output json
+scripts/uipath-with-dotnet8.sh uip solution pack "uipath/solution/treatment-access-command-center" --dry-run --output json
+```
+
+Verified local checks after the fix:
+
+- `uip rpa validate --file-path Main.xaml --output json` from
+  `uipath/robots/PayerPortalFallback` returned no diagnostics.
+- `scripts/uipath-with-dotnet8.sh uip rpa build ...` returned
+  `Data.Success=true`.
+- `uip solution project import --source ... --solutionFile ...` imported the
+  project into `treatment-access-command-center.uipx`.
+- `uip solution project list --solution-folder ... --output json` lists
+  `PayerPortalFallback` as a `Process`.
+- `uip solution resource refresh --solution-folder ... --output json` returned
+  no warnings and no external bindings.
+- `scripts/uipath-with-dotnet8.sh uip solution pack ... --dry-run --output json`
+  returned `Status=Valid`.
+
+Do not hand-write UiPath project metadata. Follow
 `uipath/robots/payer-portal-fallback/live-smoke-approval-gate.md` before any
 robot execution, Orchestrator job start, solution publish/deploy, event write,
 or portal submission.

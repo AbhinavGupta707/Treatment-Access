@@ -75,18 +75,18 @@ Core implementation pieces:
 
 ## UiPath Components
 
-| Component                  | How it is used                                                                               | Current proof                                                                                                 |
-| -------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| Maestro Case               | Coordinates the treatment access lifecycle and secondary exception stages.                   | SDD and case lifecycle documented under `uipath/maestro`.                                                     |
-| Agent Builder              | Hosts seven domain agents with distinct contracts and visible trace payloads.                | Local Agent Builder packets exist; static `uip agent validate` was recorded during Checkpoint 3.              |
-| API Workflows              | Calls mock EHR, payer, pharmacy, and event mirror endpoints.                                 | Workflow JSON artifacts exist and Checkpoint 2 validation was recorded.                                       |
-| Action Center              | Holds clinician evidence approval, appeal signoff, and exception review gates.               | Task contracts and prompts exist; no live tasks were created.                                                 |
-| Data Service/Data Fabric   | Stores case, evidence, task, decision, appeal, and audit shapes in the intended live system. | Entity model documented; no live Data Service writes were performed.                                          |
-| Orchestrator               | Provides folder, runtime, assets, logs, and future robot job governance.                     | Folder `TreatmentAccessHackathon` and development runtime discovered; no jobs started.                        |
-| Assistant/Robot            | Executes the payer portal fallback when payer API is unavailable.                            | Assistant/Robot available; real RPA project creation remains blocked by .NET SDK/Studio restore prerequisite. |
-| IXP/Document Understanding | Preferred production extraction path for policies, chart evidence, and denial letters.       | Service is reachable, but local CLI lacks `uip ixp`; fallback parser preserves source spans and confidence.   |
-| UiPath Apps                | Intended case intake/operator surface.                                                       | Intake contracts and launch workflow documentation exist.                                                     |
-| Solutions                  | Packages the live UiPath project boundary.                                                   | Local solution shell exists; upload/publish/deploy/activate have not run.                                     |
+| Component                  | How it is used                                                                               | Current proof                                                                                                                                              |
+| -------------------------- | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Maestro Case               | Coordinates the treatment access lifecycle and secondary exception stages.                   | SDD and case lifecycle documented under `uipath/maestro`.                                                                                                  |
+| Agent Builder              | Hosts seven domain agents with distinct contracts and visible trace payloads.                | Local Agent Builder packets exist; static `uip agent validate` was recorded during Checkpoint 3.                                                           |
+| API Workflows              | Calls mock EHR, payer, pharmacy, and event mirror endpoints.                                 | Workflow JSON artifacts exist and Checkpoint 2 validation was recorded.                                                                                    |
+| Action Center              | Holds clinician evidence approval, appeal signoff, and exception review gates.               | Task contracts and prompts exist; no live tasks were created.                                                                                              |
+| Data Service/Data Fabric   | Stores case, evidence, task, decision, appeal, and audit shapes in the intended live system. | Entity model documented; no live Data Service writes were performed.                                                                                       |
+| Orchestrator               | Provides folder, runtime, assets, logs, and future robot job governance.                     | Folder `TreatmentAccessHackathon` and development runtime discovered; no jobs started.                                                                     |
+| Assistant/Robot            | Executes the payer portal fallback when payer API is unavailable.                            | Real `PayerPortalFallback` project shell exists, builds with the repo .NET 8 helper, and is imported into the solution; UIA capture/run/job remains gated. |
+| IXP/Document Understanding | Preferred production extraction path for policies, chart evidence, and denial letters.       | Service is reachable, but local CLI lacks `uip ixp`; fallback parser preserves source spans and confidence.                                                |
+| UiPath Apps                | Intended case intake/operator surface.                                                       | Intake contracts and launch workflow documentation exist.                                                                                                  |
+| Solutions                  | Packages the live UiPath project boundary.                                                   | Local solution shell exists; upload/publish/deploy/activate have not run.                                                                                  |
 
 ## Seven-Agent Story
 
@@ -154,27 +154,28 @@ Use this path for the five-minute video and live judge walkthrough:
     timeline.
 13. Close by stating exactly which live UiPath actions remain approval-gated.
 
-If live RPA is not approved or the .NET SDK prerequisite is still blocked, say:
+If live RPA is not approved or UIA capture/job execution has not been approved,
+say:
 
 > The demo uses the local synthetic portal fallback proof. The real UiPath RPA
-> run and Orchestrator job are approval-gated and currently await the documented
-> local .NET SDK/Studio restore prerequisite. We did not fake UiPath XAML or
-> claim a live job that did not run.
+> project shell is created, validated, imported into the solution, and pack
+> dry-run valid. We did not run a live UiPath RPA job or claim a live job that
+> did not run.
 
 ## Mocked Vs Live Statement
 
 Use this as the Devpost transparency section:
 
-| Area             | What is working locally                                                                                                 | What is not claimed                                                                                      |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Synthetic data   | Deterministic fictional patient, payer, policy, evidence, denial, and audit data.                                       | No real PHI, payer, provider, credential, or patient data.                                               |
-| Command Center   | Renders case state, evidence matrix, seven agent traces, fallback, denial, appeal, care, and audit views.               | It is not claimed as the live system of record.                                                          |
-| Mock API         | Supports health, reset, toggles, event ingestion, payer unavailable behavior, portal fallback success, and state reads. | It is not a real payer/EHR/pharmacy integration.                                                         |
-| Seven agents     | Local contracts and deterministic smoke runtime prove behavior and trace/audit payloads.                                | No live Agent Builder run/debug is claimed.                                                              |
-| UiPath workflows | Maestro/API Workflow/Action Center/Data Service artifacts and runbooks exist.                                           | No live side-effecting Maestro run, task creation, Data Service write, or workflow execution is claimed. |
-| Portal fallback  | Mock payer portal and local fallback smoke prove API-down-to-portal-confirmation behavior.                              | No live RPA run, Orchestrator job, or external payer portal submission is claimed.                       |
-| IXP/DU           | Fallback parser keeps source spans and confidence so IXP can be swapped in later.                                       | No IXP project mutation or live extraction deployment is claimed.                                        |
-| Solution         | Local solution shell documents intended packaging.                                                                      | No solution upload, publish, deploy, or activation is claimed.                                           |
+| Area             | What is working locally                                                                                                            | What is not claimed                                                                                      |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Synthetic data   | Deterministic fictional patient, payer, policy, evidence, denial, and audit data.                                                  | No real PHI, payer, provider, credential, or patient data.                                               |
+| Command Center   | Renders case state, evidence matrix, seven agent traces, fallback, denial, appeal, care, and audit views.                          | It is not claimed as the live system of record.                                                          |
+| Mock API         | Supports health, reset, toggles, event ingestion, payer unavailable behavior, portal fallback success, and state reads.            | It is not a real payer/EHR/pharmacy integration.                                                         |
+| Seven agents     | Local contracts and deterministic smoke runtime prove behavior and trace/audit payloads.                                           | No live Agent Builder run/debug is claimed.                                                              |
+| UiPath workflows | Maestro/API Workflow/Action Center/Data Service artifacts and runbooks exist.                                                      | No live side-effecting Maestro run, task creation, Data Service write, or workflow execution is claimed. |
+| Portal fallback  | Mock payer portal, local fallback smoke, and real UiPath RPA project/solution shell prove the API-down-to-portal handoff boundary. | No live RPA run, Orchestrator job, UIA target capture, or external payer portal submission is claimed.   |
+| IXP/DU           | Fallback parser keeps source spans and confidence so IXP can be swapped in later.                                                  | No IXP project mutation or live extraction deployment is claimed.                                        |
+| Solution         | Local solution shell includes `PayerPortalFallback` and passes pack dry-run.                                                       | No solution upload, publish, deploy, or activation is claimed.                                           |
 
 ## Safety And Privacy
 
@@ -300,9 +301,9 @@ the dependency and list the narrower local check that was run instead.
 
 ## Limitations
 
-- Real RPA project creation is blocked locally until the UiPath headless Studio
-  restore path has a .NET SDK available. The repo documents this and does not
-  fake a UiPath RPA project.
+- Real RPA project creation is unblocked locally. `PayerPortalFallback` exists
+  as a UiPath project shell, validates, builds with `scripts/uipath-with-dotnet8.sh`,
+  is imported into the local solution, and passes solution pack dry-run.
 - Live RPA execution, Orchestrator job start, solution deployment, Action Center
   task creation, Data Service writes, IXP mutation, Agent Builder run/debug, and
   Maestro run/debug remain explicit approval-gated steps.
@@ -315,10 +316,10 @@ the dependency and list the narrower local check that was run instead.
 
 ## Future Production Steps
 
-- Resolve the local .NET SDK/UiPath Studio restore prerequisite.
-- Create/import the real `PayerPortalFallback` UiPath project with indicated UIA
-  targets.
-- Register the RPA project in the UiPath solution shell.
+- Complete UiPath UI Automation indication for the real `PayerPortalFallback`
+  project against the synthetic mock payer portal.
+- Re-run RPA validate/build and solution pack dry-run after UIA targets are
+  captured.
 - Configure Orchestrator assets for API, Command Center, portal URL, and
   synthetic credentials.
 - Publish and run a live approval-gated robot smoke against the mock payer

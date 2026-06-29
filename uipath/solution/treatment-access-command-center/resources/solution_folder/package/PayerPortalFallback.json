@@ -1,0 +1,23 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "PayerPortalFallback",
+    "kind": "package",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "a48571ee-1a5c-43df-9d5e-1e419e5b4a1f",
+    "isOverridable": true,
+    "dependencies": [],
+    "runtimeDependencies": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "name": "PayerPortalFallback"
+    },
+    "locks": [],
+    "key": "e0ca7391-0664-4c0b-82fc-f4af76fcdd28",
+    "files": []
+  }
+}

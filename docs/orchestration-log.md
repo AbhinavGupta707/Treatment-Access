@@ -452,11 +452,12 @@ Checkpoint 4 result:
 - The QA smoke proves API failure -> portal fallback -> robot event -> Command
   Center-visible state without live UiPath side effects.
 
-Remaining live-readiness risk:
+Remaining live-readiness risk at Checkpoint 4 closeout:
 
-- A real UiPath RPA project/package is not yet created because local
-  `uip rpa init` is blocked by the missing .NET SDK/UiPath headless Studio Helm
-  restore prerequisite. Live RPA run/debug, Orchestrator job start, solution
+- A real UiPath RPA project/package had not yet been created because local
+  `uip rpa init` was blocked by the missing .NET SDK/UiPath headless Studio Helm
+  restore prerequisite. This was superseded by the post-Checkpoint 5 RPA runtime
+  unblock below. Live RPA run/debug, Orchestrator job start, solution
   upload/publish/deploy/activate, Action Center task creation, Data Service
   writes, and any payer submission still require explicit approval.
 
@@ -550,14 +551,47 @@ Checkpoint 5 result:
   live UiPath captures.
 - `CI=true pnpm verify:submission-readiness` statically checks required
   submission artifacts, safety wording, and mocked-vs-live disclosures.
-- RPA setup docs record the current real blocker rather than fabricating UiPath
-  artifacts: `uip rpa init` still reaches a missing .NET SDK restore failure.
+- RPA setup docs recorded the then-current real blocker rather than fabricating
+  UiPath artifacts: `uip rpa init` still reached a missing .NET SDK restore
+  failure at Checkpoint 5 closeout. This was superseded by the post-Checkpoint 5
+  RPA runtime unblock below.
 
-Remaining manual/live work:
+Remaining manual/live work at Checkpoint 5 closeout:
 
 - Install a .NET SDK visible to UiPath Assistant/Robot's headless Studio restore
-  path before creating the real `PayerPortalFallback` RPA project.
+  path before creating the real `PayerPortalFallback` RPA project. This was
+  superseded by the post-Checkpoint 5 RPA runtime unblock below.
 - Live RPA run/debug, Orchestrator job start, solution upload/publish/deploy,
   Action Center task creation, Data Service writes, Agent Builder/Maestro
   debug, IXP mutation, and real payer submission remain explicit approval-gated
   actions.
+
+## 2026-06-29 - Post-Checkpoint 5 RPA Runtime Unblock
+
+After the Checkpoint 5 closeout, the user installed a system .NET SDK and reran
+the real `uip rpa init` command. The command returned `success: true` and
+created `uipath/robots/PayerPortalFallback`.
+
+Follow-up integration work completed in the main worktree:
+
+- Installed Homebrew `dotnet@8` because UiPath's
+  `UiPath.WorkflowCompiler.dll` targets `Microsoft.NETCore.App` 8.0.
+- Added `scripts/uipath-with-dotnet8.sh` to select Homebrew's .NET 8 runtime
+  for local UiPath build/pack checks.
+- Verified the source RPA shell with `uip rpa analyzer-rules list`,
+  `uip rpa validate --file-path Main.xaml`, and
+  `scripts/uipath-with-dotnet8.sh uip rpa build ...`.
+- Imported the project into
+  `uipath/solution/treatment-access-command-center` with
+  `uip solution project import`.
+- Verified `uip solution project list` includes `PayerPortalFallback` as a
+  `Process`.
+- Ran `uip solution resource refresh` with no warnings or external bindings.
+- Ran `scripts/uipath-with-dotnet8.sh uip solution pack ... --dry-run`; result
+  was `Status: Valid`.
+
+No live RPA run/debug, Orchestrator job start, solution upload/publish/deploy,
+Action Center task creation, Data Service write, Agent Builder/Maestro debug,
+IXP mutation, or payer submission was performed. Remaining live-readiness work
+is UIA target indication against the synthetic mock payer portal followed by
+approved live smoke.

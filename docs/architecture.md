@@ -61,17 +61,17 @@ flowchart TB
 
 ## UiPath Components
 
-| Component                  | Role in the product                                                                              | Current truthful status                                                                                            |
-| -------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| Maestro Case               | Owns the case lifecycle, stages, exception paths, and work handoffs.                             | Case design artifacts exist. Live debug/run remains approval-gated.                                                |
-| Agent Builder              | Hosts seven specialized operators with schema-bounded outputs and trace/audit envelopes.         | Local Agent Builder packets and deterministic runtime smoke exist. Live Agent Builder debug/run is approval-gated. |
-| API Workflows              | Pull EHR/order data, call payer/pharmacy/event endpoints, and write event records.               | Static workflow artifacts and local mock contracts exist. Side-effecting live runs require approval.               |
-| Action Center              | Captures clinician evidence validation, missing evidence review, appeal signoff, and exceptions. | Task schemas and sample payloads exist. Live task creation/completion is approval-gated.                           |
-| Orchestrator               | Governs folders, jobs, assets, logs, and the robot fallback execution path.                      | Folder and runtime discovery have been verified. Job start is approval-gated.                                      |
-| Assistant/Robot            | Executes portal fallback against the synthetic payer portal when the API channel is down.        | Robot contract and setup notes exist. A real RPA project/run depends on the local Studio/.NET prerequisite.        |
-| Data Service/Data Fabric   | Intended durable case/event record system for live UiPath-written state.                         | Data model artifacts exist. Live writes are approval-gated.                                                        |
-| IXP/Document Understanding | Preferred extraction path for policy and denial documents when available.                        | IXP command surface is not currently registered locally; fallback parser preserves schema-compatible source spans. |
-| Solution                   | Bundles UiPath projects for Studio Web/deployment lifecycle.                                     | Solution shell exists. Upload, publish, deploy, and activation are approval-gated.                                 |
+| Component                  | Role in the product                                                                              | Current truthful status                                                                                                            |
+| -------------------------- | ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Maestro Case               | Owns the case lifecycle, stages, exception paths, and work handoffs.                             | Case design artifacts exist. Live debug/run remains approval-gated.                                                                |
+| Agent Builder              | Hosts seven specialized operators with schema-bounded outputs and trace/audit envelopes.         | Local Agent Builder packets and deterministic runtime smoke exist. Live Agent Builder debug/run is approval-gated.                 |
+| API Workflows              | Pull EHR/order data, call payer/pharmacy/event endpoints, and write event records.               | Static workflow artifacts and local mock contracts exist. Side-effecting live runs require approval.                               |
+| Action Center              | Captures clinician evidence validation, missing evidence review, appeal signoff, and exceptions. | Task schemas and sample payloads exist. Live task creation/completion is approval-gated.                                           |
+| Orchestrator               | Governs folders, jobs, assets, logs, and the robot fallback execution path.                      | Folder and runtime discovery have been verified. Job start is approval-gated.                                                      |
+| Assistant/Robot            | Executes portal fallback against the synthetic payer portal when the API channel is down.        | Real RPA project shell exists, builds, and is imported into the solution. UIA capture and live run/job remain gated.               |
+| Data Service/Data Fabric   | Intended durable case/event record system for live UiPath-written state.                         | Data model artifacts exist. Live writes are approval-gated.                                                                        |
+| IXP/Document Understanding | Preferred extraction path for policy and denial documents when available.                        | IXP command surface is not currently registered locally; fallback parser preserves schema-compatible source spans.                 |
+| Solution                   | Bundles UiPath projects for Studio Web/deployment lifecycle.                                     | Solution shell includes `PayerPortalFallback` and passes pack dry-run. Upload, publish, deploy, and activation are approval-gated. |
 
 ## Seven-Agent Operating Model
 
@@ -121,9 +121,10 @@ The fallback story is the signature exception path:
 8. The Command Center shows the fallback event, confirmation ID, channel, and
    audit trail.
 
-If live RPA execution is not approved or the local Studio/.NET prerequisite is
-unresolved, the demo uses `CI=true pnpm smoke:checkpoint4` as the deterministic
-local proof. That proof does not claim a live UiPath RPA job ran.
+If live RPA execution and UIA target capture are not approved, the demo uses
+`CI=true pnpm smoke:checkpoint4` as the deterministic local proof. The real RPA
+project and solution shell are present, but that proof does not claim a live
+UiPath RPA job ran.
 
 ## Mocked Vs Live Boundaries
 

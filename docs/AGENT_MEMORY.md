@@ -17,6 +17,14 @@ Treatment Access Command Center for UiPath AgentHack 2026 Track 1 - Maestro Case
 
 Assistant/Robot is installed and available. The connected workspace machine is assigned to `TreatmentAccessHackathon`, and the folder reports one connected/available `Development` runtime. The tenant's single `Unattended` license is intentionally unallocated; reserve it later only if the final RPA portal fallback must run as a fully unattended Orchestrator job.
 
+Post-checkpoint RPA unblock: `.NET 8` is installed through Homebrew
+`dotnet@8`, and `scripts/uipath-with-dotnet8.sh` selects it for UiPath RPA
+build/pack commands. The real `PayerPortalFallback` project shell exists under
+`uipath/robots/PayerPortalFallback`, is imported into
+`uipath/solution/treatment-access-command-center/PayerPortalFallback`, validates,
+builds, and passes solution pack dry-run. Remaining live risk is UIA target
+capture plus approved robot/job/deploy/write execution, not project creation.
+
 ## Checkpoint 1 Status
 
 Checkpoint 1 is merged and verified on `main`.
@@ -167,8 +175,9 @@ Checkpoint 4 interim merge progress before final closeout:
   still returns `PAYER_API_DOWN`.
 - UiPath Robot & Runtime Wiring merged into `main` as `2e9979a`; it includes a
   solution shell, robot contract, Studio indication checklist, and validation
-  notes. A real RPA project is not yet created because `uip rpa init` is blocked
-  by the local missing .NET SDK/Helm restore prerequisite.
+  notes. At Checkpoint 4 closeout, a real RPA project had not yet been created
+  because `uip rpa init` was blocked by the local missing .NET SDK/Helm restore
+  prerequisite.
 - Command Center Demo UX was still active in
   `/Users/abhinavgupta/.codex/worktrees/2a44/Treatment Access`.
 - Integration QA & Demo Proof committed `c1c518b` and was reviewed but held
@@ -295,13 +304,24 @@ Checkpoint 5 evidence screenshots:
 - `uipath/screenshots/mock-payer-portal-local.png`
 - `uipath/screenshots/mock-payer-portal-confirmation-local.png`
 
-Known remaining blocker:
+Post-checkpoint RPA unblock:
 
-- The real `PayerPortalFallback` UiPath RPA project still cannot be created on
-  this Mac because `uip rpa init` reaches the headless Studio restore path, but
-  the UiPath Assistant-bundled `dotnet` runtime has no SDK available. The exact
-  remediation and approval-gated smoke path are documented under
-  `uipath/robots/payer-portal-fallback`.
+- Homebrew `dotnet@8` installed .NET 8.0.128 SDK / 8.0.28 runtime side-by-side
+  with the existing .NET 10 install.
+- Added `scripts/uipath-with-dotnet8.sh` so local UiPath build/pack commands use
+  the .NET 8 runtime expected by `UiPath.WorkflowCompiler.dll`.
+- Created the real `uipath/robots/PayerPortalFallback` project via
+  `uip rpa init`.
+- Verified `Main.xaml` with `uip rpa validate`, built with
+  `scripts/uipath-with-dotnet8.sh uip rpa build`, imported the project into the
+  local solution, ran `uip solution resource refresh`, and confirmed
+  `scripts/uipath-with-dotnet8.sh uip solution pack ... --dry-run` returns
+  `Status: Valid`.
+
+Known remaining live-readiness work:
+
+- Complete UIA target indication against the synthetic mock payer portal, then
+  re-run RPA validate/build and solution pack dry-run.
 
 Runtime safety remains unchanged: live RPA run/debug, Orchestrator job start,
 solution upload/publish/deploy/activate, agent debug, Maestro debug, IXP
