@@ -41,12 +41,8 @@
   "closureReadiness": {
     "closure_ready": false,
     "next_stage": "care_continuity",
-    "blockers": [
-      "pharmacy_scheduling_handoff_workflow_not_yet_executed"
-    ],
-    "required_events_before_audit": [
-      "pharmacy_handoff_completed"
-    ]
+    "blockers": ["pharmacy_scheduling_handoff_workflow_not_yet_executed"],
+    "required_events_before_audit": ["pharmacy_handoff_completed"]
   },
   "eventPayloads": [
     {
@@ -58,9 +54,7 @@
       "action": "care_handoff_ready",
       "input_summary": "Appeal approval approval-syn-appeal-001 is present for synthetic case case-syn-001.",
       "output_summary": "Prepared pharmacy-scheduling-handoff.workflow.json invocation payload.",
-      "evidence_refs": [
-        "decision-appeal-approved-syn-001"
-      ],
+      "evidence_refs": ["decision-appeal-approved-syn-001"],
       "payer_status": "appeal_approved",
       "timestamp": "2026-06-28T22:35:00.000Z"
     }
@@ -68,12 +62,8 @@
   "traceSummary": {
     "agent_name": "Care Continuity Agent",
     "status": "completed",
-    "tool_calls": [
-      "pharmacy_scheduling_handoff_api_workflow_planned"
-    ],
-    "evidence_refs": [
-      "decision-appeal-approved-syn-001"
-    ]
+    "tool_calls": ["pharmacy_scheduling_handoff_api_workflow_planned"],
+    "evidence_refs": ["decision-appeal-approved-syn-001"]
   },
   "synthetic_data_disclaimer": "Synthetic fictional demo data; pharmacy handoff is administrative coordination only."
 }

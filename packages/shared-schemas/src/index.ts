@@ -423,12 +423,11 @@ const BaseAgentInputSchema = z.object({
   demo_toggles: z.lazy(() => DemoTogglesSchema),
 });
 
-export const CoverageRequirementAgentInputSchema =
-  BaseAgentInputSchema.extend({
-    agent_id: z.literal("coverage-requirement"),
-    payer_policy: PayerPolicySchema,
-    criteria: z.array(PolicyCriterionSchema),
-  });
+export const CoverageRequirementAgentInputSchema = BaseAgentInputSchema.extend({
+  agent_id: z.literal("coverage-requirement"),
+  payer_policy: PayerPolicySchema,
+  criteria: z.array(PolicyCriterionSchema),
+});
 
 export const CoverageRequirementAgentOutputSchema = z.object({
   agent_id: z.literal("coverage-requirement"),
@@ -579,7 +578,9 @@ export const AgentRuntimeSummarySchema = z.object({
   evidence_refs: z.array(z.string()).default([]),
   synthetic_data_disclaimer: z
     .string()
-    .default("Synthetic deterministic agent runtime; no live UiPath execution."),
+    .default(
+      "Synthetic deterministic agent runtime; no live UiPath execution.",
+    ),
 });
 
 export const DemoTogglesSchema = z.object({

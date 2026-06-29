@@ -90,13 +90,8 @@
       ]
     }
   ],
-  "evidence_artifacts_used": [
-    "artifact-progress-note",
-    "artifact-med-history"
-  ],
-  "blocking_missing_criteria": [
-    "criterion-safety-screen"
-  ],
+  "evidence_artifacts_used": ["artifact-progress-note", "artifact-med-history"],
+  "blocking_missing_criteria": ["criterion-safety-screen"],
   "human_review_recommended": true,
   "source_grounding_warnings": [
     "Safety screening criterion is blocking and no source artifact is present in the synthetic chart snapshot."

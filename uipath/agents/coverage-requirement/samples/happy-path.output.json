@@ -1,9 +1,6 @@
 {
   "authorization_required": true,
-  "submission_channels": [
-    "payer_api",
-    "payer_portal_rpa"
-  ],
+  "submission_channels": ["payer_api", "payer_portal_rpa"],
   "criteria": [
     {
       "criterion_id": "criterion-diagnosis",
@@ -98,10 +95,7 @@
     "effective_date": "2026-01-01",
     "source_uri": "fixture://policies/aurora-vale-fictionalimab-policy.md",
     "summary": "Synthetic payer policy requiring diagnosis confirmation, prior therapy history, safety screening, and clinician attestation before approval.",
-    "submission_channels": [
-      "payer_api",
-      "payer_portal_rpa"
-    ],
+    "submission_channels": ["payer_api", "payer_portal_rpa"],
     "required_documents": [
       "specialist progress note",
       "medication history",
@@ -171,8 +165,6 @@
       "extraction_fallback_parser",
       "schema_validator"
     ],
-    "evidence_refs": [
-      "artifact-policy"
-    ]
+    "evidence_refs": ["artifact-policy"]
   }
 }

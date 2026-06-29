@@ -28,9 +28,7 @@
     "artifact-progress-note",
     "policy-citation-diagnosis"
   ],
-  "missing_or_weak_refs": [
-    "human-approval-diagnosis-severity"
-  ],
+  "missing_or_weak_refs": ["human-approval-diagnosis-severity"],
   "unsupported_claim_warnings": [
     "Severity or medical-necessity language cannot be submitted until a clinician approves the final draft."
   ],

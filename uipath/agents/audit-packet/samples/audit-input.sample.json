@@ -129,10 +129,7 @@
   "appealPacket": {
     "appeal_id": "appeal-syn-001",
     "clinician_approved": true,
-    "evidence_used": [
-      "mapping-step-therapy",
-      "mapping-diagnosis"
-    ],
+    "evidence_used": ["mapping-step-therapy", "mapping-diagnosis"],
     "unsupported_claim_warnings": []
   },
   "pharmacyHandoff": {

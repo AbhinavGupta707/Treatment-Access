@@ -9,9 +9,7 @@
       {
         "section_id": "case_summary",
         "title": "Case Summary",
-        "record_refs": [
-          "case-syn-001"
-        ]
+        "record_refs": ["case-syn-001"]
       },
       {
         "section_id": "policy_and_evidence",
@@ -43,10 +41,7 @@
       {
         "section_id": "care_continuity",
         "title": "Approval Handoff",
-        "record_refs": [
-          "pharmacy-handoff-syn-001",
-          "scheduling-task-syn-001"
-        ]
+        "record_refs": ["pharmacy-handoff-syn-001", "scheduling-task-syn-001"]
       }
     ],
     "included_record_refs": [
@@ -55,13 +50,8 @@
       "trace-coverage-agent-001",
       "trace-care-continuity-agent-001"
     ],
-    "approval_refs": [
-      "decision-appeal-approved-syn-001"
-    ],
-    "handoff_refs": [
-      "pharmacy-handoff-syn-001",
-      "scheduling-task-syn-001"
-    ],
+    "approval_refs": ["decision-appeal-approved-syn-001"],
+    "handoff_refs": ["pharmacy-handoff-syn-001", "scheduling-task-syn-001"],
     "disclaimers": [
       "Synthetic fictional demo data only; no real PHI.",
       "Appeal text is an administrative draft and requires clinician approval before submission.",
@@ -118,10 +108,7 @@
   "traceSummary": {
     "agent_name": "Audit Packet Agent",
     "status": "completed",
-    "tool_calls": [
-      "audit_completeness_validator",
-      "unsupported_claim_checker"
-    ],
+    "tool_calls": ["audit_completeness_validator", "unsupported_claim_checker"],
     "evidence_refs": [
       "packet-syn-001",
       "appeal-syn-001",

@@ -79,12 +79,7 @@
         "properties": {
           "handoff_status": {
             "type": "string",
-            "enum": [
-              "blocked",
-              "ready_to_invoke",
-              "completed",
-              "failed"
-            ],
+            "enum": ["blocked", "ready_to_invoke", "completed", "failed"],
             "description": "Care continuity outcome for Maestro routing."
           },
           "workflowInvocation": {
@@ -123,12 +118,7 @@
               },
               "status": {
                 "type": "string",
-                "enum": [
-                  "pending",
-                  "sent",
-                  "accepted",
-                  "failed"
-                ]
+                "enum": ["pending", "sent", "accepted", "failed"]
               },
               "pharmacy_name": {
                 "type": "string"
@@ -228,13 +218,7 @@
                 },
                 "actor_type": {
                   "type": "string",
-                  "enum": [
-                    "agent",
-                    "api_workflow",
-                    "robot",
-                    "human",
-                    "system"
-                  ]
+                  "enum": ["agent", "api_workflow", "robot", "human", "system"]
                 },
                 "actor_name": {
                   "type": "string"

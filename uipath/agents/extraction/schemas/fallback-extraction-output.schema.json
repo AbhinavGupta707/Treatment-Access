@@ -80,9 +80,7 @@
                 "type": "string"
               }
             },
-            "required": [
-              "source_uri"
-            ],
+            "required": ["source_uri"],
             "additionalProperties": false
           },
           "evidence_ref": {

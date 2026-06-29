@@ -13,9 +13,7 @@
   "patient_snapshot": {
     "patient_id": "patient-syn-001",
     "coverage_plan": "Aurora Vale Fictional Health Premier PPO",
-    "diagnosis_codes": [
-      "K50.90"
-    ],
+    "diagnosis_codes": ["K50.90"],
     "synthetic_data_disclaimer": "Synthetic fictional patient for demo use only."
   },
   "treatment_order": {

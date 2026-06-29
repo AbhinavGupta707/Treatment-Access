@@ -107,8 +107,7 @@ function runAgent(
   const output = outputForAgent(agentId, context);
   const evidenceRefs = evidenceRefsForOutput(output);
   const needsHuman = output.safety_flags.some(
-    (flag) =>
-      flag.requires_human_approval || flag.severity === "blocking",
+    (flag) => flag.requires_human_approval || flag.severity === "blocking",
   );
   const status = needsHuman ? "needs_human" : "completed";
   const traceId = `trace-runtime-${agentId}`;
@@ -266,8 +265,7 @@ function submissionPacketOutput(context: RuntimeContext): AgentOutput {
   const unsupportedClaimWarnings = unsupportedWarnings(clinicalAssertions);
   const blockedReasons = [
     ...missingBlocking.map(
-      (criterion) =>
-        `Missing blocking evidence for ${criterion.criterion_id}.`,
+      (criterion) => `Missing blocking evidence for ${criterion.criterion_id}.`,
     ),
     ...unsupportedClaimWarnings,
   ];
@@ -306,12 +304,11 @@ function denialRescueOutput(context: RuntimeContext): AgentOutput {
     documentation_gap:
       "Resolve the documentation gap with cited diagnosis and severity evidence routed for clinician attestation.",
   };
-  const evidenceGapIdsByReason: Record<DenialReasonCategory, string[]> =
-    {
-      step_therapy: ["mapping-step-therapy"],
-      safety_screen: ["mapping-safety-screen"],
-      documentation_gap: ["mapping-diagnosis"],
-    };
+  const evidenceGapIdsByReason: Record<DenialReasonCategory, string[]> = {
+    step_therapy: ["mapping-step-therapy"],
+    safety_screen: ["mapping-safety-screen"],
+    documentation_gap: ["mapping-diagnosis"],
+  };
 
   return {
     agent_id: "denial-rescue",
@@ -456,8 +453,7 @@ function payerDecisionForToggles(
   toggles: DemoToggles,
 ): PayerDecision {
   return (
-    denialLetterScenarios[toggles.denial_reason] ??
-    fixture.payerDecisions[0]
+    denialLetterScenarios[toggles.denial_reason] ?? fixture.payerDecisions[0]
   );
 }
 
@@ -520,8 +516,7 @@ function clinicalAssertionSafetyFlags(
     .filter((assertion) => assertion.status !== "supported")
     .map((assertion) => ({
       flag_id: `flag-${assertion.assertion_id}`,
-      severity:
-        assertion.status === "unsupported" ? "blocking" : "warning",
+      severity: assertion.status === "unsupported" ? "blocking" : "warning",
       code:
         assertion.status === "unsupported"
           ? "UNSUPPORTED_CLINICAL_ASSERTION"
@@ -534,9 +529,7 @@ function clinicalAssertionSafetyFlags(
     }));
 }
 
-function unsupportedWarnings(
-  assertions: ClinicalAssertionReview[],
-): string[] {
+function unsupportedWarnings(assertions: ClinicalAssertionReview[]): string[] {
   return assertions
     .filter((assertion) => assertion.status !== "supported")
     .map((assertion) => assertion.warning)
@@ -605,8 +598,7 @@ function outputSummaryForAgent(agentId: AgentId, output: AgentOutput): string {
         ? output.remediation_summary
         : "";
     case "submission-packet":
-      return output.agent_id === "submission-packet" &&
-        output.ready_to_submit
+      return output.agent_id === "submission-packet" && output.ready_to_submit
         ? "Submission packet is ready for payer API."
         : "Submission packet is blocked pending safety or clinician review.";
     case "denial-rescue":

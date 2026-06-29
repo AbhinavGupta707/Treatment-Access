@@ -35,11 +35,7 @@
                 "description": "Medication name."
               }
             },
-            "required": [
-              "case_id",
-              "patient_id",
-              "order_id"
-            ]
+            "required": ["case_id", "patient_id", "order_id"]
           },
           "criteria": {
             "type": "array",
@@ -67,11 +63,7 @@
                 "severity": {
                   "type": "string",
                   "description": "Downstream blocking severity.",
-                  "enum": [
-                    "blocking",
-                    "warning",
-                    "informational"
-                  ]
+                  "enum": ["blocking", "warning", "informational"]
                 },
                 "must_be_clinician_attested": {
                   "type": "boolean",
@@ -122,9 +114,7 @@
                       "description": "Short synthetic excerpt, maximum 280 characters."
                     }
                   },
-                  "required": [
-                    "source_uri"
-                  ]
+                  "required": ["source_uri"]
                 },
                 "version": {
                   "type": "string",
@@ -238,11 +228,7 @@
                 },
                 "status": {
                   "type": "string",
-                  "enum": [
-                    "final",
-                    "missing",
-                    "pending"
-                  ],
+                  "enum": ["final", "missing", "pending"],
                   "description": "Lab status."
                 },
                 "source_artifact_id": {
@@ -250,12 +236,7 @@
                   "description": "Source artifact id."
                 }
               },
-              "required": [
-                "lab_id",
-                "test_name",
-                "result",
-                "status"
-              ]
+              "required": ["lab_id", "test_name", "result", "status"]
             }
           },
           "medication_history": {
@@ -328,10 +309,7 @@
                 "description": "Site of care."
               }
             },
-            "required": [
-              "order_id",
-              "medication_name"
-            ]
+            "required": ["order_id", "medication_name"]
           },
           "demo_toggles": {
             "type": "object",
@@ -445,9 +423,7 @@
                       "description": "Short synthetic excerpt, maximum 280 characters."
                     }
                   },
-                  "required": [
-                    "source_uri"
-                  ]
+                  "required": ["source_uri"]
                 },
                 "confidence": {
                   "type": "number",
@@ -466,12 +442,7 @@
                 "reviewer_decision": {
                   "type": "string",
                   "description": "Default pending until Action Center resolves.",
-                  "enum": [
-                    "pending",
-                    "approved",
-                    "edited",
-                    "rejected"
-                  ]
+                  "enum": ["pending", "approved", "edited", "rejected"]
                 },
                 "citations": {
                   "type": "array",
@@ -529,16 +500,10 @@
                             "description": "Short synthetic excerpt, maximum 280 characters."
                           }
                         },
-                        "required": [
-                          "source_uri"
-                        ]
+                        "required": ["source_uri"]
                       }
                     },
-                    "required": [
-                      "citation_id",
-                      "label",
-                      "source_span"
-                    ]
+                    "required": ["citation_id", "label", "source_span"]
                   }
                 }
               },
@@ -599,9 +564,7 @@
               "actor_type": {
                 "type": "string",
                 "description": "Always agent for these outputs.",
-                "enum": [
-                  "agent"
-                ]
+                "enum": ["agent"]
               },
               "actor_name": {
                 "type": "string",
@@ -667,11 +630,7 @@
               "status": {
                 "type": "string",
                 "description": "Agent completion status.",
-                "enum": [
-                  "completed",
-                  "needs_human",
-                  "failed"
-                ]
+                "enum": ["completed", "needs_human", "failed"]
               },
               "input_summary": {
                 "type": "string",

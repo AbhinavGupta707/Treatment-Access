@@ -67,11 +67,7 @@
                 "description": "Synthetic data disclaimer."
               }
             },
-            "required": [
-              "patient_id",
-              "coverage_plan",
-              "diagnosis_codes"
-            ]
+            "required": ["patient_id", "coverage_plan", "diagnosis_codes"]
           },
           "treatment_order": {
             "type": "object",
@@ -271,11 +267,7 @@
                 "severity": {
                   "type": "string",
                   "description": "Downstream blocking severity.",
-                  "enum": [
-                    "blocking",
-                    "warning",
-                    "informational"
-                  ]
+                  "enum": ["blocking", "warning", "informational"]
                 },
                 "must_be_clinician_attested": {
                   "type": "boolean",
@@ -326,9 +318,7 @@
                       "description": "Short synthetic excerpt, maximum 280 characters."
                     }
                   },
-                  "required": [
-                    "source_uri"
-                  ]
+                  "required": ["source_uri"]
                 },
                 "version": {
                   "type": "string",
@@ -419,16 +409,10 @@
                       "description": "Short synthetic excerpt, maximum 280 characters."
                     }
                   },
-                  "required": [
-                    "source_uri"
-                  ]
+                  "required": ["source_uri"]
                 }
               },
-              "required": [
-                "citation_id",
-                "label",
-                "source_span"
-              ]
+              "required": ["citation_id", "label", "source_span"]
             }
           },
           "payer_policy": {
@@ -543,16 +527,10 @@
                           "description": "Short synthetic excerpt, maximum 280 characters."
                         }
                       },
-                      "required": [
-                        "source_uri"
-                      ]
+                      "required": ["source_uri"]
                     }
                   },
-                  "required": [
-                    "citation_id",
-                    "label",
-                    "source_span"
-                  ]
+                  "required": ["citation_id", "label", "source_span"]
                 }
               }
             },
@@ -597,9 +575,7 @@
               "actor_type": {
                 "type": "string",
                 "description": "Always agent for these outputs.",
-                "enum": [
-                  "agent"
-                ]
+                "enum": ["agent"]
               },
               "actor_name": {
                 "type": "string",
@@ -665,11 +641,7 @@
               "status": {
                 "type": "string",
                 "description": "Agent completion status.",
-                "enum": [
-                  "completed",
-                  "needs_human",
-                  "failed"
-                ]
+                "enum": ["completed", "needs_human", "failed"]
               },
               "input_summary": {
                 "type": "string",

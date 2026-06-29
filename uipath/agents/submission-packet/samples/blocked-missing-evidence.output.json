@@ -16,10 +16,7 @@
     "provider_reference": "provider-syn-gi-001",
     "urgency": "urgent"
   },
-  "attachment_ids": [
-    "attachment-progress-note",
-    "attachment-policy"
-  ],
+  "attachment_ids": ["attachment-progress-note", "attachment-policy"],
   "cover_letter_summary": "Administrative packet is blocked because required synthetic safety screening evidence is missing.",
   "evidence_refs": [
     "mapping-diagnosis",
@@ -30,9 +27,7 @@
   "unsupported_claim_warnings": [
     "Do not assert recent TB and hepatitis screening until artifact-safety-labs or clinician-approved substitute evidence is present."
   ],
-  "required_human_approval_refs": [
-    "human-approval-diagnosis-severity"
-  ],
+  "required_human_approval_refs": ["human-approval-diagnosis-severity"],
   "built_at": "2026-06-29T09:10:00.000Z",
   "version": "submission-packet.agent.v1",
   "audit_summary": "Submission Packet Agent blocked synthetic payer submission because safety-screen evidence is missing."

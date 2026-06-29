@@ -107,11 +107,7 @@
     "properties": {
       "packet_status": {
         "type": "string",
-        "enum": [
-          "audit_ready",
-          "audit_draft_blocked",
-          "needs_human_review"
-        ]
+        "enum": ["audit_ready", "audit_draft_blocked", "needs_human_review"]
       },
       "auditPacketManifest": {
         "type": "object",
@@ -207,13 +203,7 @@
           },
           "actor_type": {
             "type": "string",
-            "enum": [
-              "agent",
-              "api_workflow",
-              "robot",
-              "human",
-              "system"
-            ]
+            "enum": ["agent", "api_workflow", "robot", "human", "system"]
           },
           "actor_name": {
             "type": "string"

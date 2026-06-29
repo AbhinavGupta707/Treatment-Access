@@ -37,18 +37,12 @@
             "description": "SLA state."
           }
         },
-        "required": [
-          "case_id",
-          "medication_name"
-        ]
+        "required": ["case_id", "medication_name"]
       },
       "case_urgency": {
         "type": "string",
         "description": "Case urgency.",
-        "enum": [
-          "routine",
-          "urgent"
-        ]
+        "enum": ["routine", "urgent"]
       },
       "criteria": {
         "type": "array",
@@ -76,11 +70,7 @@
             "severity": {
               "type": "string",
               "description": "Downstream blocking severity.",
-              "enum": [
-                "blocking",
-                "warning",
-                "informational"
-              ]
+              "enum": ["blocking", "warning", "informational"]
             },
             "must_be_clinician_attested": {
               "type": "boolean",
@@ -131,9 +121,7 @@
                   "description": "Short synthetic excerpt, maximum 280 characters."
                 }
               },
-              "required": [
-                "source_uri"
-              ]
+              "required": ["source_uri"]
             },
             "version": {
               "type": "string",
@@ -242,9 +230,7 @@
                   "description": "Short synthetic excerpt, maximum 280 characters."
                 }
               },
-              "required": [
-                "source_uri"
-              ]
+              "required": ["source_uri"]
             },
             "confidence": {
               "type": "number",
@@ -263,12 +249,7 @@
             "reviewer_decision": {
               "type": "string",
               "description": "Default pending until Action Center resolves.",
-              "enum": [
-                "pending",
-                "approved",
-                "edited",
-                "rejected"
-              ]
+              "enum": ["pending", "approved", "edited", "rejected"]
             },
             "citations": {
               "type": "array",
@@ -326,16 +307,10 @@
                         "description": "Short synthetic excerpt, maximum 280 characters."
                       }
                     },
-                    "required": [
-                      "source_uri"
-                    ]
+                    "required": ["source_uri"]
                   }
                 },
-                "required": [
-                  "citation_id",
-                  "label",
-                  "source_span"
-                ]
+                "required": ["citation_id", "label", "source_span"]
               }
             }
           },
@@ -449,10 +424,7 @@
             "severity": {
               "type": "string",
               "description": "Gate severity.",
-              "enum": [
-                "blocking",
-                "warning"
-              ]
+              "enum": ["blocking", "warning"]
             },
             "policy_citation": {
               "type": "string",
@@ -534,9 +506,7 @@
             },
             "status": {
               "type": "string",
-              "enum": [
-                "pending"
-              ],
+              "enum": ["pending"],
               "description": "Draft task status."
             },
             "assigned_role": {
@@ -603,9 +573,7 @@
           "actor_type": {
             "type": "string",
             "description": "Always agent for these outputs.",
-            "enum": [
-              "agent"
-            ]
+            "enum": ["agent"]
           },
           "actor_name": {
             "type": "string",
@@ -671,11 +639,7 @@
           "status": {
             "type": "string",
             "description": "Agent completion status.",
-            "enum": [
-              "completed",
-              "needs_human",
-              "failed"
-            ]
+            "enum": ["completed", "needs_human", "failed"]
           },
           "input_summary": {
             "type": "string",

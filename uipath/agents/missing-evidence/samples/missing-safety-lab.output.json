@@ -8,10 +8,7 @@
       "gate_type": "missing_evidence",
       "severity": "blocking",
       "policy_citation": "Aurora Vale Fictionalimab Policy 2026, Section 3.2",
-      "evidence_refs": [
-        "mapping-safety-screen",
-        "policy-citation-safety"
-      ],
+      "evidence_refs": ["mapping-safety-screen", "policy-citation-safety"],
       "reason": "Blocking TB/hepatitis safety screening evidence is missing from the synthetic chart snapshot.",
       "assigned_role": "nurse-coordinator",
       "task_prompt": "Upload or attest to synthetic TB and hepatitis screening before payer submission.",
@@ -31,9 +28,7 @@
       "due_at": "2026-06-29T17:00:00.000Z"
     }
   ],
-  "secondary_stage_activations": [
-    "missing_evidence"
-  ],
+  "secondary_stage_activations": ["missing_evidence"],
   "visible_missing_evidence_output": "Submission blocked: TB and hepatitis safety screening is missing for criterion-safety-screen. Route a missing-evidence task to nurse-coordinator before payer submission.",
   "source_grounding_warnings": [],
   "audit_event_draft": {
@@ -64,9 +59,6 @@
       "action_center_task_builder",
       "schema_validator"
     ],
-    "evidence_refs": [
-      "gate-missing-safety-screen",
-      "mapping-safety-screen"
-    ]
+    "evidence_refs": ["gate-missing-safety-screen", "mapping-safety-screen"]
   }
 }

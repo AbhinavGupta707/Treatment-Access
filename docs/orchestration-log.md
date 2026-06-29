@@ -258,3 +258,52 @@ Runtime safety:
 
 - Workers may run static validation, local tests, and read-only UiPath discovery.
 - Workers must not run live `uip agent debug`, `uip solution upload`, `uip solution publish`, `uip solution deploy`, `uip maestro case debug`, IXP project creation/upload/publish, Action Center task creation, or Data Service writes without explicit user approval.
+
+## 2026-06-29 - Checkpoint 3 Final Integration
+
+Checkpoint 3 lanes integrated into `main`:
+
+| Lane                                    | Worker commit | Integration result |
+| --------------------------------------- | ------------- | ------------------ |
+| Shared Agent Contracts & Runtime        | `e38cfd6`     | Merged into `main` |
+| Policy/Evidence/Missing Evidence Agents | `d818d7b`     | Merged into `main` |
+| Submission/Denial/Appeal Agents         | `61173cc`     | Merged into `main` |
+| Care Continuity/Audit/Extraction        | `a50690c`     | Merged into `main` |
+
+Integration patches applied:
+
+- Normalized the Denial Rescue strategy vocabulary so legacy `medical_necessity` demo toggles are accepted but the agent-facing output category is `documentation_gap`.
+- Updated Care Continuity and Audit Packet validation docs from unavailable `uip agent refresh` to the locally supported `uip agent migrate`.
+- Ran a final Prettier pass over generated Agent Builder JSON/Markdown and runtime TypeScript.
+
+Static UiPath validation:
+
+- `uip agent validate --output json` passed for eight local Agent Builder projects:
+  - `coverage-requirement/CoverageRequirementAgent`
+  - `evidence-retrieval/EvidenceRetrievalAgent`
+  - `missing-evidence/MissingEvidenceAgent`
+  - `submission-packet`
+  - `denial-rescue`
+  - `appeal-packet`
+  - `care-continuity`
+  - `audit-packet`
+
+Closeout checks passed:
+
+- `CI=true pnpm verify`
+- `CI=true pnpm format:check`
+- `CI=true pnpm seed`
+- `DEBUG_SMOKE=1 CI=true pnpm smoke:checkpoint1 -- --port 8878`
+- `CI=true pnpm smoke:agents`
+- `git diff --check`
+
+Checkpoint 3 result:
+
+- The repo now has seven distinct domain agent contracts and deterministic runtime smoke coverage for Coverage Requirement, Evidence Retrieval, Missing Evidence, Submission Packet, Denial Rescue, Appeal Packet, and Care Continuity.
+- Static UiPath Agent Builder packets exist for those seven agents plus an Audit Packet agent.
+- Extraction readiness is documented with an IXP/Document Understanding preferred path and a schema-compatible fallback parser preserving source spans and confidence.
+- No live UiPath agent debug/run, solution upload/publish/deploy, IXP mutation, Action Center task creation, Maestro debug, Data Service write, or payer submission was performed.
+
+Known note: local UiPath CLI `1.195.1` does not expose an `ixp` command prefix, and uses `uip agent migrate` rather than the generated-doc `refresh` verb.
+
+Next checkpoint: wire these validated Agent Builder artifacts into a live UiPath solution/runtime path and run approved live smoke only after explicit user approval for each side-effecting UiPath action.

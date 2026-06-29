@@ -35,9 +35,7 @@
     "human-approval-diagnosis-severity"
   ],
   "unsupported_claim_warnings": [],
-  "required_human_approval_refs": [
-    "human-approval-diagnosis-severity"
-  ],
+  "required_human_approval_refs": ["human-approval-diagnosis-severity"],
   "built_at": "2026-06-29T09:10:00.000Z",
   "version": "submission-packet.agent.v1",
   "audit_summary": "Submission Packet Agent assembled a ready synthetic packet with three attachments and clinician-approved blocking assertions."

@@ -42,9 +42,7 @@
   "closureReadiness": {
     "closure_ready": false,
     "next_stage": "care_continuity",
-    "blockers": [
-      "pharmacy_handoff_failed"
-    ],
+    "blockers": ["pharmacy_handoff_failed"],
     "required_events_before_audit": [
       "pharmacy_handoff_completed",
       "human_exception_resolved"
@@ -60,9 +58,7 @@
       "action": "pharmacy_handoff_failed",
       "input_summary": "Approval reference approval-syn-appeal-001 was ready for handoff.",
       "output_summary": "Synthetic pharmacy handoff failed; human exception review required.",
-      "evidence_refs": [
-        "decision-appeal-approved-syn-001"
-      ],
+      "evidence_refs": ["decision-appeal-approved-syn-001"],
       "payer_status": "appeal_approved",
       "timestamp": "2026-06-28T22:36:00.000Z"
     }
@@ -70,12 +66,8 @@
   "traceSummary": {
     "agent_name": "Care Continuity Agent",
     "status": "failed",
-    "tool_calls": [
-      "pharmacy_scheduling_handoff_api_workflow_failed"
-    ],
-    "evidence_refs": [
-      "decision-appeal-approved-syn-001"
-    ]
+    "tool_calls": ["pharmacy_scheduling_handoff_api_workflow_failed"],
+    "evidence_refs": ["decision-appeal-approved-syn-001"]
   },
   "synthetic_data_disclaimer": "Synthetic fictional demo data; failed handoff requires governed human exception handling."
 }

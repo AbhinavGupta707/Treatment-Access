@@ -79,15 +79,15 @@ Smoke note: local server binding was blocked by the sandbox without escalation, 
 
 Run/publish safety: no live Maestro debug, side-effecting workflow execution, publish, deploy, Action Center task creation, or Data Service entity creation has been performed. Those actions still require explicit user approval.
 
-## Next Checkpoint
+## Checkpoint 3 Status
 
-Checkpoint 3 orchestration is being launched from the verified Checkpoint 2 `main` state.
+Checkpoint 3 is merged and locally verified on `main`.
 
-Base commit: `9a78504 Finalize checkpoint 2 integration`.
+Launch commit: `2ba229f Launch checkpoint 3 orchestration`.
 
 Control runbook: `docs/checkpoint-3-orchestrator.md`.
 
-Active lanes:
+Integrated lanes:
 
 | Lane                                    | Thread ID                              | Worktree path                                                |
 | --------------------------------------- | -------------------------------------- | ------------------------------------------------------------ |
@@ -96,4 +96,30 @@ Active lanes:
 | Submission/Denial/Appeal Agents         | `019f10b4-6b34-77c2-98de-1aab237a998a` | `/Users/abhinavgupta/.codex/worktrees/f839/Treatment Access` |
 | Care Continuity/Audit/Extraction        | `019f10b4-cda5-73a1-8ec4-cad9b3470ac4` | `/Users/abhinavgupta/.codex/worktrees/04aa/Treatment Access` |
 
-Runtime safety remains unchanged: live UiPath agent debug, publish/deploy/upload, IXP project mutation, Action Center task creation, Maestro debug, and Data Service writes require explicit user approval. Checkpoint 3 workers may perform static/local authoring and read-only UiPath discovery.
+Integration summary:
+
+- Shared runtime merged from `e38cfd6`, adding `@tacc/agent-runtime`, seven agent contracts, `CI=true pnpm smoke:agents`, and UiPath-facing contract docs.
+- Policy/Evidence/Missing Evidence Agent Builder packets merged from `d818d7b`.
+- Submission/Denial/Appeal Agent Builder packets merged from `61173cc`.
+- Care Continuity, Audit Packet, and Extraction readiness/fallback packets merged from `a50690c`.
+- Integration reconciliation landed in `761ef07`, mapping legacy `medical_necessity` demo toggles to the agent-facing `documentation_gap` denial strategy and replacing stale `uip agent refresh` docs with the local `uip agent migrate` command.
+
+Closeout checks passed:
+
+- `CI=true pnpm verify`
+- `CI=true pnpm format:check`
+- `CI=true pnpm seed`
+- `DEBUG_SMOKE=1 CI=true pnpm smoke:checkpoint1 -- --port 8878`
+- `CI=true pnpm smoke:agents`
+- `git diff --check`
+- `uip agent validate --output json` for Coverage Requirement, Evidence Retrieval, Missing Evidence, Submission Packet, Denial Rescue, Appeal Packet, Care Continuity, and Audit Packet projects.
+
+Extraction/IXP note:
+
+- Read-only `uip ixp projects list --output json` is unavailable in local CLI `1.195.1` because the `ixp` command prefix is not registered. This remains a command-surface/registration blocker, not a permissions/runtime diagnosis.
+
+Runtime safety remains unchanged: live UiPath agent debug/run, solution upload/publish/deploy, IXP project mutation, Action Center task creation, Maestro debug, Data Service writes, and payer submission require explicit user approval.
+
+## Next Checkpoint
+
+Checkpoint 4 should integrate these validated agent artifacts into a live UiPath solution/runtime path: register/pack solution resources, wire tool/process bindings, and perform approved Studio Web/Agent Builder smoke only after explicit approval for each side-effecting UiPath action.

@@ -33,8 +33,9 @@ const missingSafetyOutput = MissingEvidenceAgentOutputSchema.parse(
     ?.output,
 );
 const blockedSubmission = SubmissionPacketAgentOutputSchema.parse(
-  missingSafety.results.find((result) => result.agent_id === "submission-packet")
-    ?.output,
+  missingSafety.results.find(
+    (result) => result.agent_id === "submission-packet",
+  )?.output,
 );
 assert(
   missingSafetyOutput.can_submit === false &&
@@ -90,8 +91,8 @@ const unapprovedClinicalAssertion = evidenceOutput.clinical_assertions.find(
 assert(
   Boolean(
     unapprovedClinicalAssertion?.evidence_refs.length &&
-      unapprovedClinicalAssertion.policy_citations.length &&
-      unapprovedClinicalAssertion.human_approval_required,
+    unapprovedClinicalAssertion.policy_citations.length &&
+    unapprovedClinicalAssertion.human_approval_required,
   ),
   "Clinical assertions must carry evidence refs, policy citations, or human approval routing.",
 );

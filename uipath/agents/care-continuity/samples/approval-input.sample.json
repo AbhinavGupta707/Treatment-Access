@@ -27,9 +27,7 @@
     "patient_id": "patient-syn-001",
     "age": 34,
     "synthetic_name": "Synthetic Patient TAC-001",
-    "diagnosis_codes": [
-      "K50.90"
-    ],
+    "diagnosis_codes": ["K50.90"],
     "coverage_plan": "Aurora Vale Fictional Health Premier PPO",
     "provider_id": "provider-syn-gi-001",
     "preferred_contact_channel": "portal",
