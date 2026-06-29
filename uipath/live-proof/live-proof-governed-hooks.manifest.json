@@ -1,0 +1,240 @@
+{
+  "contractVersion": "2026-06-29.checkpoint7.uipath-governed-hooks",
+  "scope": {
+    "uipathFolderName": "TreatmentAccessHackathon",
+    "uipathFolderId": "7986316",
+    "uipathFolderKey": "4fba2fa1-012b-469a-b6aa-e5be3811c173",
+    "syntheticDataOnly": true,
+    "syntheticDataDisclaimer": "Synthetic demo data only. Not PHI. Not medical or legal advice.",
+    "separateProjectGuardrail": "Do not reuse or modify AgentFactoryDemo for this proof."
+  },
+  "liveProofContract": {
+    "requestSchemaName": "TreatmentAccessLiveProofRequest",
+    "responseSchemaName": "TreatmentAccessLiveProofRun",
+    "correlationKeys": ["liveProofRunId", "caseId", "demoRunId"],
+    "requiredVisibleEvents": [
+      "case_live_proof_started",
+      "policy_checked",
+      "evidence_mapped",
+      "human_gate_required",
+      "submission_packet_ready_or_blocked",
+      "payer_api_unavailable_or_not_attempted",
+      "live_proof_completed_or_waiting_for_approval"
+    ],
+    "allowedEventActors": [
+      "maestro",
+      "api_workflow",
+      "agent",
+      "action_center",
+      "robot",
+      "system"
+    ]
+  },
+  "diagnosticOrder": [
+    "registration_discovery_install_state",
+    "official_activation_flow",
+    "permissions_runtime"
+  ],
+  "hookSurfaces": [
+    {
+      "surface": "coded_agent_or_agent_builder",
+      "owner": "UiPath Agents",
+      "registrationDiscovery": [
+        "uip agent validate --help",
+        "uip agent list --output json",
+        "uip codedagent --help",
+        "uip codedagent setup --output json"
+      ],
+      "officialActivationFlow": [
+        "Greenfield coded agents must be scaffolded with uip codedagent new and initialized with uip codedagent init.",
+        "Low-code Agent Builder packets must validate before any run/debug.",
+        "Bindings are derived from SDK/resource calls and regenerated through the official sync workflow."
+      ],
+      "approvalGatedCommands": [
+        "uip agent debug <agent-project> --output json",
+        "uip agent run start <release-or-process-key> --folder-id 7986316 --inputs '<synthetic-json>' --output json",
+        "uip codedagent debug --output json",
+        "uip codedagent run --output json"
+      ],
+      "evidenceToCapture": [
+        "agent project or release key",
+        "run id or debug session id",
+        "validated output schema name",
+        "LangSmith trace URL or trace metadata",
+        "event mirror ids written by UiPath-owned orchestration"
+      ]
+    },
+    {
+      "surface": "maestro_case",
+      "owner": "UiPath Maestro",
+      "registrationDiscovery": [
+        "uip maestro case validate --help",
+        "uip maestro case process list --output json"
+      ],
+      "officialActivationFlow": [
+        "Validate an approved caseplan.json before any debug/run.",
+        "Refresh solution resources before upload or debug.",
+        "Use the TreatmentAccessHackathon folder key for approved runs."
+      ],
+      "approvalGatedCommands": [
+        "uip maestro case debug uipath/maestro --folder-id 7986316 --output json",
+        "uip maestro case process run <case-process-key> 4fba2fa1-012b-469a-b6aa-e5be3811c173 --inputs '<synthetic-json>' --validate --output json"
+      ],
+      "evidenceToCapture": [
+        "case process key",
+        "case instance id",
+        "stage reached",
+        "human gate state",
+        "first UiPath-written event id"
+      ]
+    },
+    {
+      "surface": "action_center",
+      "owner": "UiPath Action Center",
+      "registrationDiscovery": [
+        "uip tasks users 7986316 --output json",
+        "uip tasks list --folder-id 7986316 --output json"
+      ],
+      "officialActivationFlow": [
+        "Create tasks only through an approved Maestro/HITL, Action App, or workflow path using the checked-in quickform contracts.",
+        "Discover task id and type before assign, reassign, complete, or inspect operations.",
+        "Complete or assign tasks only after a separate explicit approval."
+      ],
+      "approvalGatedCommands": [
+        "approved Maestro/HITL or workflow step that creates exactly one synthetic task",
+        "uip tasks assign <task-id> --user <reviewer> --output json",
+        "uip tasks complete <task-id> --type <task-type> --folder-id 7986316 --action <outcome> --data '<synthetic-json>' --output json"
+      ],
+      "evidenceToCapture": [
+        "task id",
+        "task type",
+        "assigned role or reviewer placeholder",
+        "status before and after the approved action",
+        "event mirror id for the task gate"
+      ]
+    },
+    {
+      "surface": "data_service_data_fabric",
+      "owner": "UiPath Data Service / Data Fabric",
+      "registrationDiscovery": [
+        "uip df entities list --output json",
+        "uip df entities list --folder-key 4fba2fa1-012b-469a-b6aa-e5be3811c173 --output json"
+      ],
+      "officialActivationFlow": [
+        "Confirm the Data Fabric CLI exposes folder scoping before any record write.",
+        "Resolve the native folder-scoped entity id from discovery instead of assuming names.",
+        "Insert or update only synthetic records that match uipath/data-service/entities.json."
+      ],
+      "approvalGatedCommands": [
+        "uip df records insert <entity-id> --folder-key 4fba2fa1-012b-469a-b6aa-e5be3811c173 --body '<synthetic-json>' --output json",
+        "uip df records update <entity-id> <record-id> --folder-key 4fba2fa1-012b-469a-b6aa-e5be3811c173 --body '<synthetic-json>' --output json"
+      ],
+      "evidenceToCapture": [
+        "entity id and display name",
+        "record id",
+        "case id",
+        "event type",
+        "post-write readback command output with secrets redacted"
+      ]
+    },
+    {
+      "surface": "orchestrator_job",
+      "owner": "UiPath Orchestrator",
+      "registrationDiscovery": [
+        "uip or processes list --folder-path TreatmentAccessHackathon --output json",
+        "uip or folders runtimes TreatmentAccessHackathon --output json",
+        "uip or sessions attended list --folder-path TreatmentAccessHackathon --output json"
+      ],
+      "officialActivationFlow": [
+        "Resolve the published process key before starting a job.",
+        "Confirm a connected Development runtime is available for this hackathon folder.",
+        "Pass only local mock payer portal and synthetic case inputs."
+      ],
+      "approvalGatedCommands": [
+        "uip or jobs start <process-key> --folder-path TreatmentAccessHackathon --runtime-type Development --jobs-count 1 --input-arguments '<synthetic-json>' --wait-for-completion --timeout 300 --output json"
+      ],
+      "evidenceToCapture": [
+        "job key",
+        "process key",
+        "runtime type",
+        "portal confirmation id",
+        "robot-authored event id"
+      ]
+    },
+    {
+      "surface": "rpa",
+      "owner": "UiPath RPA",
+      "registrationDiscovery": [
+        "uip rpa init --help --output json",
+        "uip rpa analyzer-rules list --scope Workflow --project-dir uipath/robots/PayerPortalFallback --output json",
+        "uip rpa validate --file-path Main.xaml --output json"
+      ],
+      "officialActivationFlow": [
+        "Use the real PayerPortalFallback project created by uip rpa init.",
+        "Indicate UIA targets against the synthetic mock payer portal before live smoke.",
+        "Validate Main.xaml and build the project before run/debug."
+      ],
+      "approvalGatedCommands": [
+        "uip rpa run uipath/robots/PayerPortalFallback --input-arguments '<synthetic-json>' --output json",
+        "uip rpa debug start uipath/robots/PayerPortalFallback --input-arguments '<synthetic-json>' --output json"
+      ],
+      "evidenceToCapture": [
+        "workflow validation result",
+        "build result",
+        "run or debug id if approved",
+        "portal confirmation id",
+        "robot event id"
+      ]
+    },
+    {
+      "surface": "solution_lifecycle",
+      "owner": "UiPath Solutions",
+      "registrationDiscovery": [
+        "uip solution init --help --output json",
+        "uip solution project list --solution-folder uipath/solution/treatment-access-command-center --output json",
+        "uip solution resource refresh --solution-folder uipath/solution/treatment-access-command-center --output json",
+        "scripts/uipath-with-dotnet8.sh uip solution pack uipath/solution/treatment-access-command-center --dry-run --output json"
+      ],
+      "officialActivationFlow": [
+        "Refresh resources before pack, upload, or deploy.",
+        "Pack locally before publish/deploy.",
+        "Deploy only to TreatmentAccessHackathon through the approved parent folder key."
+      ],
+      "approvalGatedCommands": [
+        "uip solution upload uipath/solution/treatment-access-command-center --output json",
+        "uip solution pack uipath/solution/treatment-access-command-center --output json",
+        "uip solution publish <package.zip> --output json",
+        "uip solution deploy run <solution-package-key> --parent-folder-key 4fba2fa1-012b-469a-b6aa-e5be3811c173 --output json",
+        "uip solution deploy activate <deployment-id> --output json"
+      ],
+      "evidenceToCapture": [
+        "solution package name and version",
+        "deployment id",
+        "activation status",
+        "resource refresh result",
+        "pack status"
+      ]
+    }
+  ],
+  "defaultMode": {
+    "name": "no_side_effect_readiness",
+    "allowed": [
+      "read-only discovery",
+      "local static validation",
+      "local RPA build",
+      "solution pack dry-run",
+      "manifest and sample validation"
+    ],
+    "forbiddenWithoutApproval": [
+      "live agent debug or run",
+      "Maestro debug or run",
+      "Action Center task creation, assignment, or completion",
+      "Data Service/Data Fabric record writes",
+      "Orchestrator job start",
+      "RPA run or debug",
+      "solution upload, publish, deploy, or activate",
+      "IXP mutation",
+      "payer submission"
+    ]
+  }
+}

@@ -24,6 +24,12 @@ If cloud access is unavailable, run the local subset:
 CI=true pnpm uipath:readiness -- local
 ```
 
+For the Checkpoint 7 governed-hook contract only, run:
+
+```bash
+CI=true pnpm uipath:live-proof:readiness
+```
+
 The wrapper checks registration and discovery state first:
 
 - `uip` command surface and installed tools;
@@ -33,6 +39,8 @@ The wrapper checks registration and discovery state first:
   Data Fabric entity discovery, and Agent Builder project discovery;
 - solution project list, resource refresh, pack dry-run;
 - RPA analyzer rules, `Main.xaml` validation, and project build.
+- live proof governed-hook manifest, future Coded Agent authoring contract, and
+  synthetic event/request samples.
 
 The wrapper does not run live agent jobs, Coded Agent jobs, Maestro debug/run,
 Action Center task creation, Data Fabric record writes, Orchestrator job

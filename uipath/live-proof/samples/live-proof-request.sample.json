@@ -1,0 +1,33 @@
+{
+  "liveProofRunId": "live-proof-syn-001",
+  "demoRunId": "demo-run-syn-001",
+  "caseId": "case-syn-001",
+  "patientId": "patient-syn-001",
+  "orderId": "order-syn-001",
+  "payerId": "payer-syn-001",
+  "mode": "live",
+  "requestedBy": "demo-operator",
+  "uipathFolderName": "TreatmentAccessHackathon",
+  "uipathFolderKey": "4fba2fa1-012b-469a-b6aa-e5be3811c173",
+  "synthetic": true,
+  "approvalState": {
+    "sideEffectApprovalGranted": false,
+    "approvedSurfaces": []
+  },
+  "runIntent": {
+    "executeFireworksBackedAgents": true,
+    "captureLangSmithTraceMetadata": true,
+    "writeLocalEventMirrorOnlyByDefault": true,
+    "createActionCenterTask": false,
+    "writeDataServiceRecord": false,
+    "startOrchestratorJob": false,
+    "runRpaRobot": false,
+    "deploySolution": false
+  },
+  "clinicalSafety": {
+    "requiresSourceEvidence": true,
+    "appealDraftRequiresClinicianReview": true,
+    "payerSubmissionAllowed": false
+  },
+  "syntheticDataDisclaimer": "Synthetic demo data only. Not PHI. Not medical or legal advice."
+}

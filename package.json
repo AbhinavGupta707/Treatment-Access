@@ -31,6 +31,7 @@
     "verify:checkpoint6": "CI=true pnpm verify:submission-readiness && CI=true pnpm smoke:checkpoint6-readiness",
     "verify:setup": "node --import tsx/esm scripts/check-setup.ts",
     "verify:submission-readiness": "node --import tsx/esm scripts/verify-submission-readiness.ts",
+    "uipath:live-proof:readiness": "node --import tsx/esm scripts/verify-uipath-live-proof-hooks.ts",
     "uipath:readiness": "scripts/uipath-live-readiness.sh"
   },
   "dependencies": {

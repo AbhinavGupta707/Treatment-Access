@@ -15,6 +15,18 @@ const checks = [
   ["Mock payer portal", "apps/mock-payer-portal/src/main.tsx"],
   ["UiPath setup docs", "docs/setup-uipath.md"],
   ["UiPath live readiness wrapper", "scripts/uipath-live-readiness.sh"],
+  [
+    "UiPath live proof hook verifier",
+    "scripts/verify-uipath-live-proof-hooks.ts",
+  ],
+  [
+    "UiPath live proof manifest",
+    "uipath/live-proof/live-proof-governed-hooks.manifest.json",
+  ],
+  [
+    "UiPath live proof coded agent contract",
+    "uipath/coded-agents/live-proof/coded-agent-authoring-contract.json",
+  ],
   ["UiPath live wiring runbook", "uipath/live-wiring-runbook.md"],
 ] as const;
 

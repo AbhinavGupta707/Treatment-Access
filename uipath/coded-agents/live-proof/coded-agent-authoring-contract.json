@@ -1,0 +1,79 @@
+{
+  "contractVersion": "2026-06-29.checkpoint7.coded-agent-authoring",
+  "futureProjectName": "TreatmentAccessLiveProofAgent",
+  "projectState": "authoring_artifact_only",
+  "scaffoldRule": "If this becomes a real coded agent, create it with uip codedagent new and uip codedagent init. Do not hand-author the scaffold.",
+  "frameworkTarget": "LangGraph-compatible Python coded agent or Agent Builder wrapper invoking the shared live proof contract",
+  "inputContract": {
+    "name": "TreatmentAccessLiveProofRequest",
+    "requiredFields": [
+      "liveProofRunId",
+      "demoRunId",
+      "caseId",
+      "patientId",
+      "orderId",
+      "payerId",
+      "mode",
+      "synthetic",
+      "approvalState"
+    ],
+    "hardRequirements": [
+      "synthetic must be true",
+      "uipathFolderName must be TreatmentAccessHackathon",
+      "sideEffectApprovalGranted defaults to false",
+      "payerSubmissionAllowed defaults to false"
+    ]
+  },
+  "outputContract": {
+    "name": "TreatmentAccessLiveProofRun",
+    "requiredFields": [
+      "liveProofRunId",
+      "caseId",
+      "status",
+      "steps",
+      "approvalGates",
+      "uipathEvidenceRefs",
+      "events",
+      "syntheticDataDisclaimer"
+    ],
+    "statusValues": [
+      "not_started",
+      "running",
+      "completed",
+      "needs_human",
+      "failed",
+      "cancelled"
+    ]
+  },
+  "resourceBindingPolicy": {
+    "deriveBindingsFromSdkCalls": true,
+    "neverHandAuthorBindings": true,
+    "expectedResources": [
+      "Action Center escalation or task route",
+      "Data Fabric entity records",
+      "Orchestrator process for PayerPortalFallback",
+      "event mirror API workflow",
+      "LangSmith trace metadata"
+    ]
+  },
+  "sideEffectPolicy": {
+    "defaultMode": "no_side_effect",
+    "approvalRequiredFor": [
+      "agent debug or run",
+      "Maestro debug or run",
+      "Action Center task creation, assignment, or completion",
+      "Data Service/Data Fabric record write",
+      "Orchestrator job start",
+      "RPA run or debug",
+      "solution upload, publish, deploy, or activate",
+      "IXP mutation",
+      "payer submission"
+    ]
+  },
+  "implementationNotes": [
+    "The coded agent should invoke the live proof API or shared runtime once that lane is merged.",
+    "It should emit UiPath evidence references rather than claiming the Command Center is authoritative.",
+    "Every clinical assertion must carry evidence refs, policy citation, or a human approval gate.",
+    "Appeal language is an administrative draft for clinician review."
+  ]
+}
