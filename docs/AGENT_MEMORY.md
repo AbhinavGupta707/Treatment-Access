@@ -559,13 +559,13 @@ Target outcome:
 
 Checkpoint 8 lanes:
 
-| Merge order | Lane                                                    | Planned ownership                                                                                    |
-| ----------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| 1           | Cloud Discovery, Permissions, and Approval Matrix       | `docs/**`, `scripts/**`, read-only `uip` probes                                                      |
-| 2           | UiPath Event State and Data Service Bridge              | `uipath/data-service/**`, `uipath/live-proof/**`, `services/mock-healthcare-api/**`, schemas/scripts |
-| 3           | Action Center Human Gate Proof                          | `uipath/action-center/**`, `uipath/live-proof/**`, Command Center proof UI/scripts/docs              |
-| 4           | Orchestrator RPA Portal Fallback Proof                  | `uipath/robots/**`, `uipath/solution/**`, mock portal/scripts/docs                                   |
-| 5           | Final Demo UX, Evidence Manifest, and Submission Claims | Command Center, README, docs, screenshots manifest, final smoke                                      |
+| Merge order | Lane                                                    | Thread ID                              | Worktree path                                                |
+| ----------- | ------------------------------------------------------- | -------------------------------------- | ------------------------------------------------------------ |
+| 1           | Cloud Discovery, Permissions, and Approval Matrix       | `019f1460-9441-7b61-bd2b-99f549af25d6` | `/Users/abhinavgupta/.codex/worktrees/6f77/Treatment Access` |
+| 2           | UiPath Event State and Data Service Bridge              | `019f1460-9666-7403-903f-0b2ca513f2e3` | `/Users/abhinavgupta/.codex/worktrees/8cbc/Treatment Access` |
+| 3           | Action Center Human Gate Proof                          | `019f1460-9235-76a0-9821-043542d0f7a6` | `/Users/abhinavgupta/.codex/worktrees/46af/Treatment Access` |
+| 4           | Orchestrator RPA Portal Fallback Proof                  | `019f1460-9487-75f2-898d-f8aab81f0ab3` | `/Users/abhinavgupta/.codex/worktrees/8ca5/Treatment Access` |
+| 5           | Final Demo UX, Evidence Manifest, and Submission Claims | `019f1460-96bc-7e13-93ed-7e9dc3dcf2fd` | `/Users/abhinavgupta/.codex/worktrees/5299/Treatment Access` |
 
 Safety:
 

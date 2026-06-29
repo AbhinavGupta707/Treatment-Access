@@ -873,15 +873,15 @@ Added control docs:
 - `docs/live-uipath-final-execution-plan.md`
 - `docs/checkpoint-8-live-uipath-final-orchestrator.md`
 
-Planned Checkpoint 8 lanes:
+Launched Checkpoint 8 lanes:
 
-| Merge order | Lane                                                    |
-| ----------- | ------------------------------------------------------- |
-| 1           | Cloud Discovery, Permissions, and Approval Matrix       |
-| 2           | UiPath Event State and Data Service Bridge              |
-| 3           | Action Center Human Gate Proof                          |
-| 4           | Orchestrator RPA Portal Fallback Proof                  |
-| 5           | Final Demo UX, Evidence Manifest, and Submission Claims |
+| Merge order | Lane                                                    | Thread ID                              | Worktree path                                                |
+| ----------- | ------------------------------------------------------- | -------------------------------------- | ------------------------------------------------------------ |
+| 1           | Cloud Discovery, Permissions, and Approval Matrix       | `019f1460-9441-7b61-bd2b-99f549af25d6` | `/Users/abhinavgupta/.codex/worktrees/6f77/Treatment Access` |
+| 2           | UiPath Event State and Data Service Bridge              | `019f1460-9666-7403-903f-0b2ca513f2e3` | `/Users/abhinavgupta/.codex/worktrees/8cbc/Treatment Access` |
+| 3           | Action Center Human Gate Proof                          | `019f1460-9235-76a0-9821-043542d0f7a6` | `/Users/abhinavgupta/.codex/worktrees/46af/Treatment Access` |
+| 4           | Orchestrator RPA Portal Fallback Proof                  | `019f1460-9487-75f2-898d-f8aab81f0ab3` | `/Users/abhinavgupta/.codex/worktrees/8ca5/Treatment Access` |
+| 5           | Final Demo UX, Evidence Manifest, and Submission Claims | `019f1460-96bc-7e13-93ed-7e9dc3dcf2fd` | `/Users/abhinavgupta/.codex/worktrees/5299/Treatment Access` |
 
 Safety remains unchanged: no live UiPath side-effect command, payer submission,
 or real health data without explicit user approval.

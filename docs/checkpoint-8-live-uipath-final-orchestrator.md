@@ -28,13 +28,13 @@ visible, synthetic, live UiPath proof:
 
 ## Lane Plan
 
-| Merge order | Lane                                                    | Ownership                                                                                                                       | Goal                                                                                                                   |
-| ----------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| 1           | Cloud Discovery, Permissions, and Approval Matrix       | `docs/**`, `scripts/**`, read-only `uip` probes                                                                                 | Produce exact tenant/folder/product discovery, side-effect approval matrix, and final live proof decision tree.        |
-| 2           | UiPath Event State and Data Service Bridge              | `uipath/data-service/**`, `uipath/live-proof/**`, `services/mock-healthcare-api/**`, `packages/shared-schemas/**`, `scripts/**` | Make at least one UiPath-written synthetic event/case-state path verifiable and distinguishable from local-only state. |
-| 3           | Action Center Human Gate Proof                          | `uipath/action-center/**`, `uipath/live-proof/**`, `apps/command-center/**`, `scripts/**`, docs                                 | Prepare live task creation/read/complete proof or a documented UiPath-controlled fallback with UI evidence.            |
-| 4           | Orchestrator RPA Portal Fallback Proof                  | `uipath/robots/**`, `uipath/solution/**`, `apps/mock-payer-portal/**`, `scripts/**`, docs                                       | Prepare publish/run/job proof for `PayerPortalFallback` against the synthetic portal and confirmation write-back.      |
-| 5           | Final Demo UX, Evidence Manifest, and Submission Claims | `apps/command-center/**`, `README.md`, `docs/**`, `uipath/screenshots/**`, `scripts/**`                                         | Make final demo flow and submission wording match live proof evidence, with no overclaims.                             |
+| Merge order | Lane                                                    | Ownership                                                                                                                       | Goal                                                                                                                   | Thread ID                              | Worktree path                                                |
+| ----------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------- | ------------------------------------------------------------ |
+| 1           | Cloud Discovery, Permissions, and Approval Matrix       | `docs/**`, `scripts/**`, read-only `uip` probes                                                                                 | Produce exact tenant/folder/product discovery, side-effect approval matrix, and final live proof decision tree.        | `019f1460-9441-7b61-bd2b-99f549af25d6` | `/Users/abhinavgupta/.codex/worktrees/6f77/Treatment Access` |
+| 2           | UiPath Event State and Data Service Bridge              | `uipath/data-service/**`, `uipath/live-proof/**`, `services/mock-healthcare-api/**`, `packages/shared-schemas/**`, `scripts/**` | Make at least one UiPath-written synthetic event/case-state path verifiable and distinguishable from local-only state. | `019f1460-9666-7403-903f-0b2ca513f2e3` | `/Users/abhinavgupta/.codex/worktrees/8cbc/Treatment Access` |
+| 3           | Action Center Human Gate Proof                          | `uipath/action-center/**`, `uipath/live-proof/**`, `apps/command-center/**`, `scripts/**`, docs                                 | Prepare live task creation/read/complete proof or a documented UiPath-controlled fallback with UI evidence.            | `019f1460-9235-76a0-9821-043542d0f7a6` | `/Users/abhinavgupta/.codex/worktrees/46af/Treatment Access` |
+| 4           | Orchestrator RPA Portal Fallback Proof                  | `uipath/robots/**`, `uipath/solution/**`, `apps/mock-payer-portal/**`, `scripts/**`, docs                                       | Prepare publish/run/job proof for `PayerPortalFallback` against the synthetic portal and confirmation write-back.      | `019f1460-9487-75f2-898d-f8aab81f0ab3` | `/Users/abhinavgupta/.codex/worktrees/8ca5/Treatment Access` |
+| 5           | Final Demo UX, Evidence Manifest, and Submission Claims | `apps/command-center/**`, `README.md`, `docs/**`, `uipath/screenshots/**`, `scripts/**`                                         | Make final demo flow and submission wording match live proof evidence, with no overclaims.                             | `019f1460-96bc-7e13-93ed-7e9dc3dcf2fd` | `/Users/abhinavgupta/.codex/worktrees/5299/Treatment Access` |
 
 ## Required Worker Rules
 
@@ -139,7 +139,7 @@ Stop and ask the user if:
 
 - [x] Reconcile Checkpoint 7 and push `main`.
 - [x] Create Checkpoint 8 final execution plan.
-- [ ] Commit Checkpoint 8 prep docs.
-- [ ] Spawn five Checkpoint 8 lane worktrees.
-- [ ] Record thread IDs/worktree paths in project memory.
-- [ ] Begin heartbeat monitoring.
+- [x] Commit Checkpoint 8 prep docs.
+- [x] Spawn five Checkpoint 8 lane worktrees.
+- [x] Record thread IDs/worktree paths in project memory.
+- [x] Begin heartbeat monitoring.
