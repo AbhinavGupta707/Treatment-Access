@@ -235,6 +235,7 @@ Known remaining blocker:
 Checkpoint 5 orchestration is active on `main`.
 
 Launch base commit: `2142714`.
+Launch commit and worker base: `97413b9`.
 
 Control runbook: `docs/checkpoint-5-orchestrator.md`.
 
@@ -249,12 +250,12 @@ Checkpoint 5 outcome:
 
 Active isolated lanes:
 
-| Merge order | Lane                          | Thread ID | Worktree path | Ownership                                                              |
-| ----------- | ----------------------------- | --------- | ------------- | ---------------------------------------------------------------------- |
-| 1           | RPA Runtime & Solution Import | pending   | pending       | `uipath/robots/**`, `uipath/solution/**`, RPA setup notes              |
-| 2           | Evidence Capture & Final QA   | pending   | pending       | `uipath/screenshots/**`, `docs/testing.md`, final QA scripts/docs      |
-| 3           | README & Submission Package   | pending   | pending       | `README.md`, `docs/submission.md`, license/submission checklist        |
-| 4           | Demo Script & Deck Outline    | pending   | pending       | `docs/demo-script.md`, `docs/architecture.md`, deck/video outline docs |
+| Merge order | Lane                          | Thread ID                              | Worktree path                                                | Ownership                                                              |
+| ----------- | ----------------------------- | -------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| 1           | RPA Runtime & Solution Import | `019f1111-dd23-7811-808d-6026e4185b1a` | `/Users/abhinavgupta/.codex/worktrees/97ee/Treatment Access` | `uipath/robots/**`, `uipath/solution/**`, RPA setup notes              |
+| 2           | Evidence Capture & Final QA   | `019f1111-dcf9-7ae3-9dbf-c92a53b13d79` | `/Users/abhinavgupta/.codex/worktrees/5d6a/Treatment Access` | `uipath/screenshots/**`, `docs/testing.md`, final QA scripts/docs      |
+| 3           | README & Submission Package   | `019f1111-dcd9-7411-b1d7-cbed628604b0` | `/Users/abhinavgupta/.codex/worktrees/284a/Treatment Access` | `README.md`, `docs/submission.md`, license/submission checklist        |
+| 4           | Demo Script & Deck Outline    | `019f1111-df2e-7991-aaab-4643545917ea` | `/Users/abhinavgupta/.codex/worktrees/55e8/Treatment Access` | `docs/demo-script.md`, `docs/architecture.md`, deck/video outline docs |
 
 Runtime safety remains unchanged: live RPA run/debug, Orchestrator job start,
 solution upload/publish/deploy/activate, agent debug, Maestro debug, IXP
