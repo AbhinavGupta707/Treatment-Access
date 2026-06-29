@@ -1,0 +1,114 @@
+{
+  "payloadSchema": "tacc.actionCenter.liveProof.clinicianValidationTaskPayload.v1",
+  "payloadVersion": "2026-06-29",
+  "syntheticDataOnly": true,
+  "noPhi": true,
+  "uipathScope": {
+    "organization": "galacticus",
+    "tenant": "DefaultTenant",
+    "folderName": "TreatmentAccessHackathon",
+    "folderId": 7986316,
+    "folderKey": "4fba2fa1-012b-469a-b6aa-e5be3811c173"
+  },
+  "task": {
+    "contractPath": "uipath/action-center/contracts/clinician-evidence-validation.quickform.json",
+    "taskKey": "clinician_evidence_validation",
+    "taskType": "FormTask",
+    "formType": "QuickForm",
+    "displayName": "Clinician Evidence Validation",
+    "taskCatalog": "Treatment Access Clinical Review",
+    "priority": "High",
+    "assignmentTarget": {
+      "targetType": "group_preferred",
+      "targetName": "Treatment Access Clinician Reviewers",
+      "fallback": "Resolve a task-eligible reviewer during live smoke with `uip tasks users 7986316 --output json`; do not commit reviewer personal identifiers."
+    }
+  },
+  "caseContext": {
+    "caseId": "case-syn-001",
+    "externalCaseKey": "TACC-2026-001",
+    "maestroCaseId": "maestro-case-placeholder-001",
+    "syntheticPatientLabel": "Synthetic Patient TAC-001",
+    "requestedMedication": "Fictionalimab",
+    "payerName": "Aurora Vale Fictional Health",
+    "currentStage": "clinical_validation"
+  },
+  "clinicalGate": {
+    "unsupportedClaim": {
+      "claimId": "unsupported-claim-diagnosis-severity-001",
+      "claimText": "Specialist documentation supports moderate-to-severe fictional disease activity for the requested therapy.",
+      "reasonHumanReviewRequired": "The claim is high-impact and must have clinician attestation before it can be used in the submission packet.",
+      "autonomousUseAllowed": false
+    },
+    "policyCriterion": {
+      "criterionId": "criterion-diagnosis",
+      "description": "Confirmed diagnosis of moderate-to-severe fictional inflammatory bowel condition.",
+      "policyCitation": "Aurora Vale Fictionalimab Policy 2026, Section 2.1",
+      "policySourceRef": "fixture://policies/aurora-vale-fictionalimab-policy.md#diagnosis-and-severity"
+    },
+    "evidenceRefs": [
+      {
+        "artifactId": "artifact-progress-note",
+        "sourceUri": "fixture://notes/specialist-progress-note.md",
+        "sourceSpan": "fixture://notes/specialist-progress-note.md#diagnosis-and-severity",
+        "summary": "Synthetic specialist progress note describes disease activity and requested therapy rationale.",
+        "confidence": 0.87
+      },
+      {
+        "artifactId": "policy-citation-diagnosis",
+        "sourceUri": "fixture://policies/aurora-vale-fictionalimab-policy.md",
+        "sourceSpan": "fixture://policies/aurora-vale-fictionalimab-policy.md#section-2.1",
+        "summary": "Synthetic payer policy requires specialist documentation of diagnosis and disease activity.",
+        "confidence": 1
+      }
+    ]
+  },
+  "allowedOutcomes": [
+    {
+      "id": "approve",
+      "name": "Approve",
+      "requiresAttestation": true,
+      "continuesSubmission": true
+    },
+    {
+      "id": "approve_with_edits",
+      "name": "Approve With Edits",
+      "requiresAttestation": true,
+      "continuesSubmission": true
+    },
+    {
+      "id": "reject",
+      "name": "Reject",
+      "requiresAttestation": false,
+      "continuesSubmission": false
+    },
+    {
+      "id": "request_more_evidence",
+      "name": "Request More Evidence",
+      "requiresAttestation": false,
+      "continuesSubmission": false
+    }
+  ],
+  "completionDataTemplate": {
+    "reviewerfinaltext": "Clinician-approved synthetic evidence text goes here.",
+    "policycitationfinal": "Aurora Vale Fictionalimab Policy 2026, Section 2.1",
+    "reviewerdecision": "approved",
+    "attestationconfirmed": true,
+    "reviewernotes": "Synthetic demo attestation only; no real patient or medical advice.",
+    "moreevidencereason": ""
+  },
+  "eventMirrorOnCreate": {
+    "actor_type": "action_center",
+    "actor_name": "Clinician Evidence Validation",
+    "task_or_agent_name": "clinician-evidence-validation.quickform",
+    "action": "human.task.created",
+    "case_id": "case-syn-001",
+    "maestro_case_id": "maestro-case-placeholder-001",
+    "input_summary": "Synthetic unsupported clinical claim routed to clinician validation.",
+    "output_summary": "Action Center task created; task ID and deep link must be captured before any live claim.",
+    "evidence_refs": [
+      "fixture://notes/specialist-progress-note.md#diagnosis-and-severity",
+      "fixture://policies/aurora-vale-fictionalimab-policy.md#section-2.1"
+    ]
+  }
+}

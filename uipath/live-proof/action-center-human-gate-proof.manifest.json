@@ -1,0 +1,105 @@
+{
+  "manifestSchema": "tacc.checkpoint8.actionCenterHumanGateProof.v1",
+  "manifestVersion": "2026-06-29",
+  "scope": {
+    "organization": "galacticus",
+    "tenant": "DefaultTenant",
+    "folderName": "TreatmentAccessHackathon",
+    "folderId": 7986316,
+    "folderKey": "4fba2fa1-012b-469a-b6aa-e5be3811c173",
+    "syntheticDataOnly": true,
+    "separateProjectGuardrail": "Do not reuse or modify AgentFactoryDemo."
+  },
+  "liveTaskClaim": {
+    "status": "not_claimed",
+    "requirement": "Do not claim a live Action Center task unless a numeric task ID and tenant-qualified deep link are captured from UiPath.",
+    "taskId": null,
+    "deepLink": null
+  },
+  "readOnlyDiscovery": {
+    "commandsRun": [
+      "uip login status --output json",
+      "uip tasks users 7986316 --output json",
+      "uip tasks list --folder-id 7986316 --output json"
+    ],
+    "results": [
+      "Login succeeded for cloud.uipath.com organization galacticus tenant DefaultTenant.",
+      "Folder 7986316 exposed one task-eligible DirectoryUser; personal reviewer identifiers are intentionally not committed.",
+      "Folder 7986316 returned an empty Action Center task list at discovery time."
+    ],
+    "sideEffects": "none"
+  },
+  "taskPayload": {
+    "path": "uipath/action-center/live-proof/clinician-validation-task-payload.json",
+    "contractPath": "uipath/action-center/contracts/clinician-evidence-validation.quickform.json",
+    "taskType": "FormTask",
+    "formType": "QuickForm",
+    "caseId": "case-syn-001",
+    "externalCaseKey": "TACC-2026-001",
+    "containsUnsupportedClaim": true,
+    "containsPolicyCitation": true,
+    "containsEvidenceRefs": true,
+    "noPhi": true
+  },
+  "approvalGatedLivePath": {
+    "creation": {
+      "approvalRequired": true,
+      "preferredStep": "Run the approved Maestro, Flow, Coded Agent, or API Workflow path that contains the Human-in-the-Loop QuickForm node bound to the clinician validation contract.",
+      "requiredInputs": [
+        "uipath/action-center/live-proof/clinician-validation-task-payload.json",
+        "uipath/action-center/contracts/clinician-evidence-validation.quickform.json"
+      ],
+      "evidenceRequired": [
+        "numeric task ID",
+        "task type",
+        "task key if returned by UiPath",
+        "tenant-qualified Action Center deep link",
+        "status after creation",
+        "event mirror record for human.task.created"
+      ]
+    },
+    "assignment": {
+      "approvalRequired": true,
+      "commandTemplate": "uip tasks assign <task-id> --user <reviewer-email> --output json",
+      "precheckCommand": "uip tasks users 7986316 --output json",
+      "verifyCommand": "uip tasks get <task-id> --task-type FormTask --folder-id 7986316 --output json"
+    },
+    "completion": {
+      "approvalRequired": true,
+      "commandTemplate": "uip tasks complete <task-id> --type FormTask --folder-id 7986316 --action \"Approve\" --data '{\"reviewerfinaltext\":\"Clinician-approved synthetic evidence text goes here.\",\"policycitationfinal\":\"Aurora Vale Fictionalimab Policy 2026, Section 2.1\",\"reviewerdecision\":\"approved\",\"attestationconfirmed\":true,\"reviewernotes\":\"Synthetic demo attestation only; no real patient or medical advice.\",\"moreevidencereason\":\"\"}' --output json",
+      "verifyCommand": "uip tasks get <task-id> --task-type FormTask --folder-id 7986316 --output json",
+      "eventMirrorAction": "human.task.completed"
+    }
+  },
+  "deepLinkRules": {
+    "standalonePattern": "https://cloud.uipath.com/galacticus/DefaultTenant/actions_/current-task/tasks/<task-id>",
+    "inboxPattern": "https://cloud.uipath.com/galacticus/DefaultTenant/orchestrator_/actions/inbox/<task-key>",
+    "tenantSlugRequired": true,
+    "notes": "Use the standalone pattern with numeric task ID when no task key is returned. Never emit a tenant-less Action Center link."
+  },
+  "fallback": {
+    "useOnlyIf": [
+      "Action Center or Actions service is not registered or discoverable after tenant/folder discovery.",
+      "No task-eligible reviewer or group can be discovered for folder 7986316 after official activation checks.",
+      "The approved task creation path fails with a licensing, permission, catalog, or feature-capability blocker.",
+      "The current uip tasks surface remains read/assign/complete only and no approved HITL workflow creation surface is available before recording."
+    ],
+    "proofSurface": "UiPath-controlled event mirror record written by the approved H1 Data Service/API Workflow path.",
+    "requiredUiLabel": "UiPath-controlled human gate fallback - no live Action Center task created",
+    "requiredEvent": {
+      "action": "human_gate_fallback_recorded",
+      "actor_type": "api_workflow",
+      "actor_name": "UiPath Human Gate Fallback",
+      "task_or_agent_name": "TreatmentAccessWriteEvent",
+      "case_id": "case-syn-001",
+      "maestro_case_id": "maestro-case-placeholder-001",
+      "input_summary": "Action Center task creation was blocked or unavailable after discovery; synthetic unsupported claim remains gated.",
+      "output_summary": "Human gate shown as UiPath-controlled fallback, not as a live Action Center task.",
+      "evidence_refs": [
+        "uipath/action-center/live-proof/clinician-validation-task-payload.json",
+        "uipath/action-center/contracts/clinician-evidence-validation.quickform.json"
+      ]
+    },
+    "approvalGatedCommandTemplate": "uip api-workflow run uipath/api-workflows/write-event.workflow.json --input-arguments '{\"apiBaseUrl\":\"<mock-healthcare-api-url>\",\"caseId\":\"case-syn-001\",\"maestroCaseId\":\"maestro-case-placeholder-001\",\"actorName\":\"UiPath Human Gate Fallback\",\"taskOrAgentName\":\"TreatmentAccessWriteEvent\",\"action\":\"human_gate_fallback_recorded\",\"inputSummary\":\"Action Center task creation was blocked or unavailable after discovery; synthetic unsupported claim remains gated.\",\"outputSummary\":\"Human gate shown as UiPath-controlled fallback, not as a live Action Center task.\",\"evidenceRefs\":[\"uipath/action-center/live-proof/clinician-validation-task-payload.json\",\"uipath/action-center/contracts/clinician-evidence-validation.quickform.json\"],\"traceId\":\"checkpoint8-action-center-fallback\"}' --output json"
+  }
+}

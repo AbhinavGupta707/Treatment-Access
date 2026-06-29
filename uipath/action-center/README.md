@@ -95,3 +95,26 @@ must read those UiPath-written events as the source of live human-task state.
 
 Appeal text is an administrative draft for clinician review. Do not submit an
 appeal unless the appeal signoff task completes with an approval outcome.
+
+## Checkpoint 8 H2 Proof Packet
+
+The final Action Center human gate proof packet is documented in
+`docs/action-center-live-proof.md` and
+`uipath/live-proof/action-center-human-gate-proof.manifest.json`.
+
+The synthetic clinician validation payload is
+`uipath/action-center/live-proof/clinician-validation-task-payload.json`. It
+defines the case ID, unsupported claim, policy citation, evidence refs, allowed
+outcomes, completion data template, and no-PHI safety flags for the final H2
+live proof.
+
+Do not claim a live Action Center task unless a numeric task ID and
+tenant-qualified deep link exist. If Action Center task creation is blocked by
+tenant capabilities, the Command Center must label the alternative exactly:
+`UiPath-controlled human gate fallback - no live Action Center task created`.
+
+Verify the packet locally with:
+
+```bash
+CI=true pnpm smoke:checkpoint8-action-center-proof
+```
