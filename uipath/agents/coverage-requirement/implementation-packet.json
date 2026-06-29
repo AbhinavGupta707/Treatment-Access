@@ -1,0 +1,63 @@
+{
+  "packetSchema": "tacc.uipathAgentBuilderImplementationPacket.v1",
+  "packetVersion": "2026-06-29",
+  "agentDisplayName": "Coverage Requirement Agent",
+  "uiPath": {
+    "folder": {
+      "name": "TreatmentAccessHackathon",
+      "id": 7986316,
+      "key": "4fba2fa1-012b-469a-b6aa-e5be3811c173"
+    },
+    "lowCodeProjectPath": "uipath/agents/coverage-requirement/CoverageRequirementAgent",
+    "variant": "autonomous",
+    "liveStepsRun": []
+  },
+  "purpose": "Extract payer policy criteria with citation IDs, source spans, and requirement confidence.",
+  "contract": {
+    "inputSchemaSource": "CoverageRequirementAgent/agent.json#/inputSchema",
+    "outputSchemaSource": "CoverageRequirementAgent/agent.json#/outputSchema",
+    "primaryOutputs": [
+      "authorization_required",
+      "submission_channels",
+      "criteria",
+      "required_documents",
+      "policy_citations",
+      "payer_policy",
+      "human_approval_required",
+      "source_grounding_warnings"
+    ],
+    "groundingRule": "Every clinical assertion must include evidence refs, policy citation/source span, or human approval requirement."
+  },
+  "toolMappings": [
+    {
+      "name": "policy_lookup_api",
+      "status": "documented_not_bound",
+      "futureBinding": "API Workflow or context grounding policy lookup; synthetic fixtures only."
+    },
+    {
+      "name": "extraction_fallback_parser",
+      "status": "documented_not_bound",
+      "futureBinding": "Shared extraction fallback or IXP/DU lane output."
+    },
+    {
+      "name": "schema_validator",
+      "status": "documented_not_bound",
+      "futureBinding": "Shared agent-runtime schema validation."
+    }
+  ],
+  "safetyRules": [
+    "Synthetic data only.",
+    "No real patient, payer, provider, credential, or PHI text.",
+    "Do not create live UiPath tasks, Data Service records, or agent debug runs without explicit approval.",
+    "Submission must be blocked when blocking safety-lab evidence is missing."
+  ],
+  "validation": {
+    "staticAgentValidateCommand": "uip agent validate uipath/agents/coverage-requirement/CoverageRequirementAgent --output json",
+    "jsonValidationCommand": "node -e \"const fs=require('fs'); for (const f of process.argv.slice(1)) JSON.parse(fs.readFileSync(f,'utf8'))\" uipath/agents/coverage-requirement/implementation-packet.json uipath/agents/coverage-requirement/samples/*.json"
+  },
+  "integrationNotes": [
+    "Shared runtime lane should pass fixture/schema-compatible objects into the standalone agent inputs or wrap these agents inline in the Maestro policy_evidence stage.",
+    "Agent outputs intentionally include audit_event_draft and agent_trace_draft so UiPath workflows remain the live writers of case state.",
+    "Tool mappings are documented for Agent Builder configuration; this lane did not bind external process tools because live/runtime resource discovery and uploads are out of scope."
+  ]
+}

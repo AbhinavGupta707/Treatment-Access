@@ -1,0 +1,804 @@
+{
+  "version": "1.1.0",
+  "settings": {
+    "model": "gpt-5.4",
+    "maxTokens": 12000,
+    "temperature": 0,
+    "engine": "basic-v2",
+    "maxIterations": 8,
+    "mode": "standard"
+  },
+  "inputSchema": {
+    "type": "object",
+    "description": "Coverage Requirement Agent input.",
+    "properties": {
+      "case_context": {
+        "type": "object",
+        "description": "TreatmentAccessCase subset.",
+        "properties": {
+          "case_id": {
+            "type": "string",
+            "description": "Case id."
+          },
+          "payer_id": {
+            "type": "string",
+            "description": "Payer id."
+          },
+          "service_type": {
+            "type": "string",
+            "description": "Service type."
+          },
+          "medication_name": {
+            "type": "string",
+            "description": "Medication name."
+          },
+          "urgency": {
+            "type": "string",
+            "description": "Case urgency."
+          }
+        },
+        "required": [
+          "case_id",
+          "payer_id",
+          "service_type",
+          "medication_name"
+        ]
+      },
+      "patient_snapshot": {
+        "type": "object",
+        "description": "PatientSnapshot subset; synthetic only.",
+        "properties": {
+          "patient_id": {
+            "type": "string",
+            "description": "Synthetic patient id."
+          },
+          "coverage_plan": {
+            "type": "string",
+            "description": "Synthetic coverage plan."
+          },
+          "diagnosis_codes": {
+            "type": "array",
+            "description": "Diagnosis codes from synthetic fixture.",
+            "items": {
+              "type": "string",
+              "description": "Diagnosis code."
+            }
+          },
+          "synthetic_data_disclaimer": {
+            "type": "string",
+            "description": "Synthetic data disclaimer."
+          }
+        },
+        "required": [
+          "patient_id",
+          "coverage_plan",
+          "diagnosis_codes"
+        ]
+      },
+      "treatment_order": {
+        "type": "object",
+        "description": "TreatmentOrder subset.",
+        "properties": {
+          "order_id": {
+            "type": "string",
+            "description": "Order id."
+          },
+          "service_type": {
+            "type": "string",
+            "description": "Service type."
+          },
+          "medication_name": {
+            "type": "string",
+            "description": "Requested medication."
+          },
+          "dose": {
+            "type": "string",
+            "description": "Dose text from synthetic order."
+          },
+          "diagnosis": {
+            "type": "string",
+            "description": "Synthetic diagnosis description."
+          },
+          "requested_start_date": {
+            "type": "string",
+            "description": "Requested start date."
+          }
+        },
+        "required": [
+          "order_id",
+          "service_type",
+          "medication_name",
+          "diagnosis"
+        ]
+      },
+      "payer_policy_document": {
+        "type": "object",
+        "description": "Synthetic policy source text or structured fixture.",
+        "properties": {
+          "policy_id": {
+            "type": "string",
+            "description": "Policy id."
+          },
+          "payer_id": {
+            "type": "string",
+            "description": "Payer id."
+          },
+          "payer_name": {
+            "type": "string",
+            "description": "Synthetic payer name."
+          },
+          "policy_name": {
+            "type": "string",
+            "description": "Policy display name."
+          },
+          "version": {
+            "type": "string",
+            "description": "Policy version."
+          },
+          "effective_date": {
+            "type": "string",
+            "description": "Policy effective date."
+          },
+          "source_uri": {
+            "type": "string",
+            "description": "Synthetic source URI."
+          },
+          "summary": {
+            "type": "string",
+            "description": "Synthetic policy summary."
+          },
+          "text": {
+            "type": "string",
+            "description": "Synthetic policy text or extract."
+          }
+        },
+        "required": [
+          "policy_id",
+          "payer_id",
+          "policy_name",
+          "version",
+          "source_uri"
+        ]
+      },
+      "policy_artifacts": {
+        "type": "array",
+        "description": "Policy EvidenceArtifact-compatible inputs.",
+        "items": {
+          "type": "object",
+          "description": "Policy artifact.",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "description": "Artifact id."
+            },
+            "source_uri": {
+              "type": "string",
+              "description": "Source URI."
+            },
+            "display_name": {
+              "type": "string",
+              "description": "Display name."
+            },
+            "extracted_text": {
+              "type": "string",
+              "description": "Synthetic extracted text."
+            },
+            "extraction_method": {
+              "type": "string",
+              "description": "Extraction method."
+            },
+            "extraction_confidence": {
+              "type": "number",
+              "description": "Extraction confidence.",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "synthetic": {
+              "type": "boolean",
+              "description": "Must be true."
+            }
+          },
+          "required": [
+            "artifact_id",
+            "source_uri",
+            "display_name",
+            "synthetic"
+          ]
+        }
+      },
+      "demo_toggles": {
+        "type": "object",
+        "description": "Demo toggles that may influence criteria visibility.",
+        "properties": {
+          "missing_safety_lab": {
+            "type": "boolean",
+            "description": "Whether safety labs are absent in demo scenario."
+          }
+        },
+        "required": []
+      }
+    },
+    "required": [
+      "case_context",
+      "patient_snapshot",
+      "treatment_order",
+      "payer_policy_document",
+      "policy_artifacts",
+      "demo_toggles"
+    ]
+  },
+  "outputSchema": {
+    "type": "object",
+    "description": "Coverage Requirement Agent output.",
+    "properties": {
+      "authorization_required": {
+        "type": "boolean",
+        "description": "True when policy requires prior authorization for the requested service."
+      },
+      "submission_channels": {
+        "type": "array",
+        "description": "Allowed submission channels.",
+        "items": {
+          "type": "string",
+          "enum": [
+            "payer_api",
+            "payer_portal_rpa",
+            "manual_fax_placeholder"
+          ]
+        }
+      },
+      "criteria": {
+        "type": "array",
+        "description": "Extracted PolicyCriterion-compatible criteria.",
+        "items": {
+          "type": "object",
+          "description": "PolicyCriterion-compatible criterion plus extraction confidence.",
+          "properties": {
+            "criterion_id": {
+              "type": "string",
+              "description": "Stable criterion id."
+            },
+            "policy_id": {
+              "type": "string",
+              "description": "Payer policy id."
+            },
+            "description": {
+              "type": "string",
+              "description": "Requirement text as an administrative policy requirement, not medical advice."
+            },
+            "required_evidence_type": {
+              "type": "string",
+              "description": "Evidence type needed to satisfy criterion."
+            },
+            "severity": {
+              "type": "string",
+              "description": "Downstream blocking severity.",
+              "enum": [
+                "blocking",
+                "warning",
+                "informational"
+              ]
+            },
+            "must_be_clinician_attested": {
+              "type": "boolean",
+              "description": "True when a clinician must approve the assertion before submission."
+            },
+            "policy_citation": {
+              "type": "string",
+              "description": "Human-readable policy citation string."
+            },
+            "source_span": {
+              "type": "object",
+              "description": "Source location for a policy or clinical evidence assertion.",
+              "properties": {
+                "artifact_id": {
+                  "type": "string",
+                  "description": "Optional source artifact identifier."
+                },
+                "source_uri": {
+                  "type": "string",
+                  "description": "Synthetic source URI or fixture URI."
+                },
+                "section_label": {
+                  "type": "string",
+                  "description": "Document section, table, row, or field label."
+                },
+                "start_line": {
+                  "type": "integer",
+                  "description": "Optional 1-based start line.",
+                  "minimum": 1
+                },
+                "end_line": {
+                  "type": "integer",
+                  "description": "Optional 1-based end line.",
+                  "minimum": 1
+                },
+                "char_start": {
+                  "type": "integer",
+                  "description": "Optional 0-based character start.",
+                  "minimum": 0
+                },
+                "char_end": {
+                  "type": "integer",
+                  "description": "Optional 0-based character end.",
+                  "minimum": 0
+                },
+                "excerpt": {
+                  "type": "string",
+                  "description": "Short synthetic excerpt, maximum 280 characters."
+                }
+              },
+              "required": [
+                "source_uri"
+              ]
+            },
+            "version": {
+              "type": "string",
+              "description": "Policy version."
+            },
+            "requirement_confidence": {
+              "type": "number",
+              "description": "Confidence that the criterion was extracted from the supplied synthetic policy source.",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "required": [
+            "criterion_id",
+            "policy_id",
+            "description",
+            "required_evidence_type",
+            "severity",
+            "must_be_clinician_attested",
+            "policy_citation",
+            "source_span",
+            "version",
+            "requirement_confidence"
+          ]
+        }
+      },
+      "required_documents": {
+        "type": "array",
+        "description": "Required document labels.",
+        "items": {
+          "type": "string",
+          "description": "Required document label."
+        }
+      },
+      "policy_citations": {
+        "type": "array",
+        "description": "Policy citations referenced by extracted criteria.",
+        "items": {
+          "type": "object",
+          "description": "Policy citation with source span.",
+          "properties": {
+            "citation_id": {
+              "type": "string",
+              "description": "Stable citation id."
+            },
+            "label": {
+              "type": "string",
+              "description": "Human-readable policy section label."
+            },
+            "source_span": {
+              "type": "object",
+              "description": "Source location for a policy or clinical evidence assertion.",
+              "properties": {
+                "artifact_id": {
+                  "type": "string",
+                  "description": "Optional source artifact identifier."
+                },
+                "source_uri": {
+                  "type": "string",
+                  "description": "Synthetic source URI or fixture URI."
+                },
+                "section_label": {
+                  "type": "string",
+                  "description": "Document section, table, row, or field label."
+                },
+                "start_line": {
+                  "type": "integer",
+                  "description": "Optional 1-based start line.",
+                  "minimum": 1
+                },
+                "end_line": {
+                  "type": "integer",
+                  "description": "Optional 1-based end line.",
+                  "minimum": 1
+                },
+                "char_start": {
+                  "type": "integer",
+                  "description": "Optional 0-based character start.",
+                  "minimum": 0
+                },
+                "char_end": {
+                  "type": "integer",
+                  "description": "Optional 0-based character end.",
+                  "minimum": 0
+                },
+                "excerpt": {
+                  "type": "string",
+                  "description": "Short synthetic excerpt, maximum 280 characters."
+                }
+              },
+              "required": [
+                "source_uri"
+              ]
+            }
+          },
+          "required": [
+            "citation_id",
+            "label",
+            "source_span"
+          ]
+        }
+      },
+      "payer_policy": {
+        "type": "object",
+        "description": "PayerPolicy-compatible extracted policy record.",
+        "properties": {
+          "policy_id": {
+            "type": "string",
+            "description": "Policy id."
+          },
+          "payer_id": {
+            "type": "string",
+            "description": "Payer id."
+          },
+          "payer_name": {
+            "type": "string",
+            "description": "Synthetic payer name."
+          },
+          "policy_name": {
+            "type": "string",
+            "description": "Policy name."
+          },
+          "version": {
+            "type": "string",
+            "description": "Policy version."
+          },
+          "effective_date": {
+            "type": "string",
+            "description": "Effective date."
+          },
+          "source_uri": {
+            "type": "string",
+            "description": "Source URI."
+          },
+          "summary": {
+            "type": "string",
+            "description": "Source-grounded synthetic summary."
+          },
+          "submission_channels": {
+            "type": "array",
+            "description": "Submission channels.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "payer_api",
+                "payer_portal_rpa",
+                "manual_fax_placeholder"
+              ]
+            }
+          },
+          "required_documents": {
+            "type": "array",
+            "description": "Required documents.",
+            "items": {
+              "type": "string",
+              "description": "Document label."
+            }
+          },
+          "citations": {
+            "type": "array",
+            "description": "Policy citations.",
+            "items": {
+              "type": "object",
+              "description": "Policy citation with source span.",
+              "properties": {
+                "citation_id": {
+                  "type": "string",
+                  "description": "Stable citation id."
+                },
+                "label": {
+                  "type": "string",
+                  "description": "Human-readable policy section label."
+                },
+                "source_span": {
+                  "type": "object",
+                  "description": "Source location for a policy or clinical evidence assertion.",
+                  "properties": {
+                    "artifact_id": {
+                      "type": "string",
+                      "description": "Optional source artifact identifier."
+                    },
+                    "source_uri": {
+                      "type": "string",
+                      "description": "Synthetic source URI or fixture URI."
+                    },
+                    "section_label": {
+                      "type": "string",
+                      "description": "Document section, table, row, or field label."
+                    },
+                    "start_line": {
+                      "type": "integer",
+                      "description": "Optional 1-based start line.",
+                      "minimum": 1
+                    },
+                    "end_line": {
+                      "type": "integer",
+                      "description": "Optional 1-based end line.",
+                      "minimum": 1
+                    },
+                    "char_start": {
+                      "type": "integer",
+                      "description": "Optional 0-based character start.",
+                      "minimum": 0
+                    },
+                    "char_end": {
+                      "type": "integer",
+                      "description": "Optional 0-based character end.",
+                      "minimum": 0
+                    },
+                    "excerpt": {
+                      "type": "string",
+                      "description": "Short synthetic excerpt, maximum 280 characters."
+                    }
+                  },
+                  "required": [
+                    "source_uri"
+                  ]
+                }
+              },
+              "required": [
+                "citation_id",
+                "label",
+                "source_span"
+              ]
+            }
+          }
+        },
+        "required": [
+          "policy_id",
+          "payer_id",
+          "payer_name",
+          "policy_name",
+          "version",
+          "effective_date",
+          "source_uri",
+          "summary",
+          "submission_channels",
+          "required_documents",
+          "citations"
+        ]
+      },
+      "human_approval_required": {
+        "type": "boolean",
+        "description": "True if any extracted assertion lacks adequate policy citation or needs clinical approval."
+      },
+      "source_grounding_warnings": {
+        "type": "array",
+        "description": "Warnings for missing citations, ambiguous policy text, or human approval requirements.",
+        "items": {
+          "type": "string",
+          "description": "Warning."
+        }
+      },
+      "audit_event_draft": {
+        "type": "object",
+        "description": "Audit event draft for UiPath event writer workflow.",
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "description": "Stable event id or deterministic draft id."
+          },
+          "case_id": {
+            "type": "string",
+            "description": "Treatment access case id."
+          },
+          "actor_type": {
+            "type": "string",
+            "description": "Always agent for these outputs.",
+            "enum": [
+              "agent"
+            ]
+          },
+          "actor_name": {
+            "type": "string",
+            "description": "Agent display name."
+          },
+          "task_or_agent_name": {
+            "type": "string",
+            "description": "Agent display name."
+          },
+          "action": {
+            "type": "string",
+            "description": "Machine-readable action name."
+          },
+          "input_summary": {
+            "type": "string",
+            "description": "Brief source-grounded input summary."
+          },
+          "output_summary": {
+            "type": "string",
+            "description": "Brief source-grounded output summary."
+          },
+          "evidence_refs": {
+            "type": "array",
+            "description": "Artifact ids, citation ids, mapping ids, or human approval refs supporting the output.",
+            "items": {
+              "type": "string",
+              "description": "Evidence reference id."
+            }
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "ISO timestamp supplied by runtime or draft timestamp placeholder."
+          }
+        },
+        "required": [
+          "event_id",
+          "case_id",
+          "actor_type",
+          "actor_name",
+          "task_or_agent_name",
+          "action",
+          "input_summary",
+          "output_summary",
+          "evidence_refs"
+        ]
+      },
+      "agent_trace_draft": {
+        "type": "object",
+        "description": "Agent trace draft for runtime observability.",
+        "properties": {
+          "trace_id": {
+            "type": "string",
+            "description": "Stable trace id or deterministic draft id."
+          },
+          "case_id": {
+            "type": "string",
+            "description": "Treatment access case id."
+          },
+          "agent_name": {
+            "type": "string",
+            "description": "Agent display name."
+          },
+          "status": {
+            "type": "string",
+            "description": "Agent completion status.",
+            "enum": [
+              "completed",
+              "needs_human",
+              "failed"
+            ]
+          },
+          "input_summary": {
+            "type": "string",
+            "description": "Brief input summary."
+          },
+          "output_summary": {
+            "type": "string",
+            "description": "Brief output summary."
+          },
+          "tool_calls": {
+            "type": "array",
+            "description": "Documented tool names used or expected in runtime.",
+            "items": {
+              "type": "string",
+              "description": "Tool name."
+            }
+          },
+          "evidence_refs": {
+            "type": "array",
+            "description": "Evidence, citation, artifact, mapping, or human approval refs.",
+            "items": {
+              "type": "string",
+              "description": "Reference id."
+            }
+          }
+        },
+        "required": [
+          "trace_id",
+          "case_id",
+          "agent_name",
+          "status",
+          "input_summary",
+          "output_summary",
+          "tool_calls",
+          "evidence_refs"
+        ]
+      }
+    },
+    "required": [
+      "authorization_required",
+      "submission_channels",
+      "criteria",
+      "required_documents",
+      "policy_citations",
+      "payer_policy",
+      "human_approval_required",
+      "source_grounding_warnings",
+      "audit_event_draft",
+      "agent_trace_draft"
+    ]
+  },
+  "metadata": {
+    "storageVersion": "50.0.0",
+    "isConversational": false,
+    "showProjectCreationExperience": false,
+    "targetRuntime": "pythonAgent"
+  },
+  "type": "lowCode",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are the Coverage Requirement Agent for the Treatment Access Command Center. Extract payer prior-authorization requirements from synthetic policy inputs and produce source-grounded administrative criteria.\n\nScope:\n- In scope: determine whether authorization is required, identify submission channels, extract policy criteria, required documents, citations, source spans, and confidence.\n- Out of scope: diagnosing a patient, judging medical necessity independently, drafting appeal language, submitting to a payer, or creating live records.\n\nTools:\n- policy_lookup_api: use when a payer_id, policy_id, or policy source URI is supplied and a policy fixture must be selected. Do not use for real payer systems.\n- extraction_fallback_parser: use when supplied policy text or artifact text needs line/section/span extraction.\n- schema_validator: use before final output to ensure PayerPolicy and PolicyCriterion-compatible fields are present.\nThe current local packet documents these tools for Agent Builder wiring; if a tool is not connected, rely only on supplied input fields.\n\nOutput:\n- Return only a result conforming to the output schema.\n- Every criterion must include policy_citation, source_span, and requirement_confidence.\n- Every clinical or coverage assertion must be backed by a policy citation/source span or marked as requiring human approval.\n- Use only synthetic source URIs and synthetic text from the input; never add real payer, provider, patient, or policy text.\n\nUncertainty:\n- If the policy source is missing or ambiguous, set authorization_required=false only when the supplied policy explicitly says no authorization is required; otherwise set human_approval_required=true and include a source_grounding_warning.\n- If a criterion affects submission eligibility and lacks a citation or source span, include it as a blocking warning that requires human approval rather than presenting it as established fact.",
+      "contentTokens": [
+        {
+          "type": "simpleText",
+          "rawString": "You are the Coverage Requirement Agent for the Treatment Access Command Center. Extract payer prior-authorization requirements from synthetic policy inputs and produce source-grounded administrative criteria.\n\nScope:\n- In scope: determine whether authorization is required, identify submission channels, extract policy criteria, required documents, citations, source spans, and confidence.\n- Out of scope: diagnosing a patient, judging medical necessity independently, drafting appeal language, submitting to a payer, or creating live records.\n\nTools:\n- policy_lookup_api: use when a payer_id, policy_id, or policy source URI is supplied and a policy fixture must be selected. Do not use for real payer systems.\n- extraction_fallback_parser: use when supplied policy text or artifact text needs line/section/span extraction.\n- schema_validator: use before final output to ensure PayerPolicy and PolicyCriterion-compatible fields are present.\nThe current local packet documents these tools for Agent Builder wiring; if a tool is not connected, rely only on supplied input fields.\n\nOutput:\n- Return only a result conforming to the output schema.\n- Every criterion must include policy_citation, source_span, and requirement_confidence.\n- Every clinical or coverage assertion must be backed by a policy citation/source span or marked as requiring human approval.\n- Use only synthetic source URIs and synthetic text from the input; never add real payer, provider, patient, or policy text.\n\nUncertainty:\n- If the policy source is missing or ambiguous, set authorization_required=false only when the supplied policy explicitly says no authorization is required; otherwise set human_approval_required=true and include a source_grounding_warning.\n- If a criterion affects submission eligibility and lacks a citation or source span, include it as a blocking warning that requires human approval rather than presenting it as established fact."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "Extract coverage requirements for this synthetic treatment access case.\n\nCase context:\n{{input.case_context}}\n\nPatient coverage:\n{{input.patient_snapshot}}\n\nTreatment order:\n{{input.treatment_order}}\n\nPayer policy input:\n{{input.payer_policy_document}}\n\nPolicy artifacts:\n{{input.policy_artifacts}}\n\nDemo toggles:\n{{input.demo_toggles}}\n\nReturn authorization_required, submission_channels, criteria, required_documents, policy_citations, payer_policy, human_approval_required, source_grounding_warnings, audit_event_draft, and agent_trace_draft.",
+      "contentTokens": [
+        {
+          "type": "simpleText",
+          "rawString": "Extract coverage requirements for this synthetic treatment access case.\n\nCase context:\n"
+        },
+        {
+          "type": "variable",
+          "rawString": "input.case_context"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\nPatient coverage:\n"
+        },
+        {
+          "type": "variable",
+          "rawString": "input.patient_snapshot"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\nTreatment order:\n"
+        },
+        {
+          "type": "variable",
+          "rawString": "input.treatment_order"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\nPayer policy input:\n"
+        },
+        {
+          "type": "variable",
+          "rawString": "input.payer_policy_document"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\nPolicy artifacts:\n"
+        },
+        {
+          "type": "variable",
+          "rawString": "input.policy_artifacts"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\nDemo toggles:\n"
+        },
+        {
+          "type": "variable",
+          "rawString": "input.demo_toggles"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\nReturn authorization_required, submission_channels, criteria, required_documents, policy_citations, payer_policy, human_approval_required, source_grounding_warnings, audit_event_draft, and agent_trace_draft."
+        }
+      ]
+    }
+  ],
+  "projectId": "433013c3-a3a2-4382-aead-261d5d282269"
+}

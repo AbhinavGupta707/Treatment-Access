@@ -1,0 +1,168 @@
+{
+  "case_context": {
+    "case_id": "case-syn-001",
+    "patient_id": "patient-syn-001",
+    "order_id": "order-syn-001",
+    "payer_id": "payer-aurora-vale",
+    "service_type": "specialty_medication",
+    "medication_name": "Fictionalimab",
+    "urgency": "urgent",
+    "sla_due_at": "2026-07-01T17:00:00.000Z",
+    "sla_state": "on_track",
+    "maestro_case_id": "maestro-case-placeholder-001"
+  },
+  "case_urgency": "urgent",
+  "criteria": [
+    {
+      "criterion_id": "criterion-diagnosis",
+      "policy_id": "policy-aurora-vale-biologic-2026",
+      "description": "Confirmed diagnosis of moderate-to-severe fictional inflammatory bowel condition.",
+      "required_evidence_type": "specialist_note",
+      "severity": "blocking",
+      "must_be_clinician_attested": true,
+      "policy_citation": "Aurora Vale Fictionalimab Policy 2026, Section 2.1",
+      "source_span": {
+        "source_uri": "fixture://policies/aurora-vale-fictionalimab-policy.md",
+        "section_label": "Diagnosis and severity",
+        "excerpt": "Fictional policy requires specialist documentation of diagnosis and disease activity."
+      },
+      "version": "2026.1",
+      "requirement_confidence": 0.93
+    },
+    {
+      "criterion_id": "criterion-step-therapy",
+      "policy_id": "policy-aurora-vale-biologic-2026",
+      "description": "Documented inadequate response or intolerance to two preferred therapies.",
+      "required_evidence_type": "medication_history",
+      "severity": "blocking",
+      "must_be_clinician_attested": false,
+      "policy_citation": "Aurora Vale Fictionalimab Policy 2026, Section 2.4",
+      "source_span": {
+        "source_uri": "fixture://policies/aurora-vale-fictionalimab-policy.md",
+        "section_label": "Preferred therapy history",
+        "excerpt": "Fictional policy requires two preferred therapy attempts before Fictionalimab."
+      },
+      "version": "2026.1",
+      "requirement_confidence": 0.95
+    },
+    {
+      "criterion_id": "criterion-safety-screen",
+      "policy_id": "policy-aurora-vale-biologic-2026",
+      "description": "Recent TB and hepatitis screening before Fictionalimab initiation.",
+      "required_evidence_type": "safety_labs",
+      "severity": "blocking",
+      "must_be_clinician_attested": false,
+      "policy_citation": "Aurora Vale Fictionalimab Policy 2026, Section 3.2",
+      "source_span": {
+        "source_uri": "fixture://policies/aurora-vale-fictionalimab-policy.md",
+        "section_label": "Safety screening",
+        "excerpt": "Fictional policy requires negative TB and hepatitis screening within six months."
+      },
+      "version": "2026.1",
+      "requirement_confidence": 0.96
+    }
+  ],
+  "evidence_mappings": [
+    {
+      "mapping_id": "mapping-diagnosis",
+      "case_id": "case-syn-001",
+      "criterion_id": "criterion-diagnosis",
+      "artifact_id": "artifact-progress-note",
+      "status": "needs_human_validation",
+      "evidence_summary": "Specialist note supports diagnosis and severity; clinician attestation is required before submission.",
+      "source_quote_short": "Fictional excerpt: symptoms remain moderate-to-severe despite prior therapy attempts.",
+      "source_span": {
+        "artifact_id": "artifact-progress-note",
+        "source_uri": "fixture://notes/specialist-progress-note.md",
+        "section_label": "Assessment",
+        "excerpt": "Fictional excerpt: symptoms remain moderate-to-severe despite prior therapy attempts."
+      },
+      "confidence": 0.87,
+      "needs_human_review": true,
+      "human_review_reason": "High-impact medical assertion requires clinician validation.",
+      "reviewer_decision": "pending",
+      "citations": [
+        {
+          "citation_id": "policy-citation-diagnosis",
+          "label": "Policy Section 2.1",
+          "source_span": {
+            "source_uri": "fixture://policies/aurora-vale-fictionalimab-policy.md",
+            "section_label": "Diagnosis and severity",
+            "excerpt": "Fictional policy requires specialist documentation of diagnosis and disease activity."
+          }
+        }
+      ]
+    },
+    {
+      "mapping_id": "mapping-step-therapy",
+      "case_id": "case-syn-001",
+      "criterion_id": "criterion-step-therapy",
+      "artifact_id": "artifact-med-history",
+      "status": "found",
+      "evidence_summary": "Synthetic medication history lists two preferred therapies with documented outcomes.",
+      "source_quote_short": "Fictional excerpt: inadequate response to Preferred Therapy A and intolerance to Preferred Therapy B.",
+      "source_span": {
+        "artifact_id": "artifact-med-history",
+        "source_uri": "fixture://ehr/medication-history.json",
+        "section_label": "priorTherapies",
+        "excerpt": "Fictional excerpt: two prior therapy outcomes are documented for demo review."
+      },
+      "confidence": 0.94,
+      "needs_human_review": false,
+      "human_review_reason": "",
+      "reviewer_decision": "pending",
+      "citations": [
+        {
+          "citation_id": "policy-citation-step",
+          "label": "Policy Section 2.4",
+          "source_span": {
+            "source_uri": "fixture://policies/aurora-vale-fictionalimab-policy.md",
+            "section_label": "Preferred therapy history",
+            "excerpt": "Fictional policy requires two preferred therapy attempts before Fictionalimab."
+          }
+        }
+      ]
+    },
+    {
+      "mapping_id": "mapping-safety-screen",
+      "case_id": "case-syn-001",
+      "criterion_id": "criterion-safety-screen",
+      "artifact_id": "",
+      "status": "missing",
+      "evidence_summary": "Safety screening is missing in the current synthetic chart snapshot.",
+      "source_quote_short": "",
+      "source_span": {
+        "source_uri": "fixture://labs/safety-screening.csv",
+        "section_label": "missing-safety-screen-toggle",
+        "excerpt": "Demo toggle removed TB and hepatitis safety screening evidence."
+      },
+      "confidence": 0,
+      "needs_human_review": true,
+      "human_review_reason": "Blocking safety criterion must be supplied before submission.",
+      "reviewer_decision": "pending",
+      "citations": [
+        {
+          "citation_id": "policy-citation-safety",
+          "label": "Policy Section 3.2",
+          "source_span": {
+            "source_uri": "fixture://policies/aurora-vale-fictionalimab-policy.md",
+            "section_label": "Safety screening",
+            "excerpt": "Fictional policy requires negative TB and hepatitis screening within six months."
+          }
+        }
+      ]
+    }
+  ],
+  "action_center_contract": {
+    "taskKey": "clinician_evidence_validation",
+    "displayName": "Clinician Evidence Validation",
+    "taskCatalog": "Treatment Access Clinical Review",
+    "folderName": "TreatmentAccessHackathon",
+    "assignmentTargetRole": "nurse-coordinator"
+  },
+  "demo_toggles": {
+    "missing_safety_lab": true,
+    "force_low_confidence_extraction": false,
+    "clinician_rejects_assertion": false
+  }
+}

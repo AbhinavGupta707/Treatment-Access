@@ -1,0 +1,142 @@
+{
+  "case_context": {
+    "case_id": "case-syn-001",
+    "patient_id": "patient-syn-001",
+    "order_id": "order-syn-001",
+    "payer_id": "payer-aurora-vale",
+    "service_type": "specialty_medication",
+    "medication_name": "Fictionalimab",
+    "urgency": "urgent",
+    "sla_due_at": "2026-07-01T17:00:00.000Z",
+    "sla_state": "on_track"
+  },
+  "criteria": [
+    {
+      "criterion_id": "criterion-diagnosis",
+      "policy_id": "policy-aurora-vale-biologic-2026",
+      "description": "Confirmed diagnosis of moderate-to-severe fictional inflammatory bowel condition.",
+      "required_evidence_type": "specialist_note",
+      "severity": "blocking",
+      "must_be_clinician_attested": true,
+      "policy_citation": "Aurora Vale Fictionalimab Policy 2026, Section 2.1",
+      "source_span": {
+        "source_uri": "fixture://policies/aurora-vale-fictionalimab-policy.md",
+        "section_label": "Diagnosis and severity",
+        "excerpt": "Fictional policy requires specialist documentation of diagnosis and disease activity."
+      },
+      "version": "2026.1",
+      "requirement_confidence": 0.93
+    },
+    {
+      "criterion_id": "criterion-step-therapy",
+      "policy_id": "policy-aurora-vale-biologic-2026",
+      "description": "Documented inadequate response or intolerance to two preferred therapies.",
+      "required_evidence_type": "medication_history",
+      "severity": "blocking",
+      "must_be_clinician_attested": false,
+      "policy_citation": "Aurora Vale Fictionalimab Policy 2026, Section 2.4",
+      "source_span": {
+        "source_uri": "fixture://policies/aurora-vale-fictionalimab-policy.md",
+        "section_label": "Preferred therapy history",
+        "excerpt": "Fictional policy requires two preferred therapy attempts before Fictionalimab."
+      },
+      "version": "2026.1",
+      "requirement_confidence": 0.95
+    },
+    {
+      "criterion_id": "criterion-safety-screen",
+      "policy_id": "policy-aurora-vale-biologic-2026",
+      "description": "Recent TB and hepatitis screening before Fictionalimab initiation.",
+      "required_evidence_type": "safety_labs",
+      "severity": "blocking",
+      "must_be_clinician_attested": false,
+      "policy_citation": "Aurora Vale Fictionalimab Policy 2026, Section 3.2",
+      "source_span": {
+        "source_uri": "fixture://policies/aurora-vale-fictionalimab-policy.md",
+        "section_label": "Safety screening",
+        "excerpt": "Fictional policy requires negative TB and hepatitis screening within six months."
+      },
+      "version": "2026.1",
+      "requirement_confidence": 0.96
+    }
+  ],
+  "artifacts": [
+    {
+      "artifact_id": "artifact-progress-note",
+      "case_id": "case-syn-001",
+      "type": "progress_note",
+      "source_uri": "fixture://notes/specialist-progress-note.md",
+      "display_name": "Synthetic Specialist Progress Note",
+      "extracted_text": "Synthetic progress note: demo clinician documents ongoing moderate-to-severe symptoms and recommends Fictionalimab after prior therapy attempts.",
+      "structured_fields": {
+        "clinician_attestation_required": true
+      },
+      "extraction_method": "fallback_parser",
+      "extraction_confidence": 0.87,
+      "synthetic": true
+    },
+    {
+      "artifact_id": "artifact-med-history",
+      "case_id": "case-syn-001",
+      "type": "medication_history",
+      "source_uri": "fixture://ehr/medication-history.json",
+      "display_name": "Synthetic Medication History",
+      "extracted_text": "Synthetic medication history: preferred therapy A had inadequate response; preferred therapy B stopped for fictional intolerance.",
+      "structured_fields": {
+        "prior_therapy_count": 2
+      },
+      "extraction_method": "seeded_fixture",
+      "extraction_confidence": 0.94,
+      "synthetic": true
+    }
+  ],
+  "labs": [
+    {
+      "lab_id": "lab-tb-screen",
+      "test_name": "Synthetic TB screening",
+      "result": "not present in synthetic chart snapshot",
+      "collected_at": "2026-06-21T09:15:00.000Z",
+      "status": "missing",
+      "source_artifact_id": ""
+    },
+    {
+      "lab_id": "lab-hep-b-screen",
+      "test_name": "Synthetic hepatitis B surface antigen",
+      "result": "not present in synthetic chart snapshot",
+      "collected_at": "2026-06-21T09:15:00.000Z",
+      "status": "missing",
+      "source_artifact_id": ""
+    }
+  ],
+  "medication_history": [
+    {
+      "medication_history_id": "med-history-preferred-a",
+      "medication_name": "Preferred Therapy A",
+      "therapy_class": "fictional conventional therapy",
+      "start_date": "2025-10-01",
+      "end_date": "2026-01-15",
+      "outcome": "Synthetic record indicates inadequate response.",
+      "source_artifact_id": "artifact-med-history"
+    },
+    {
+      "medication_history_id": "med-history-preferred-b",
+      "medication_name": "Preferred Therapy B",
+      "therapy_class": "fictional immunomodulator",
+      "start_date": "2026-02-01",
+      "end_date": "2026-04-10",
+      "outcome": "Synthetic record indicates intolerance in a demo-only note.",
+      "source_artifact_id": "artifact-med-history"
+    }
+  ],
+  "treatment_order": {
+    "order_id": "order-syn-001",
+    "medication_name": "Fictionalimab",
+    "diagnosis": "Moderate-to-severe fictional inflammatory bowel condition",
+    "requested_start_date": "2026-07-03",
+    "site_of_care": "home administration after specialty pharmacy onboarding"
+  },
+  "demo_toggles": {
+    "missing_safety_lab": true,
+    "force_low_confidence_extraction": false
+  }
+}

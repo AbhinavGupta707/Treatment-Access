@@ -1,0 +1,65 @@
+{
+  "packetSchema": "tacc.uipathAgentBuilderImplementationPacket.v1",
+  "packetVersion": "2026-06-29",
+  "agentDisplayName": "Evidence Retrieval Agent",
+  "uiPath": {
+    "folder": {
+      "name": "TreatmentAccessHackathon",
+      "id": 7986316,
+      "key": "4fba2fa1-012b-469a-b6aa-e5be3811c173"
+    },
+    "lowCodeProjectPath": "uipath/agents/evidence-retrieval/EvidenceRetrievalAgent",
+    "variant": "autonomous",
+    "liveStepsRun": []
+  },
+  "purpose": "Map chart, lab, medication, order, and attachment artifacts to criteria with source spans.",
+  "contract": {
+    "inputSchemaSource": "EvidenceRetrievalAgent/agent.json#/inputSchema",
+    "outputSchemaSource": "EvidenceRetrievalAgent/agent.json#/outputSchema",
+    "primaryOutputs": [
+      "evidence_mappings",
+      "evidence_artifacts_used",
+      "blocking_missing_criteria",
+      "human_review_recommended",
+      "source_grounding_warnings"
+    ],
+    "groundingRule": "Every clinical assertion must include evidence refs, policy citation/source span, or human approval requirement."
+  },
+  "toolMappings": [
+    {
+      "name": "mock_ehr_order_evidence_pull",
+      "status": "documented_not_bound",
+      "futureBinding": "uipath/api-workflows/ehr-order-evidence-pull.workflow.json output."
+    },
+    {
+      "name": "document_extractor_or_ixp",
+      "status": "documented_not_bound",
+      "futureBinding": "IXP/Document Understanding lane or fallback parser."
+    },
+    {
+      "name": "deterministic_evidence_search",
+      "status": "documented_not_bound",
+      "futureBinding": "Shared runtime deterministic matcher."
+    },
+    {
+      "name": "schema_validator",
+      "status": "documented_not_bound",
+      "futureBinding": "Shared agent-runtime schema validation."
+    }
+  ],
+  "safetyRules": [
+    "Synthetic data only.",
+    "No real patient, payer, provider, credential, or PHI text.",
+    "Do not create live UiPath tasks, Data Service records, or agent debug runs without explicit approval.",
+    "Submission must be blocked when blocking safety-lab evidence is missing."
+  ],
+  "validation": {
+    "staticAgentValidateCommand": "uip agent validate uipath/agents/evidence-retrieval/EvidenceRetrievalAgent --output json",
+    "jsonValidationCommand": "node -e \"const fs=require('fs'); for (const f of process.argv.slice(1)) JSON.parse(fs.readFileSync(f,'utf8'))\" uipath/agents/evidence-retrieval/implementation-packet.json uipath/agents/evidence-retrieval/samples/*.json"
+  },
+  "integrationNotes": [
+    "Shared runtime lane should pass fixture/schema-compatible objects into the standalone agent inputs or wrap these agents inline in the Maestro policy_evidence stage.",
+    "Agent outputs intentionally include audit_event_draft and agent_trace_draft so UiPath workflows remain the live writers of case state.",
+    "Tool mappings are documented for Agent Builder configuration; this lane did not bind external process tools because live/runtime resource discovery and uploads are out of scope."
+  ]
+}

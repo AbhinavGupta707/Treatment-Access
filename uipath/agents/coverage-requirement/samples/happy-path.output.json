@@ -1,0 +1,178 @@
+{
+  "authorization_required": true,
+  "submission_channels": [
+    "payer_api",
+    "payer_portal_rpa"
+  ],
+  "criteria": [
+    {
+      "criterion_id": "criterion-diagnosis",
+      "policy_id": "policy-aurora-vale-biologic-2026",
+      "description": "Confirmed diagnosis of moderate-to-severe fictional inflammatory bowel condition.",
+      "required_evidence_type": "specialist_note",
+      "severity": "blocking",
+      "must_be_clinician_attested": true,
+      "policy_citation": "Aurora Vale Fictionalimab Policy 2026, Section 2.1",
+      "source_span": {
+        "source_uri": "fixture://policies/aurora-vale-fictionalimab-policy.md",
+        "section_label": "Diagnosis and severity",
+        "excerpt": "Fictional policy requires specialist documentation of diagnosis and disease activity."
+      },
+      "version": "2026.1",
+      "requirement_confidence": 0.93
+    },
+    {
+      "criterion_id": "criterion-step-therapy",
+      "policy_id": "policy-aurora-vale-biologic-2026",
+      "description": "Documented inadequate response or intolerance to two preferred therapies.",
+      "required_evidence_type": "medication_history",
+      "severity": "blocking",
+      "must_be_clinician_attested": false,
+      "policy_citation": "Aurora Vale Fictionalimab Policy 2026, Section 2.4",
+      "source_span": {
+        "source_uri": "fixture://policies/aurora-vale-fictionalimab-policy.md",
+        "section_label": "Preferred therapy history",
+        "excerpt": "Fictional policy requires two preferred therapy attempts before Fictionalimab."
+      },
+      "version": "2026.1",
+      "requirement_confidence": 0.95
+    },
+    {
+      "criterion_id": "criterion-safety-screen",
+      "policy_id": "policy-aurora-vale-biologic-2026",
+      "description": "Recent TB and hepatitis screening before Fictionalimab initiation.",
+      "required_evidence_type": "safety_labs",
+      "severity": "blocking",
+      "must_be_clinician_attested": false,
+      "policy_citation": "Aurora Vale Fictionalimab Policy 2026, Section 3.2",
+      "source_span": {
+        "source_uri": "fixture://policies/aurora-vale-fictionalimab-policy.md",
+        "section_label": "Safety screening",
+        "excerpt": "Fictional policy requires negative TB and hepatitis screening within six months."
+      },
+      "version": "2026.1",
+      "requirement_confidence": 0.96
+    }
+  ],
+  "required_documents": [
+    "specialist progress note",
+    "medication history",
+    "TB and hepatitis safety screening",
+    "clinician attestation for severity statement"
+  ],
+  "policy_citations": [
+    {
+      "citation_id": "policy-citation-diagnosis",
+      "label": "Policy Section 2.1",
+      "source_span": {
+        "source_uri": "fixture://policies/aurora-vale-fictionalimab-policy.md",
+        "section_label": "Diagnosis and severity",
+        "excerpt": "Fictional policy requires specialist documentation of diagnosis and disease activity."
+      }
+    },
+    {
+      "citation_id": "policy-citation-step",
+      "label": "Policy Section 2.4",
+      "source_span": {
+        "source_uri": "fixture://policies/aurora-vale-fictionalimab-policy.md",
+        "section_label": "Preferred therapy history",
+        "excerpt": "Fictional policy requires two preferred therapy attempts before Fictionalimab."
+      }
+    },
+    {
+      "citation_id": "policy-citation-safety",
+      "label": "Policy Section 3.2",
+      "source_span": {
+        "source_uri": "fixture://policies/aurora-vale-fictionalimab-policy.md",
+        "section_label": "Safety screening",
+        "excerpt": "Fictional policy requires negative TB and hepatitis screening within six months."
+      }
+    }
+  ],
+  "payer_policy": {
+    "policy_id": "policy-aurora-vale-biologic-2026",
+    "payer_id": "payer-aurora-vale",
+    "payer_name": "Aurora Vale Fictional Health",
+    "policy_name": "Fictionalimab Prior Authorization Policy",
+    "version": "2026.1",
+    "effective_date": "2026-01-01",
+    "source_uri": "fixture://policies/aurora-vale-fictionalimab-policy.md",
+    "summary": "Synthetic payer policy requiring diagnosis confirmation, prior therapy history, safety screening, and clinician attestation before approval.",
+    "submission_channels": [
+      "payer_api",
+      "payer_portal_rpa"
+    ],
+    "required_documents": [
+      "specialist progress note",
+      "medication history",
+      "TB and hepatitis safety screening",
+      "clinician attestation for severity statement"
+    ],
+    "citations": [
+      {
+        "citation_id": "policy-citation-diagnosis",
+        "label": "Policy Section 2.1",
+        "source_span": {
+          "source_uri": "fixture://policies/aurora-vale-fictionalimab-policy.md",
+          "section_label": "Diagnosis and severity",
+          "excerpt": "Fictional policy requires specialist documentation of diagnosis and disease activity."
+        }
+      },
+      {
+        "citation_id": "policy-citation-step",
+        "label": "Policy Section 2.4",
+        "source_span": {
+          "source_uri": "fixture://policies/aurora-vale-fictionalimab-policy.md",
+          "section_label": "Preferred therapy history",
+          "excerpt": "Fictional policy requires two preferred therapy attempts before Fictionalimab."
+        }
+      },
+      {
+        "citation_id": "policy-citation-safety",
+        "label": "Policy Section 3.2",
+        "source_span": {
+          "source_uri": "fixture://policies/aurora-vale-fictionalimab-policy.md",
+          "section_label": "Safety screening",
+          "excerpt": "Fictional policy requires negative TB and hepatitis screening within six months."
+        }
+      }
+    ]
+  },
+  "human_approval_required": true,
+  "source_grounding_warnings": [
+    "Diagnosis severity criterion requires clinician attestation before downstream submission."
+  ],
+  "audit_event_draft": {
+    "event_id": "audit-coverage.requirements.extracted-001",
+    "case_id": "case-syn-001",
+    "actor_type": "agent",
+    "actor_name": "Coverage Requirement Agent",
+    "task_or_agent_name": "Coverage Requirement Agent",
+    "action": "coverage.requirements.extracted",
+    "input_summary": "Synthetic fixture input only.",
+    "output_summary": "Coverage Requirement Agent produced source-grounded structured output.",
+    "evidence_refs": [
+      "artifact-policy",
+      "policy-citation-diagnosis",
+      "policy-citation-step",
+      "policy-citation-safety"
+    ],
+    "timestamp": "runtime-provided"
+  },
+  "agent_trace_draft": {
+    "trace_id": "trace-coverage-requirement-agent-sample",
+    "case_id": "case-syn-001",
+    "agent_name": "Coverage Requirement Agent",
+    "status": "completed",
+    "input_summary": "Synthetic Treatment Access checkpoint 3 sample.",
+    "output_summary": "Coverage Requirement Agent completed sample packet output.",
+    "tool_calls": [
+      "policy_lookup_api",
+      "extraction_fallback_parser",
+      "schema_validator"
+    ],
+    "evidence_refs": [
+      "artifact-policy"
+    ]
+  }
+}
