@@ -31,7 +31,7 @@
     "typecheck": "CI=true pnpm build:contracts && CI=true pnpm -r --if-present typecheck",
     "verify": "CI=true pnpm typecheck && CI=true pnpm test && CI=true pnpm build && pnpm verify:setup",
     "verify:checkpoint6": "CI=true pnpm verify:submission-readiness && CI=true pnpm smoke:checkpoint6-readiness",
-    "verify:rpa-portal-fallback": "node --import tsx/esm scripts/verify-rpa-portal-fallback.ts",
+    "verify:rpa-portal-fallback": "node --import tsx/esm scripts/verify-rpa-portal-fallback.ts && node --import tsx/esm scripts/verify-checkpoint8-rpa-proof.ts",
     "verify:setup": "node --import tsx/esm scripts/check-setup.ts",
     "verify:submission-readiness": "node --import tsx/esm scripts/verify-submission-readiness.ts",
     "uipath:live-proof:readiness": "node --import tsx/esm scripts/verify-uipath-live-proof-hooks.ts",
