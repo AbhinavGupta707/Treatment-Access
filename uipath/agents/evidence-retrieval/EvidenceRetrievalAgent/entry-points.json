@@ -1,0 +1,725 @@
+{
+  "$schema": "https://cloud.uipath.com/draft/2024-12/entry-point",
+  "$id": "entry-points.json",
+  "entryPoints": [
+    {
+      "filePath": "/content/agent.json",
+      "uniqueId": "8b572fa3-6cc1-4d16-8aac-35cb419b99e7",
+      "type": "agent",
+      "input": {
+        "type": "object",
+        "description": "Evidence Retrieval Agent input.",
+        "properties": {
+          "case_context": {
+            "type": "object",
+            "description": "TreatmentAccessCase subset.",
+            "properties": {
+              "case_id": {
+                "type": "string",
+                "description": "Case id."
+              },
+              "patient_id": {
+                "type": "string",
+                "description": "Patient id."
+              },
+              "order_id": {
+                "type": "string",
+                "description": "Order id."
+              },
+              "urgency": {
+                "type": "string",
+                "description": "Urgency."
+              },
+              "medication_name": {
+                "type": "string",
+                "description": "Medication name."
+              }
+            },
+            "required": [
+              "case_id",
+              "patient_id",
+              "order_id"
+            ]
+          },
+          "criteria": {
+            "type": "array",
+            "description": "PolicyCriterion-compatible criteria.",
+            "items": {
+              "type": "object",
+              "description": "PolicyCriterion-compatible criterion plus extraction confidence.",
+              "properties": {
+                "criterion_id": {
+                  "type": "string",
+                  "description": "Stable criterion id."
+                },
+                "policy_id": {
+                  "type": "string",
+                  "description": "Payer policy id."
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Requirement text as an administrative policy requirement, not medical advice."
+                },
+                "required_evidence_type": {
+                  "type": "string",
+                  "description": "Evidence type needed to satisfy criterion."
+                },
+                "severity": {
+                  "type": "string",
+                  "description": "Downstream blocking severity.",
+                  "enum": [
+                    "blocking",
+                    "warning",
+                    "informational"
+                  ]
+                },
+                "must_be_clinician_attested": {
+                  "type": "boolean",
+                  "description": "True when a clinician must approve the assertion before submission."
+                },
+                "policy_citation": {
+                  "type": "string",
+                  "description": "Human-readable policy citation string."
+                },
+                "source_span": {
+                  "type": "object",
+                  "description": "Source location for a policy or clinical evidence assertion.",
+                  "properties": {
+                    "artifact_id": {
+                      "type": "string",
+                      "description": "Optional source artifact identifier."
+                    },
+                    "source_uri": {
+                      "type": "string",
+                      "description": "Synthetic source URI or fixture URI."
+                    },
+                    "section_label": {
+                      "type": "string",
+                      "description": "Document section, table, row, or field label."
+                    },
+                    "start_line": {
+                      "type": "integer",
+                      "description": "Optional 1-based start line.",
+                      "minimum": 1
+                    },
+                    "end_line": {
+                      "type": "integer",
+                      "description": "Optional 1-based end line.",
+                      "minimum": 1
+                    },
+                    "char_start": {
+                      "type": "integer",
+                      "description": "Optional 0-based character start.",
+                      "minimum": 0
+                    },
+                    "char_end": {
+                      "type": "integer",
+                      "description": "Optional 0-based character end.",
+                      "minimum": 0
+                    },
+                    "excerpt": {
+                      "type": "string",
+                      "description": "Short synthetic excerpt, maximum 280 characters."
+                    }
+                  },
+                  "required": [
+                    "source_uri"
+                  ]
+                },
+                "version": {
+                  "type": "string",
+                  "description": "Policy version."
+                },
+                "requirement_confidence": {
+                  "type": "number",
+                  "description": "Confidence that the criterion was extracted from the supplied synthetic policy source.",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "required": [
+                "criterion_id",
+                "policy_id",
+                "description",
+                "required_evidence_type",
+                "severity",
+                "must_be_clinician_attested",
+                "policy_citation",
+                "source_span",
+                "version",
+                "requirement_confidence"
+              ]
+            }
+          },
+          "artifacts": {
+            "type": "array",
+            "description": "EvidenceArtifact-compatible artifacts.",
+            "items": {
+              "type": "object",
+              "description": "Evidence artifact.",
+              "properties": {
+                "artifact_id": {
+                  "type": "string",
+                  "description": "Artifact id."
+                },
+                "case_id": {
+                  "type": "string",
+                  "description": "Case id."
+                },
+                "type": {
+                  "type": "string",
+                  "description": "Artifact type."
+                },
+                "source_uri": {
+                  "type": "string",
+                  "description": "Source URI."
+                },
+                "display_name": {
+                  "type": "string",
+                  "description": "Display name."
+                },
+                "extracted_text": {
+                  "type": "string",
+                  "description": "Synthetic extracted text."
+                },
+                "structured_fields": {
+                  "type": "object",
+                  "description": "Structured synthetic fields."
+                },
+                "extraction_method": {
+                  "type": "string",
+                  "description": "Extraction method."
+                },
+                "extraction_confidence": {
+                  "type": "number",
+                  "description": "Extraction confidence.",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "synthetic": {
+                  "type": "boolean",
+                  "description": "Must be true."
+                }
+              },
+              "required": [
+                "artifact_id",
+                "case_id",
+                "type",
+                "source_uri",
+                "display_name",
+                "extraction_method",
+                "extraction_confidence",
+                "synthetic"
+              ]
+            }
+          },
+          "labs": {
+            "type": "array",
+            "description": "LabResult-compatible synthetic lab rows.",
+            "items": {
+              "type": "object",
+              "description": "Lab result.",
+              "properties": {
+                "lab_id": {
+                  "type": "string",
+                  "description": "Lab id."
+                },
+                "test_name": {
+                  "type": "string",
+                  "description": "Test name."
+                },
+                "result": {
+                  "type": "string",
+                  "description": "Result."
+                },
+                "collected_at": {
+                  "type": "string",
+                  "description": "Collected timestamp."
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "final",
+                    "missing",
+                    "pending"
+                  ],
+                  "description": "Lab status."
+                },
+                "source_artifact_id": {
+                  "type": "string",
+                  "description": "Source artifact id."
+                }
+              },
+              "required": [
+                "lab_id",
+                "test_name",
+                "result",
+                "status"
+              ]
+            }
+          },
+          "medication_history": {
+            "type": "array",
+            "description": "MedicationHistoryEntry-compatible rows.",
+            "items": {
+              "type": "object",
+              "description": "Medication history entry.",
+              "properties": {
+                "medication_history_id": {
+                  "type": "string",
+                  "description": "Medication history id."
+                },
+                "medication_name": {
+                  "type": "string",
+                  "description": "Medication name."
+                },
+                "therapy_class": {
+                  "type": "string",
+                  "description": "Therapy class."
+                },
+                "start_date": {
+                  "type": "string",
+                  "description": "Start date."
+                },
+                "end_date": {
+                  "type": "string",
+                  "description": "End date."
+                },
+                "outcome": {
+                  "type": "string",
+                  "description": "Synthetic outcome."
+                },
+                "source_artifact_id": {
+                  "type": "string",
+                  "description": "Source artifact id."
+                }
+              },
+              "required": [
+                "medication_history_id",
+                "medication_name",
+                "therapy_class",
+                "start_date",
+                "outcome"
+              ]
+            }
+          },
+          "treatment_order": {
+            "type": "object",
+            "description": "TreatmentOrder subset.",
+            "properties": {
+              "order_id": {
+                "type": "string",
+                "description": "Order id."
+              },
+              "medication_name": {
+                "type": "string",
+                "description": "Medication."
+              },
+              "diagnosis": {
+                "type": "string",
+                "description": "Synthetic diagnosis."
+              },
+              "requested_start_date": {
+                "type": "string",
+                "description": "Requested start date."
+              },
+              "site_of_care": {
+                "type": "string",
+                "description": "Site of care."
+              }
+            },
+            "required": [
+              "order_id",
+              "medication_name"
+            ]
+          },
+          "demo_toggles": {
+            "type": "object",
+            "description": "Demo toggles.",
+            "properties": {
+              "missing_safety_lab": {
+                "type": "boolean",
+                "description": "When true, safety labs must be missing."
+              },
+              "force_low_confidence_extraction": {
+                "type": "boolean",
+                "description": "When true, low-confidence mappings require human review."
+              }
+            },
+            "required": []
+          }
+        },
+        "required": [
+          "case_context",
+          "criteria",
+          "artifacts",
+          "labs",
+          "medication_history",
+          "treatment_order",
+          "demo_toggles"
+        ]
+      },
+      "output": {
+        "type": "object",
+        "description": "Evidence Retrieval Agent output.",
+        "properties": {
+          "evidence_mappings": {
+            "type": "array",
+            "description": "EvidenceMapping-compatible rows.",
+            "items": {
+              "type": "object",
+              "description": "EvidenceMapping-compatible row produced by the evidence agent.",
+              "properties": {
+                "mapping_id": {
+                  "type": "string",
+                  "description": "Stable mapping id."
+                },
+                "case_id": {
+                  "type": "string",
+                  "description": "Treatment access case id."
+                },
+                "criterion_id": {
+                  "type": "string",
+                  "description": "Policy criterion id."
+                },
+                "artifact_id": {
+                  "type": "string",
+                  "description": "Evidence artifact id when found; use an empty string when no artifact is available."
+                },
+                "status": {
+                  "type": "string",
+                  "description": "Evidence status.",
+                  "enum": [
+                    "found",
+                    "missing",
+                    "conflicting",
+                    "needs_human_validation"
+                  ]
+                },
+                "evidence_summary": {
+                  "type": "string",
+                  "description": "Administrative evidence summary grounded in source_span, policy citation, or human approval requirement."
+                },
+                "source_quote_short": {
+                  "type": "string",
+                  "description": "Short synthetic source quote when evidence is found."
+                },
+                "source_span": {
+                  "type": "object",
+                  "description": "Source location for a policy or clinical evidence assertion.",
+                  "properties": {
+                    "artifact_id": {
+                      "type": "string",
+                      "description": "Optional source artifact identifier."
+                    },
+                    "source_uri": {
+                      "type": "string",
+                      "description": "Synthetic source URI or fixture URI."
+                    },
+                    "section_label": {
+                      "type": "string",
+                      "description": "Document section, table, row, or field label."
+                    },
+                    "start_line": {
+                      "type": "integer",
+                      "description": "Optional 1-based start line.",
+                      "minimum": 1
+                    },
+                    "end_line": {
+                      "type": "integer",
+                      "description": "Optional 1-based end line.",
+                      "minimum": 1
+                    },
+                    "char_start": {
+                      "type": "integer",
+                      "description": "Optional 0-based character start.",
+                      "minimum": 0
+                    },
+                    "char_end": {
+                      "type": "integer",
+                      "description": "Optional 0-based character end.",
+                      "minimum": 0
+                    },
+                    "excerpt": {
+                      "type": "string",
+                      "description": "Short synthetic excerpt, maximum 280 characters."
+                    }
+                  },
+                  "required": [
+                    "source_uri"
+                  ]
+                },
+                "confidence": {
+                  "type": "number",
+                  "description": "Confidence in evidence mapping.",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "needs_human_review": {
+                  "type": "boolean",
+                  "description": "True when confidence, contradiction, missing source, or clinical assertion requires human review."
+                },
+                "human_review_reason": {
+                  "type": "string",
+                  "description": "Reason for human review or empty string when not needed."
+                },
+                "reviewer_decision": {
+                  "type": "string",
+                  "description": "Default pending until Action Center resolves.",
+                  "enum": [
+                    "pending",
+                    "approved",
+                    "edited",
+                    "rejected"
+                  ]
+                },
+                "citations": {
+                  "type": "array",
+                  "description": "Policy citations supporting the criterion.",
+                  "items": {
+                    "type": "object",
+                    "description": "Policy citation with source span.",
+                    "properties": {
+                      "citation_id": {
+                        "type": "string",
+                        "description": "Stable citation id."
+                      },
+                      "label": {
+                        "type": "string",
+                        "description": "Human-readable policy section label."
+                      },
+                      "source_span": {
+                        "type": "object",
+                        "description": "Source location for a policy or clinical evidence assertion.",
+                        "properties": {
+                          "artifact_id": {
+                            "type": "string",
+                            "description": "Optional source artifact identifier."
+                          },
+                          "source_uri": {
+                            "type": "string",
+                            "description": "Synthetic source URI or fixture URI."
+                          },
+                          "section_label": {
+                            "type": "string",
+                            "description": "Document section, table, row, or field label."
+                          },
+                          "start_line": {
+                            "type": "integer",
+                            "description": "Optional 1-based start line.",
+                            "minimum": 1
+                          },
+                          "end_line": {
+                            "type": "integer",
+                            "description": "Optional 1-based end line.",
+                            "minimum": 1
+                          },
+                          "char_start": {
+                            "type": "integer",
+                            "description": "Optional 0-based character start.",
+                            "minimum": 0
+                          },
+                          "char_end": {
+                            "type": "integer",
+                            "description": "Optional 0-based character end.",
+                            "minimum": 0
+                          },
+                          "excerpt": {
+                            "type": "string",
+                            "description": "Short synthetic excerpt, maximum 280 characters."
+                          }
+                        },
+                        "required": [
+                          "source_uri"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "citation_id",
+                      "label",
+                      "source_span"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "mapping_id",
+                "case_id",
+                "criterion_id",
+                "artifact_id",
+                "status",
+                "evidence_summary",
+                "confidence",
+                "needs_human_review",
+                "reviewer_decision",
+                "citations"
+              ]
+            }
+          },
+          "evidence_artifacts_used": {
+            "type": "array",
+            "description": "Artifact ids used by mappings.",
+            "items": {
+              "type": "string",
+              "description": "Artifact id."
+            }
+          },
+          "blocking_missing_criteria": {
+            "type": "array",
+            "description": "Blocking criteria that lack acceptable evidence.",
+            "items": {
+              "type": "string",
+              "description": "Criterion id."
+            }
+          },
+          "human_review_recommended": {
+            "type": "boolean",
+            "description": "True when any mapping needs human review."
+          },
+          "source_grounding_warnings": {
+            "type": "array",
+            "description": "Warnings for unsourced, contradictory, or low-confidence evidence.",
+            "items": {
+              "type": "string",
+              "description": "Warning."
+            }
+          },
+          "audit_event_draft": {
+            "type": "object",
+            "description": "Audit event draft for UiPath event writer workflow.",
+            "properties": {
+              "event_id": {
+                "type": "string",
+                "description": "Stable event id or deterministic draft id."
+              },
+              "case_id": {
+                "type": "string",
+                "description": "Treatment access case id."
+              },
+              "actor_type": {
+                "type": "string",
+                "description": "Always agent for these outputs.",
+                "enum": [
+                  "agent"
+                ]
+              },
+              "actor_name": {
+                "type": "string",
+                "description": "Agent display name."
+              },
+              "task_or_agent_name": {
+                "type": "string",
+                "description": "Agent display name."
+              },
+              "action": {
+                "type": "string",
+                "description": "Machine-readable action name."
+              },
+              "input_summary": {
+                "type": "string",
+                "description": "Brief source-grounded input summary."
+              },
+              "output_summary": {
+                "type": "string",
+                "description": "Brief source-grounded output summary."
+              },
+              "evidence_refs": {
+                "type": "array",
+                "description": "Artifact ids, citation ids, mapping ids, or human approval refs supporting the output.",
+                "items": {
+                  "type": "string",
+                  "description": "Evidence reference id."
+                }
+              },
+              "timestamp": {
+                "type": "string",
+                "description": "ISO timestamp supplied by runtime or draft timestamp placeholder."
+              }
+            },
+            "required": [
+              "event_id",
+              "case_id",
+              "actor_type",
+              "actor_name",
+              "task_or_agent_name",
+              "action",
+              "input_summary",
+              "output_summary",
+              "evidence_refs"
+            ]
+          },
+          "agent_trace_draft": {
+            "type": "object",
+            "description": "Agent trace draft for runtime observability.",
+            "properties": {
+              "trace_id": {
+                "type": "string",
+                "description": "Stable trace id or deterministic draft id."
+              },
+              "case_id": {
+                "type": "string",
+                "description": "Treatment access case id."
+              },
+              "agent_name": {
+                "type": "string",
+                "description": "Agent display name."
+              },
+              "status": {
+                "type": "string",
+                "description": "Agent completion status.",
+                "enum": [
+                  "completed",
+                  "needs_human",
+                  "failed"
+                ]
+              },
+              "input_summary": {
+                "type": "string",
+                "description": "Brief input summary."
+              },
+              "output_summary": {
+                "type": "string",
+                "description": "Brief output summary."
+              },
+              "tool_calls": {
+                "type": "array",
+                "description": "Documented tool names used or expected in runtime.",
+                "items": {
+                  "type": "string",
+                  "description": "Tool name."
+                }
+              },
+              "evidence_refs": {
+                "type": "array",
+                "description": "Evidence, citation, artifact, mapping, or human approval refs.",
+                "items": {
+                  "type": "string",
+                  "description": "Reference id."
+                }
+              }
+            },
+            "required": [
+              "trace_id",
+              "case_id",
+              "agent_name",
+              "status",
+              "input_summary",
+              "output_summary",
+              "tool_calls",
+              "evidence_refs"
+            ]
+          }
+        },
+        "required": [
+          "evidence_mappings",
+          "evidence_artifacts_used",
+          "blocking_missing_criteria",
+          "human_review_recommended",
+          "source_grounding_warnings",
+          "audit_event_draft",
+          "agent_trace_draft"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "case_context": {
+    "case_id": "case-syn-001",
+    "patient_id": "patient-syn-001",
+    "order_id": "order-syn-001",
+    "payer_id": "payer-aurora-vale",
+    "service_type": "specialty_medication",
+    "medication_name": "Fictionalimab",
+    "urgency": "urgent",
+    "sla_due_at": "2026-07-01T17:00:00.000Z",
+    "sla_state": "on_track"
+  },
+  "patient_snapshot": {
+    "patient_id": "patient-syn-001",
+    "coverage_plan": "Aurora Vale Fictional Health Premier PPO",
+    "diagnosis_codes": [
+      "K50.90"
+    ],
+    "synthetic_data_disclaimer": "Synthetic fictional patient for demo use only."
+  },
+  "treatment_order": {
+    "order_id": "order-syn-001",
+    "service_type": "specialty_medication",
+    "medication_name": "Fictionalimab",
+    "dose": "160 mg induction, then 80 mg every 8 weeks",
+    "diagnosis": "Moderate-to-severe fictional inflammatory bowel condition",
+    "requested_start_date": "2026-07-03"
+  },
+  "payer_policy_document": {
+    "policy_id": "policy-aurora-vale-biologic-2026",
+    "payer_id": "payer-aurora-vale",
+    "payer_name": "Aurora Vale Fictional Health",
+    "policy_name": "Fictionalimab Prior Authorization Policy",
+    "version": "2026.1",
+    "effective_date": "2026-01-01",
+    "source_uri": "fixture://policies/aurora-vale-fictionalimab-policy.md",
+    "summary": "Synthetic payer policy requiring diagnosis confirmation, prior therapy history, safety screening, and clinician attestation before approval.",
+    "text": "Synthetic policy extract with diagnosis, prior therapy, and safety screening criteria only."
+  },
+  "policy_artifacts": [
+    {
+      "artifact_id": "artifact-policy",
+      "case_id": "case-syn-001",
+      "type": "payer_policy",
+      "source_uri": "fixture://policies/aurora-vale-fictionalimab-policy.md",
+      "display_name": "Aurora Vale Fictionalimab Policy",
+      "extracted_text": "Synthetic policy text: diagnosis, prior therapies, safety screening, and care-continuity plan are reviewed for Fictionalimab.",
+      "structured_fields": {
+        "policy_id": "policy-aurora-vale-biologic-2026",
+        "required_document_count": 4
+      },
+      "extraction_method": "fallback_parser",
+      "extraction_confidence": 1,
+      "synthetic": true
+    }
+  ],
+  "demo_toggles": {
+    "missing_safety_lab": false
+  }
+}

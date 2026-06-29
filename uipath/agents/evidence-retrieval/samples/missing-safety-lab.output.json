@@ -1,0 +1,138 @@
+{
+  "evidence_mappings": [
+    {
+      "mapping_id": "mapping-diagnosis",
+      "case_id": "case-syn-001",
+      "criterion_id": "criterion-diagnosis",
+      "artifact_id": "artifact-progress-note",
+      "status": "needs_human_validation",
+      "evidence_summary": "Specialist note supports diagnosis and severity; clinician attestation is required before submission.",
+      "source_quote_short": "Fictional excerpt: symptoms remain moderate-to-severe despite prior therapy attempts.",
+      "source_span": {
+        "artifact_id": "artifact-progress-note",
+        "source_uri": "fixture://notes/specialist-progress-note.md",
+        "section_label": "Assessment",
+        "excerpt": "Fictional excerpt: symptoms remain moderate-to-severe despite prior therapy attempts."
+      },
+      "confidence": 0.87,
+      "needs_human_review": true,
+      "human_review_reason": "High-impact medical assertion requires clinician validation.",
+      "reviewer_decision": "pending",
+      "citations": [
+        {
+          "citation_id": "policy-citation-diagnosis",
+          "label": "Policy Section 2.1",
+          "source_span": {
+            "source_uri": "fixture://policies/aurora-vale-fictionalimab-policy.md",
+            "section_label": "Diagnosis and severity",
+            "excerpt": "Fictional policy requires specialist documentation of diagnosis and disease activity."
+          }
+        }
+      ]
+    },
+    {
+      "mapping_id": "mapping-step-therapy",
+      "case_id": "case-syn-001",
+      "criterion_id": "criterion-step-therapy",
+      "artifact_id": "artifact-med-history",
+      "status": "found",
+      "evidence_summary": "Synthetic medication history lists two preferred therapies with documented outcomes.",
+      "source_quote_short": "Fictional excerpt: inadequate response to Preferred Therapy A and intolerance to Preferred Therapy B.",
+      "source_span": {
+        "artifact_id": "artifact-med-history",
+        "source_uri": "fixture://ehr/medication-history.json",
+        "section_label": "priorTherapies",
+        "excerpt": "Fictional excerpt: two prior therapy outcomes are documented for demo review."
+      },
+      "confidence": 0.94,
+      "needs_human_review": false,
+      "human_review_reason": "",
+      "reviewer_decision": "pending",
+      "citations": [
+        {
+          "citation_id": "policy-citation-step",
+          "label": "Policy Section 2.4",
+          "source_span": {
+            "source_uri": "fixture://policies/aurora-vale-fictionalimab-policy.md",
+            "section_label": "Preferred therapy history",
+            "excerpt": "Fictional policy requires two preferred therapy attempts before Fictionalimab."
+          }
+        }
+      ]
+    },
+    {
+      "mapping_id": "mapping-safety-screen",
+      "case_id": "case-syn-001",
+      "criterion_id": "criterion-safety-screen",
+      "artifact_id": "",
+      "status": "missing",
+      "evidence_summary": "Safety screening is missing in the current synthetic chart snapshot.",
+      "source_quote_short": "",
+      "source_span": {
+        "source_uri": "fixture://labs/safety-screening.csv",
+        "section_label": "missing-safety-screen-toggle",
+        "excerpt": "Demo toggle removed TB and hepatitis safety screening evidence."
+      },
+      "confidence": 0,
+      "needs_human_review": true,
+      "human_review_reason": "Blocking safety criterion must be supplied before submission.",
+      "reviewer_decision": "pending",
+      "citations": [
+        {
+          "citation_id": "policy-citation-safety",
+          "label": "Policy Section 3.2",
+          "source_span": {
+            "source_uri": "fixture://policies/aurora-vale-fictionalimab-policy.md",
+            "section_label": "Safety screening",
+            "excerpt": "Fictional policy requires negative TB and hepatitis screening within six months."
+          }
+        }
+      ]
+    }
+  ],
+  "evidence_artifacts_used": [
+    "artifact-progress-note",
+    "artifact-med-history"
+  ],
+  "blocking_missing_criteria": [
+    "criterion-safety-screen"
+  ],
+  "human_review_recommended": true,
+  "source_grounding_warnings": [
+    "Safety screening criterion is blocking and no source artifact is present in the synthetic chart snapshot."
+  ],
+  "audit_event_draft": {
+    "event_id": "audit-evidence.matrix.mapped-001",
+    "case_id": "case-syn-001",
+    "actor_type": "agent",
+    "actor_name": "Evidence Retrieval Agent",
+    "task_or_agent_name": "Evidence Retrieval Agent",
+    "action": "evidence.matrix.mapped",
+    "input_summary": "Synthetic fixture input only.",
+    "output_summary": "Evidence Retrieval Agent produced source-grounded structured output.",
+    "evidence_refs": [
+      "mapping-diagnosis",
+      "mapping-step-therapy",
+      "mapping-safety-screen"
+    ],
+    "timestamp": "runtime-provided"
+  },
+  "agent_trace_draft": {
+    "trace_id": "trace-evidence-retrieval-agent-sample",
+    "case_id": "case-syn-001",
+    "agent_name": "Evidence Retrieval Agent",
+    "status": "needs_human",
+    "input_summary": "Synthetic Treatment Access checkpoint 3 sample.",
+    "output_summary": "Evidence Retrieval Agent completed sample packet output.",
+    "tool_calls": [
+      "mock_ehr_order_evidence_pull",
+      "deterministic_evidence_search",
+      "schema_validator"
+    ],
+    "evidence_refs": [
+      "artifact-progress-note",
+      "artifact-med-history",
+      "policy-citation-safety"
+    ]
+  }
+}

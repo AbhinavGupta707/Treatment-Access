@@ -1,0 +1,72 @@
+{
+  "submission_blocked": true,
+  "ready_for_submission": false,
+  "missing_evidence_gates": [
+    {
+      "gate_id": "gate-missing-safety-screen",
+      "criterion_id": "criterion-safety-screen",
+      "gate_type": "missing_evidence",
+      "severity": "blocking",
+      "policy_citation": "Aurora Vale Fictionalimab Policy 2026, Section 3.2",
+      "evidence_refs": [
+        "mapping-safety-screen",
+        "policy-citation-safety"
+      ],
+      "reason": "Blocking TB/hepatitis safety screening evidence is missing from the synthetic chart snapshot.",
+      "assigned_role": "nurse-coordinator",
+      "task_prompt": "Upload or attest to synthetic TB and hepatitis screening before payer submission.",
+      "due_at": "2026-06-29T17:00:00.000Z",
+      "human_approval_required": true,
+      "blocks_submission": true
+    }
+  ],
+  "human_tasks": [
+    {
+      "task_id": "task-missing-safety-screen",
+      "case_id": "case-syn-001",
+      "task_type": "missing_evidence",
+      "status": "pending",
+      "assigned_role": "nurse-coordinator",
+      "prompt": "Upload or attest to synthetic TB and hepatitis screening before payer submission.",
+      "due_at": "2026-06-29T17:00:00.000Z"
+    }
+  ],
+  "secondary_stage_activations": [
+    "missing_evidence"
+  ],
+  "visible_missing_evidence_output": "Submission blocked: TB and hepatitis safety screening is missing for criterion-safety-screen. Route a missing-evidence task to nurse-coordinator before payer submission.",
+  "source_grounding_warnings": [],
+  "audit_event_draft": {
+    "event_id": "audit-missing.evidence.gates.created-001",
+    "case_id": "case-syn-001",
+    "actor_type": "agent",
+    "actor_name": "Missing Evidence Agent",
+    "task_or_agent_name": "Missing Evidence Agent",
+    "action": "missing.evidence.gates.created",
+    "input_summary": "Synthetic fixture input only.",
+    "output_summary": "Missing Evidence Agent produced source-grounded structured output.",
+    "evidence_refs": [
+      "gate-missing-safety-screen",
+      "mapping-safety-screen",
+      "policy-citation-safety"
+    ],
+    "timestamp": "runtime-provided"
+  },
+  "agent_trace_draft": {
+    "trace_id": "trace-missing-evidence-agent-sample",
+    "case_id": "case-syn-001",
+    "agent_name": "Missing Evidence Agent",
+    "status": "needs_human",
+    "input_summary": "Synthetic Treatment Access checkpoint 3 sample.",
+    "output_summary": "Missing Evidence Agent completed sample packet output.",
+    "tool_calls": [
+      "role_routing_rules",
+      "action_center_task_builder",
+      "schema_validator"
+    ],
+    "evidence_refs": [
+      "gate-missing-safety-screen",
+      "mapping-safety-screen"
+    ]
+  }
+}
