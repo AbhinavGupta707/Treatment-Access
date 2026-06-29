@@ -51,6 +51,26 @@ clinician-review appeal constraints, and unsupported-claim warnings:
 CI=true pnpm smoke:agents
 ```
 
+## Checkpoint 4 Mock Payer Portal
+
+Run the local mock payer portal for RPA fallback development:
+
+```bash
+CI=true pnpm --filter @tacc/mock-payer-portal typecheck
+CI=true pnpm --filter @tacc/mock-payer-portal build
+pnpm dev:mock-payer
+```
+
+The portal runs on `http://127.0.0.1:5174` by default and uses synthetic seeded
+defaults only. Stable selectors are available on the form, member ID,
+medication, diagnosis, payer, case ID, order ID, evidence fields, submit button,
+confirmation ID, and submission status.
+
+When the mock API `payer_api_unavailable` toggle is true, direct prior-auth
+requests with `channel: "api"` still return `PAYER_API_DOWN`; fallback requests
+with `channel: "portal_fallback"` submit successfully and return a
+deterministic `AVFH-PORTAL-SYN-*` confirmation.
+
 If the mock API is already running, run the smoke against it directly:
 
 ```bash
