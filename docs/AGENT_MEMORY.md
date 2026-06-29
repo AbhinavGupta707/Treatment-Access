@@ -120,6 +120,42 @@ Extraction/IXP note:
 
 Runtime safety remains unchanged: live UiPath agent debug/run, solution upload/publish/deploy, IXP project mutation, Action Center task creation, Maestro debug, Data Service writes, and payer submission require explicit user approval.
 
-## Next Checkpoint
+## Checkpoint 4 Status
 
-Checkpoint 4 should integrate these validated agent artifacts into a live UiPath solution/runtime path: register/pack solution resources, wire tool/process bindings, and perform approved Studio Web/Agent Builder smoke only after explicit approval for each side-effecting UiPath action.
+Checkpoint 4 orchestration is active on `main`.
+
+Launch prep commit: `d2500bd Launch checkpoint 4 orchestration prep`.
+
+Control runbook: `docs/checkpoint-4-orchestrator.md`.
+
+Checkpoint 4 outcome:
+
+- Build the payer API failure to UiPath robot portal fallback path.
+- Polish the custom Command Center into a judge-facing operational walkthrough.
+- Add deterministic QA/demo proof for API failure, portal fallback, event mirror,
+  and UI visibility.
+- Prepare live UiPath runtime/solution wiring, while keeping all side-effecting
+  UiPath operations behind explicit approval.
+
+Active isolated lanes:
+
+| Merge order | Lane                          | Thread ID                              | Worktree path                                                |
+| ----------- | ----------------------------- | -------------------------------------- | ------------------------------------------------------------ |
+| 1           | Mock Payer Portal             | `019f10d2-fc7c-7e32-8acd-4f3a27e56f97` | `/Users/abhinavgupta/.codex/worktrees/48d8/Treatment Access` |
+| 2           | UiPath Robot & Runtime Wiring | `019f10d2-fc8a-7483-97a8-a79852aeb0a3` | `/Users/abhinavgupta/.codex/worktrees/8bba/Treatment Access` |
+| 3           | Command Center Demo UX        | `019f10d2-fcc0-70e2-a617-486b3e2af8c1` | `/Users/abhinavgupta/.codex/worktrees/2a44/Treatment Access` |
+| 4           | Integration QA & Demo Proof   | `019f10d2-fe34-77d3-85e8-84fc46ac8913` | `/Users/abhinavgupta/.codex/worktrees/6573/Treatment Access` |
+
+UiPath runtime baseline before launch:
+
+- CLI `uip` version `1.195.1`.
+- Logged into org `galacticus`, tenant `DefaultTenant`.
+- Folder `TreatmentAccessHackathon` visible with key
+  `4fba2fa1-012b-469a-b6aa-e5be3811c173`.
+- `uip solution init` is the active solution command surface.
+- Folder runtime reports `Development: Total 1, Connected 1, Available 1`.
+
+Runtime safety remains unchanged: live UiPath RPA run/debug, Orchestrator job
+start, solution upload/publish/deploy/activate, agent debug, Maestro debug, IXP
+mutation, Action Center task creation, Data Service writes, and payer submission
+require explicit user approval.

@@ -27,12 +27,12 @@ without unapproved live side effects.
 
 ## Lanes
 
-| Merge order | Lane                          | Thread ID | Worktree path | Ownership                                                                                |
-| ----------- | ----------------------------- | --------- | ------------- | ---------------------------------------------------------------------------------------- |
-| 1           | Mock Payer Portal             | TBD       | TBD           | `apps/mock-payer-portal/**`, portal-facing API contract notes                            |
-| 2           | UiPath Robot & Runtime Wiring | TBD       | TBD           | `uipath/robots/**`, `uipath/solution/**`, robot/runtime setup docs                       |
-| 3           | Command Center Demo UX        | TBD       | TBD           | `apps/command-center/**`, UI-facing types/helpers when needed                            |
-| 4           | Integration QA & Demo Proof   | TBD       | TBD           | `scripts/**`, `docs/testing.md`, `docs/demo-script.md`, `uipath/screenshots/**`, QA docs |
+| Merge order | Lane                          | Thread ID                              | Worktree path                                                | Ownership                                                                                |
+| ----------- | ----------------------------- | -------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| 1           | Mock Payer Portal             | `019f10d2-fc7c-7e32-8acd-4f3a27e56f97` | `/Users/abhinavgupta/.codex/worktrees/48d8/Treatment Access` | `apps/mock-payer-portal/**`, portal-facing API contract notes                            |
+| 2           | UiPath Robot & Runtime Wiring | `019f10d2-fc8a-7483-97a8-a79852aeb0a3` | `/Users/abhinavgupta/.codex/worktrees/8bba/Treatment Access` | `uipath/robots/**`, `uipath/solution/**`, robot/runtime setup docs                       |
+| 3           | Command Center Demo UX        | `019f10d2-fcc0-70e2-a617-486b3e2af8c1` | `/Users/abhinavgupta/.codex/worktrees/2a44/Treatment Access` | `apps/command-center/**`, UI-facing types/helpers when needed                            |
+| 4           | Integration QA & Demo Proof   | `019f10d2-fe34-77d3-85e8-84fc46ac8913` | `/Users/abhinavgupta/.codex/worktrees/6573/Treatment Access` | `scripts/**`, `docs/testing.md`, `docs/demo-script.md`, `uipath/screenshots/**`, QA docs |
 
 ## Monitoring Rules
 

@@ -307,3 +307,65 @@ Checkpoint 3 result:
 Known note: local UiPath CLI `1.195.1` does not expose an `ixp` command prefix, and uses `uip agent migrate` rather than the generated-doc `refresh` verb.
 
 Next checkpoint: wire these validated Agent Builder artifacts into a live UiPath solution/runtime path and run approved live smoke only after explicit user approval for each side-effecting UiPath action.
+
+## 2026-06-29 - Checkpoint 4 Launch Prep
+
+Starting point:
+
+```text
+c37da07 Finalize checkpoint 3 integration
+```
+
+Launch prep commit:
+
+```text
+d2500bd Launch checkpoint 4 orchestration prep
+```
+
+Checkpoint 4 outcome:
+
+- Build the payer API unavailable to UiPath robot portal fallback path.
+- Make the Command Center judge-walkthrough ready with visible agent traces,
+  evidence, fallback, denial rescue, care handoff, and audit state.
+- Add deterministic local QA for the API failure to portal fallback to event
+  mirror to UI proof path.
+- Prepare live UiPath runtime/solution wiring while keeping every side-effecting
+  UiPath action behind explicit approval.
+
+Read-only UiPath baseline before launch:
+
+- `uip --version` reports `1.195.1`.
+- `uip login status --output json` reports org `galacticus`, tenant
+  `DefaultTenant`.
+- `uip solution init --help --output json` succeeds, confirming the post-rename
+  `solution init` surface.
+- `uip or folders list --output json` includes `TreatmentAccessHackathon` with
+  key `4fba2fa1-012b-469a-b6aa-e5be3811c173`.
+- `uip or folders runtimes TreatmentAccessHackathon --output json` reports
+  `Development: Total 1, Connected 1, Available 1`.
+
+Active isolated lanes:
+
+| Merge order | Lane                          | Thread ID                              | Worktree path                                                | Ownership                                                                                |
+| ----------- | ----------------------------- | -------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| 1           | Mock Payer Portal             | `019f10d2-fc7c-7e32-8acd-4f3a27e56f97` | `/Users/abhinavgupta/.codex/worktrees/48d8/Treatment Access` | `apps/mock-payer-portal/**`, narrowly scoped portal fallback API contract fixes          |
+| 2           | UiPath Robot & Runtime Wiring | `019f10d2-fc8a-7483-97a8-a79852aeb0a3` | `/Users/abhinavgupta/.codex/worktrees/8bba/Treatment Access` | `uipath/robots/**`, `uipath/solution/**`, robot/runtime setup docs                       |
+| 3           | Command Center Demo UX        | `019f10d2-fcc0-70e2-a617-486b3e2af8c1` | `/Users/abhinavgupta/.codex/worktrees/2a44/Treatment Access` | `apps/command-center/**`, UI-facing helpers                                              |
+| 4           | Integration QA & Demo Proof   | `019f10d2-fe34-77d3-85e8-84fc46ac8913` | `/Users/abhinavgupta/.codex/worktrees/6573/Treatment Access` | `scripts/**`, `docs/testing.md`, `docs/demo-script.md`, `uipath/screenshots/**`, QA docs |
+
+Merge order:
+
+1. Mock Payer Portal
+2. UiPath Robot & Runtime Wiring
+3. Command Center Demo UX
+4. Integration QA & Demo Proof
+
+Runtime safety:
+
+- Workers may run static validation, local tests, browser/dev-server checks,
+  read-only UiPath discovery, and local packaging/build checks.
+- Workers must not run live `uip rpa run`, `uip rpa debug`, `uip or jobs start`,
+  `uip solution upload`, `uip solution publish`, `uip solution deploy`,
+  `uip solution deploy activate`, `uip maestro case debug`, `uip agent debug`,
+  IXP mutation, Action Center task creation, Data Service writes, or payer
+  submission without explicit user approval.
