@@ -2,7 +2,8 @@
 
 Checkpoint 2 Action Center contracts for the Treatment Access Command Center.
 These contracts define the human review layer that Maestro/API Workflow lanes can
-bind to without creating real tasks from this folder.
+bind to. The final live proof created, assigned, completed, and read back one
+synthetic Action Center task in `TreatmentAccessHackathon`.
 
 ## Contracts
 
@@ -28,7 +29,7 @@ event mirror payload to write when the task completes.
 - Folder ID: `7986316`
 - Folder key: `4fba2fa1-012b-469a-b6aa-e5be3811c173`
 - Preferred reviewer group: `Treatment Access Clinician Reviewers`
-- Current discovered assignable user fallback: set during live smoke from
+- Current discovered assignable user fallback: resolved during live smoke from
   `uip tasks users 7986316 --output json`.
 
 Use group assignment for demo resilience once the group is created and granted
@@ -50,9 +51,9 @@ Before live smoke, verify in `TreatmentAccessHackathon`:
 - The event mirror workflow can write `human.task.created` and
   `human.task.completed` records after task creation/completion.
 
-## Read-Only Discovery Run
+## Discovery And Live Task Run
 
-Commands run for this lane:
+Read-only commands run before mutation:
 
 ```bash
 uip login status --output json
@@ -67,9 +68,22 @@ Findings:
 - Folder `7986316` currently exposes at least one assignable Action Center user.
   The exact reviewer identifier is intentionally not stored in this repository;
   resolve it during live smoke with `uip tasks users 7986316 --output json`.
-- No Action Center tasks were listed in the folder at discovery time.
+- No Action Center tasks were listed in the folder at initial discovery time.
 
-No real tasks were created, assigned, completed, or modified.
+Approved live proof then created, assigned, completed, and read back one
+synthetic task:
+
+- Task ID `4401667`
+- Task type `ExternalTask`
+- Task key `93c09da5-3edb-455e-9679-d513113fd4fa`
+- ExternalTag `TACC-2026-001`
+- Final status `Completed`
+- Completed time `2026-06-29T19:44:16.577Z`
+
+The task was created through the installed UiPath Tasks SDK
+`GenericTasks/CreateTask` surface because the public `uip tasks` CLI exposes
+list/get/users/assign/complete but no create verb. Assignment and completion
+used the public CLI.
 
 Checkpoint 6 safe wrapper:
 
@@ -77,10 +91,9 @@ Checkpoint 6 safe wrapper:
 CI=true pnpm uipath:readiness -- cloud
 ```
 
-This lists task-eligible users and current tasks only. The current CLI surface
-does not expose a direct `uip tasks create` command; live task creation must be
-triggered by an approved Maestro/HITL node, Action App, or workflow that binds
-one of the contracts above. Keep task creation and completion approval-gated.
+This lists task-eligible users and current tasks only. Future live task creation
+must still be explicitly approved and should use either a deployed
+Maestro/HITL/Action App binding or the documented ExternalTask creation path.
 
 ## Integration Notes
 
@@ -109,8 +122,10 @@ outcomes, completion data template, and no-PHI safety flags for the final H2
 live proof.
 
 Do not claim a live Action Center task unless a numeric task ID and
-tenant-qualified deep link exist. If Action Center task creation is blocked by
-tenant capabilities, the Command Center must label the alternative exactly:
+tenant-qualified deep link exist. For the final proof, Task ID `4401667` is the
+live Action Center evidence. If Action Center task creation is blocked by tenant
+capabilities in another environment, the Command Center must label the
+alternative exactly:
 `UiPath-controlled human gate fallback - no live Action Center task created`.
 
 Verify the packet locally with:

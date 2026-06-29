@@ -55,19 +55,20 @@ Still not claimed:
 - No real payer submission, real PHI, real payer credential use, IXP mutation,
   live Maestro run, live Agent Builder run, or autonomous clinical/appeal
   approval is claimed.
-- Action Center is live-readable and task-ready, but no live Action Center task
-  was created because the installed `uip tasks` CLI exposes no create verb.
+- Action Center has live proof: ExternalTask `4401667` was created, assigned,
+  completed, and read back with synthetic clinician-attestation output. The
+  inline Maestro/HITL task boundary still needs production hardening.
 - The real `PayerPortalFallback` process was deployed and completed one live
   Orchestrator job, but the current `Main.xaml` is scaffold-only. UI Automation
   target capture and actual browser portal form submission remain future work.
 
 ## Proof Types
 
-| Proof type            | What it means                                                                                                    | Current wording rule                                                                                                                                                                       |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Local Synthetic Proof | Deterministic local apps, mock API, mock portal, event mirror, agent runtime, screenshots, and smoke commands.   | Can be shown as working local proof with synthetic data only.                                                                                                                              |
-| Live Provider Proof   | Fireworks/LangSmith readiness or traces after provider credentials are configured and the provider smoke passes. | Claimed only after `CI=true pnpm smoke:checkpoint6-live-providers` or equivalent captured evidence.                                                                                        |
-| Live UiPath Proof     | UiPath Automation Cloud evidence in `TreatmentAccessHackathon`: record/task/job/confirmation IDs and timestamps. | Completed for Data Fabric proof state, solution publish/deploy/activation, and one Orchestrator job; Action Center task creation and portal UIA remain honestly labelled as not completed. |
+| Proof type            | What it means                                                                                                    | Current wording rule                                                                                                                                                                                                                     |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Local Synthetic Proof | Deterministic local apps, mock API, mock portal, event mirror, agent runtime, screenshots, and smoke commands.   | Can be shown as working local proof with synthetic data only.                                                                                                                                                                            |
+| Live Provider Proof   | Fireworks/LangSmith readiness or traces after provider credentials are configured and the provider smoke passes. | Claimed only after `CI=true pnpm smoke:checkpoint6-live-providers` or equivalent captured evidence.                                                                                                                                      |
+| Live UiPath Proof     | UiPath Automation Cloud evidence in `TreatmentAccessHackathon`: record/task/job/confirmation IDs and timestamps. | Completed for Data Fabric proof state, one Action Center ExternalTask, solution publish/deploy/activation, one Orchestrator job, and Maestro debug proof up to the HITL boundary; portal UIA remains honestly labelled as not completed. |
 
 ## Problem
 
@@ -218,9 +219,9 @@ CI=true pnpm smoke:checkpoint4 -- --port 8894
 | Synthetic case data and policy/evidence fixtures | Implemented in `packages/demo-data`.                                               | No real PHI, payer, provider, credential, or patient data.                                                |
 | Event mirror and Command Center state            | Implemented through mock API and UI.                                               | Final proof IDs are recorded in UiPath Data Fabric and surfaced in the proof manifest.                    |
 | Seven agent contracts and traces                 | Deterministic runtime smoke passes locally.                                        | Agent Builder packets validated statically; no live agent run/debug claimed.                              |
-| Maestro case lifecycle                           | SDD, stage model, and integration contracts documented.                            | No live Maestro debug/run claimed.                                                                        |
+| Maestro case lifecycle                           | SDD, stage model, and integration contracts documented.                            | Live case/flow debug reached the human-task boundary; inline HITL task creation faulted there.            |
 | API Workflows                                    | Workflow JSON artifacts and local contracts exist.                                 | No side-effecting live workflow execution claimed.                                                        |
-| Action Center gates                              | Task contracts and UI gates are represented locally.                               | Live read surface verified; no live task created because no CLI create surface exists.                    |
+| Action Center gates                              | Task contracts and UI gates are represented locally.                               | Live ExternalTask `4401667` was created, assigned, completed, and read back with synthetic data.          |
 | Data Service/Data Fabric                         | Entity model documented.                                                           | Live proof entity and records created in `TreatmentAccessHackathon`.                                      |
 | Payer API unavailable path                       | `channel="api"` returns `PAYER_API_DOWN` under the toggle.                         | No real payer submission claimed.                                                                         |
 | Portal fallback                                  | Local `channel="portal_fallback"` succeeds and records robot-flavored event state. | Real UiPath process is deployed and job-complete; portal UIA capture/form submission remains not claimed. |

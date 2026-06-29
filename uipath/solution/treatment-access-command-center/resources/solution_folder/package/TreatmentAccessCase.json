@@ -1,0 +1,23 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "TreatmentAccessCase",
+    "kind": "package",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "cd554d6d-b3d8-4d73-a354-f1d4fd1d055d",
+    "isOverridable": true,
+    "dependencies": [],
+    "runtimeDependencies": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "name": "TreatmentAccessCase"
+    },
+    "locks": [],
+    "key": "466bca3a-533c-47a2-acc8-4a647d7de47e",
+    "files": []
+  }
+}

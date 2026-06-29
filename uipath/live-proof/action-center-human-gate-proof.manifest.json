@@ -11,10 +11,19 @@
     "separateProjectGuardrail": "Do not reuse or modify AgentFactoryDemo."
   },
   "liveTaskClaim": {
-    "status": "not_claimed",
-    "requirement": "Do not claim a live Action Center task unless a numeric task ID and tenant-qualified deep link are captured from UiPath.",
-    "taskId": null,
-    "deepLink": null
+    "status": "completed",
+    "requirement": "Live Action Center task claims require a numeric task ID, task type, folder, status snapshots, and tenant-qualified deep link captured from UiPath.",
+    "taskId": 4401667,
+    "taskType": "ExternalTask",
+    "taskKey": "93c09da5-3edb-455e-9679-d513113fd4fa",
+    "folderId": 7986316,
+    "externalTag": "TACC-2026-001",
+    "priority": "High",
+    "createdTime": "2026-06-29T19:43:14.197Z",
+    "completedTime": "2026-06-29T19:44:16.577Z",
+    "deepLink": "https://cloud.uipath.com/galacticus/DefaultTenant/actions_/current-task/tasks/4401667",
+    "inboxLink": "https://cloud.uipath.com/galacticus/DefaultTenant/orchestrator_/actions/inbox/93c09da5-3edb-455e-9679-d513113fd4fa",
+    "creationMethod": "Created through the installed UiPath Tasks SDK GenericTasks/CreateTask surface because the public uip tasks CLI exposes read/assign/complete commands but no create command."
   },
   "readOnlyDiscovery": {
     "commandsRun": [
@@ -28,6 +37,21 @@
       "Folder 7986316 returned an empty Action Center task list at discovery time."
     ],
     "sideEffects": "none"
+  },
+  "liveExecution": {
+    "commandsRun": [
+      "uip tasks assign 4401667 --user-id <task-eligible-user-id> --output json",
+      "uip tasks get 4401667 --task-type ExternalTask --folder-id 7986316 --output json",
+      "uip tasks complete 4401667 --type ExternalTask --folder-id 7986316 --data '{\"clinicalAttestation\":\"Approved for synthetic demo after reviewing policy citations and evidence matrix. No real patient data used.\",\"reviewNotes\":\"Evidence is source-backed; diagnosis severity remains governed by clinician attestation before payer submission.\"}' --output json",
+      "uip tasks get 4401667 --task-type ExternalTask --folder-id 7986316 --output json"
+    ],
+    "results": [
+      "Task 4401667 was created in folder 7986316 with ExternalTag TACC-2026-001.",
+      "Task 4401667 was assigned to the discovered task-eligible reviewer.",
+      "Task 4401667 was completed with synthetic clinician attestation text.",
+      "Final readback returned Status Completed and the synthetic completion payload."
+    ],
+    "sideEffects": "one synthetic Action Center ExternalTask created, assigned, and completed after explicit approval"
   },
   "taskPayload": {
     "path": "uipath/action-center/live-proof/clinician-validation-task-payload.json",
@@ -44,7 +68,7 @@
   "approvalGatedLivePath": {
     "creation": {
       "approvalRequired": true,
-      "preferredStep": "Run the approved Maestro, Flow, Coded Agent, or API Workflow path that contains the Human-in-the-Loop QuickForm node bound to the clinician validation contract.",
+      "preferredStep": "Run the approved Maestro, Flow, Coded Agent, API Workflow, or installed UiPath Tasks SDK path that creates exactly one synthetic human gate bound to the clinician validation contract.",
       "requiredInputs": [
         "uipath/action-center/live-proof/clinician-validation-task-payload.json",
         "uipath/action-center/contracts/clinician-evidence-validation.quickform.json"
@@ -60,16 +84,26 @@
     },
     "assignment": {
       "approvalRequired": true,
-      "commandTemplate": "uip tasks assign <task-id> --user <reviewer-email> --output json",
+      "commandTemplate": "uip tasks assign <task-id> --user-id <task-eligible-user-id> --output json",
       "precheckCommand": "uip tasks users 7986316 --output json",
-      "verifyCommand": "uip tasks get <task-id> --task-type FormTask --folder-id 7986316 --output json"
+      "verifyCommand": "uip tasks get <task-id> --task-type ExternalTask --folder-id 7986316 --output json"
     },
     "completion": {
       "approvalRequired": true,
-      "commandTemplate": "uip tasks complete <task-id> --type FormTask --folder-id 7986316 --action \"Approve\" --data '{\"reviewerfinaltext\":\"Clinician-approved synthetic evidence text goes here.\",\"policycitationfinal\":\"Aurora Vale Fictionalimab Policy 2026, Section 2.1\",\"reviewerdecision\":\"approved\",\"attestationconfirmed\":true,\"reviewernotes\":\"Synthetic demo attestation only; no real patient or medical advice.\",\"moreevidencereason\":\"\"}' --output json",
-      "verifyCommand": "uip tasks get <task-id> --task-type FormTask --folder-id 7986316 --output json",
+      "commandTemplate": "uip tasks complete <task-id> --type ExternalTask --folder-id 7986316 --data '{\"clinicalAttestation\":\"Clinician-approved synthetic evidence text goes here.\",\"reviewNotes\":\"Synthetic demo attestation only; no real patient or medical advice.\"}' --output json",
+      "verifyCommand": "uip tasks get <task-id> --task-type ExternalTask --folder-id 7986316 --output json",
       "eventMirrorAction": "human.task.completed"
     }
+  },
+  "maestroInlineHitlStatus": {
+    "caseInstanceId": "cad900ae-e4f9-4e59-a1c8-c6f15934f5bc",
+    "caseStatus": "Faulted",
+    "flowInstanceId": "4e17f6d2-a2d7-4730-b1ed-9d0dcadef9b0",
+    "flowStatus": "Faulted",
+    "flowCompletedBeforeHitl": ["start", "prepareSyntheticReviewPacket1"],
+    "hitlNode": "clinicianEvidenceReview1",
+    "faultSummary": "Inline Maestro Flow HITL QuickForm reached the Action Center/AppTasks request but faulted with ExternalTag field validation in the runtime serializer.",
+    "productionNextStep": "Bind the HITL node to a deployed Action App/FormTask catalog surface or use the verified ExternalTask creation path for the human gate."
   },
   "deepLinkRules": {
     "standalonePattern": "https://cloud.uipath.com/galacticus/DefaultTenant/actions_/current-task/tasks/<task-id>",

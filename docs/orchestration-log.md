@@ -960,8 +960,17 @@ Live proof achieved:
   `B2501C19-E673-F111-AC9A-0022489A9A06` for run
   `tacc-live-uipath-proof-20260629-final`.
 - Verified Action Center users/tasks read surfaces. One task-eligible user was
-  visible and zero folder tasks existed, but the installed `uip tasks` surface
-  exposes no create verb, so no live Action Center task was created.
+  visible and zero folder tasks existed before mutation. After explicit
+  approval, created, assigned, completed, and read back ExternalTask `4401667`
+  with ExternalTag `TACC-2026-001` and synthetic clinician-attestation output.
+- Created live Maestro Case instance
+  `cad900ae-e4f9-4e59-a1c8-c6f15934f5bc`; it faulted at the case action task
+  boundary because no deployed Action App binding was available in the tenant
+  registry.
+- Created live Maestro Flow instance
+  `4e17f6d2-a2d7-4730-b1ed-9d0dcadef9b0`; it completed trigger and synthetic
+  packet-prep nodes, reached HITL node `clinicianEvidenceReview1`, then faulted
+  in the AppTasks request with an `ExternalTag` validation issue.
 - Packed, published, deployed, and activated
   `treatment-access-command-center@1.0.20260629`.
 - Deployment `46ec1e63-3b09-4308-8b44-ed4b65e4e7f7` succeeded under
@@ -977,11 +986,14 @@ Honest boundaries:
   `uipath/robots/PayerPortalFallback/Main.xaml` is currently scaffold-only.
   Browser portal UI automation and portal confirmation write-back are not
   claimed.
-- No real payer submission, real PHI, live Maestro run, live Agent Builder run,
-  IXP mutation, or live Action Center task creation was performed.
+- No real payer submission, real PHI, live Agent Builder run, IXP mutation, or
+  browser portal UI automation was performed. Live Maestro debug was performed
+  and faulted at the documented HITL/action-task boundary.
 - Added `docs/live-uipath-proof-closeout.md` and updated README/submission/UI
   proof copy to surface these live IDs without overclaiming.
 - Final read-only tenant recheck succeeded: Data Fabric returned four proof
   records, solution deployment status returned `DeploymentSucceeded` /
   `SuccessfulActivate`, and Orchestrator job
   `6d9b9fa9-f582-4983-98fa-167e87d57f2a` remained `Successful`.
+- Action Center task `4401667` returned `Completed`, type `ExternalTask`, folder
+  ID `7986316`, and ExternalTag `TACC-2026-001`.

@@ -1,13 +1,34 @@
 # Action Center Live Proof
 
 This is the Checkpoint 8 H2 proof packet for the human gate in Treatment Access
-Command Center. It is safe by default: no task creation, assignment, completion,
-Data Service write, RPA run, payer submission, or deployment is performed by
-reading this document or running the verifier.
+Command Center. It records one approved synthetic Action Center task in the
+`TreatmentAccessHackathon` folder. No real patient, payer, provider, credential,
+or PHI was used.
 
-## Current Discovery
+## Live Task Result
 
-Read-only discovery was run against the expected UiPath scope:
+Live Action Center ExternalTask created, assigned, and completed.
+
+| Field           | Value                                                                                                                |
+| --------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Task ID         | `4401667`                                                                                                            |
+| Task type       | `ExternalTask`                                                                                                       |
+| Task key        | `93c09da5-3edb-455e-9679-d513113fd4fa`                                                                               |
+| Folder          | `TreatmentAccessHackathon` / `7986316`                                                                               |
+| ExternalTag     | `TACC-2026-001`                                                                                                      |
+| Priority        | `High`                                                                                                               |
+| Created time    | `2026-06-29T19:43:14.197Z`                                                                                           |
+| Completed time  | `2026-06-29T19:44:16.577Z`                                                                                           |
+| Standalone link | `https://cloud.uipath.com/galacticus/DefaultTenant/actions_/current-task/tasks/4401667`                              |
+| Inbox link      | `https://cloud.uipath.com/galacticus/DefaultTenant/orchestrator_/actions/inbox/93c09da5-3edb-455e-9679-d513113fd4fa` |
+
+The task was created through the installed UiPath Tasks SDK
+`GenericTasks/CreateTask` surface because the public `uip tasks` CLI exposes
+read, assign, and complete commands but no create command.
+
+## Discovery
+
+Read-only discovery was run first against the expected UiPath scope:
 
 ```bash
 uip login status --output json
@@ -21,10 +42,23 @@ Findings:
   `DefaultTenant`.
 - Folder: `TreatmentAccessHackathon`, folder ID `7986316`, folder key
   `4fba2fa1-012b-469a-b6aa-e5be3811c173`.
-- One task-eligible DirectoryUser is discoverable in the folder. Do not commit
-  that user's personal identifier; resolve it during live smoke.
-- No tasks were listed in the folder at discovery time.
-- No task was created, assigned, completed, or modified.
+- One task-eligible DirectoryUser was discoverable in the folder. The personal
+  identifier is not committed; the proof manifest uses a placeholder.
+- Initial task list was empty before the approved live task was created.
+
+## Commands Used
+
+After explicit approval, the live task was created, assigned, read back,
+completed, and read back again.
+
+```bash
+uip tasks assign 4401667 --user-id <task-eligible-user-id> --output json
+uip tasks get 4401667 --task-type ExternalTask --folder-id 7986316 --output json
+uip tasks complete 4401667 --type ExternalTask --folder-id 7986316 --data '{"clinicalAttestation":"Approved for synthetic demo after reviewing policy citations and evidence matrix. No real patient data used.","reviewNotes":"Evidence is source-backed; diagnosis severity remains governed by clinician attestation before payer submission."}' --output json
+uip tasks get 4401667 --task-type ExternalTask --folder-id 7986316 --output json
+```
+
+Final readback returned status `Completed` and the synthetic completion payload.
 
 ## Synthetic Clinician Task Payload
 
@@ -42,7 +76,7 @@ It contains:
 - evidence references to synthetic fixture sources only;
 - allowed outcomes: `Approve`, `Approve With Edits`, `Reject`, and
   `Request More Evidence`;
-- a completion data template for a synthetic FormTask;
+- a completion data template for a synthetic human task;
 - no PHI, no real payer, no real provider, no credential, and no real contact
   data.
 
@@ -52,73 +86,45 @@ The payload binds to the existing QuickForm contract:
 uipath/action-center/contracts/clinician-evidence-validation.quickform.json
 ```
 
-## Approval-Gated Live Path
+## Maestro HITL Boundary
 
-Task creation is approval-gated. The current `uip tasks` CLI surface supports
-runtime list/get/users/assign/complete operations, but it does not expose a
-direct `uip tasks create` command. Create the task only through an approved
-UiPath HITL creation surface: Maestro, Flow, Coded Agent, API Workflow, or a
-Studio Web workflow that contains the Human-in-the-Loop QuickForm node bound to
-the clinician validation contract.
+The live Maestro artifacts were also exercised:
 
-After explicit approval to create exactly one synthetic task:
+- Maestro Case instance `cad900ae-e4f9-4e59-a1c8-c6f15934f5bc` was created and
+  faulted at the case action task boundary because the tenant registry exposed
+  no deployed Action App binding.
+- Maestro Flow instance `4e17f6d2-a2d7-4730-b1ed-9d0dcadef9b0` completed the
+  trigger and synthetic packet-prep node, then reached the
+  inline Maestro Flow HITL QuickForm node `clinicianEvidenceReview1`.
+- The inline HITL node faulted inside the AppTasks request with an `ExternalTag`
+  validation error. The flow package remains valid; the live runtime boundary is
+  the inline QuickForm serializer, not login, folder, or task-read access.
 
-1. Run the approved HITL workflow using
-   `uipath/action-center/live-proof/clinician-validation-task-payload.json`.
-2. Capture the numeric task ID, task type, status, actor, timestamp, and folder.
-3. Build the standalone deep link with the tenant slug:
-   `https://cloud.uipath.com/galacticus/DefaultTenant/actions_/current-task/tasks/<task-id>`.
-4. If UiPath returns a task key, also capture the inbox link:
-   `https://cloud.uipath.com/galacticus/DefaultTenant/orchestrator_/actions/inbox/<task-key>`.
-5. Write or capture the `human.task.created` event mirror record.
-
-Assignment remains a separate approval-gated action:
-
-```bash
-uip tasks users 7986316 --output json
-uip tasks assign <task-id> --user <reviewer-email> --output json
-uip tasks get <task-id> --task-type FormTask --folder-id 7986316 --output json
-```
-
-Completion remains a separate approval-gated action:
-
-```bash
-uip tasks get <task-id> --task-type FormTask --folder-id 7986316 --output json
-uip tasks complete <task-id> --type FormTask --folder-id 7986316 --action "Approve" --data '{"reviewerfinaltext":"Clinician-approved synthetic evidence text goes here.","policycitationfinal":"Aurora Vale Fictionalimab Policy 2026, Section 2.1","reviewerdecision":"approved","attestationconfirmed":true,"reviewernotes":"Synthetic demo attestation only; no real patient or medical advice.","moreevidencereason":""}' --output json
-uip tasks get <task-id> --task-type FormTask --folder-id 7986316 --output json
-```
-
-Do not claim a live Action Center task unless a task ID and tenant-qualified
-deep link exist.
+For production hardening, bind the HITL step to a deployed Action App/FormTask
+catalog surface or keep using the verified ExternalTask creation path.
 
 ## Fallback Criteria
 
-Use the fallback only after layer-ordered diagnosis:
+Fallback is still documented for environments where Action Center creation is
+not available. Use the fallback only after layer-ordered diagnosis:
 
 1. Confirm login, org, tenant, folder, and `uip tasks` command registration.
 2. Confirm Actions/Action Center discovery with `uip tasks users` and
    `uip tasks list`.
 3. Confirm official activation flows: Actions service, reviewer permissions,
-   task catalog if used, and a workflow identity that can create FormTask
-   actions.
+   task catalog if used, and a workflow identity that can create tasks.
 4. Only then diagnose permissions, licensing, runtime, or catalog blockers.
 
-Fallback is allowed if Action Center task creation is blocked by tenant
-capabilities, permissions, missing reviewer access, missing catalog activation,
-or absence of an approved HITL creation surface before the final recording.
-
-The fallback proof surface is not a frontend-only switch. It must be a
-UiPath-controlled event mirror record from the approved H1 Data Service/API
-Workflow path with action `human_gate_fallback_recorded`.
-
-The Command Center must label it exactly:
+If fallback is used in another tenant, the Command Center must label it exactly:
 
 ```text
 UiPath-controlled human gate fallback - no live Action Center task created
 ```
 
-The UI must not label this as a live Action Center task, clinician completion,
-or task signoff.
+The fallback event action remains `human_gate_fallback_recorded`.
+
+The current `TreatmentAccessHackathon` proof does not rely on that fallback:
+Task ID `4401667` is the live Action Center evidence.
 
 ## Verifier
 
@@ -129,6 +135,6 @@ CI=true pnpm smoke:checkpoint8-action-center-proof
 ```
 
 The verifier checks that the H2 packet is synthetic, includes the unsupported
-claim, policy citation, evidence refs, allowed outcomes, approval-gated command
-templates, tenant-qualified deep-link patterns, fallback criteria, and no live
-task claim.
+claim, policy citation, evidence refs, allowed outcomes, the live ExternalTask
+ID/deep links, the completed task timestamp, the Maestro HITL boundary, and the
+fallback wording for tenants where task creation is unavailable.

@@ -1,0 +1,40 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "ClinicianValidationFlow",
+    "kind": "process",
+    "type": "flow",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "e642bbde-eb08-4b2d-8193-e942a9324b29",
+    "isOverridable": true,
+    "dependencies": [
+      {
+        "kind": "package",
+        "name": "ClinicianValidationFlow"
+      }
+    ],
+    "runtimeDependencies": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "type": "Flow",
+      "name": "ClinicianValidationFlow",
+      "package": {
+        "key": "9b4ae174-18b4-40ce-a8f9-14da2a3a64ba"
+      },
+      "packageName": "treatment-access-command-center.flow.ClinicianValidationFlow",
+      "inputArguments": "{}",
+      "targetFrameworkValue": "Portable",
+      "retentionAction": "Delete",
+      "retentionPeriod": 30,
+      "staleRetentionAction": "Delete",
+      "staleRetentionPeriod": 180
+    },
+    "locks": [],
+    "key": "c6ff247e-487b-4221-a898-1421ec471504",
+    "files": []
+  }
+}

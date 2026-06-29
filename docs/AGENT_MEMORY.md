@@ -649,6 +649,17 @@ hackathon. Keep the claims precise:
 - Solution deployment: `46ec1e63-3b09-4308-8b44-ed4b65e4e7f7`.
 - Pipeline deployment:
   `ddccb1a1-0781-4a8c-10b0-08ded6011ef2`.
+- Action Center ExternalTask: `4401667`, key
+  `93c09da5-3edb-455e-9679-d513113fd4fa`, ExternalTag `TACC-2026-001`,
+  completed at `2026-06-29T19:44:16.577Z` with synthetic
+  clinician-attestation output.
+- Maestro Case debug instance:
+  `cad900ae-e4f9-4e59-a1c8-c6f15934f5bc`, faulted at the case action task
+  boundary because no deployed Action App binding was available.
+- Maestro Flow debug instance:
+  `4e17f6d2-a2d7-4730-b1ed-9d0dcadef9b0`, completed trigger and packet-prep
+  nodes, reached `clinicianEvidenceReview1`, then faulted in the AppTasks
+  request with an `ExternalTag` validation issue.
 - Process key: `A9F5CE77-B566-49F0-98C3-CED31D98CA0F`.
 - Orchestrator job:
   `6d9b9fa9-f582-4983-98fa-167e87d57f2a`, completed successfully on the
@@ -657,11 +668,11 @@ hackathon. Keep the claims precise:
 Boundaries to preserve in future responses and docs:
 
 - This proves live Data Fabric proof state, solution publish/deploy/activation,
-  process discovery, machine/runtime binding, and Orchestrator job execution.
+  one Action Center human gate, Maestro debug to the HITL boundary, process
+  discovery, machine/runtime binding, and Orchestrator job execution.
 - The live job ran the deployed `PayerPortalFallback` process, but
   `Main.xaml` is scaffold-only. Do not claim browser portal UI automation or a
   portal confirmation write-back from the live job.
-- Action Center users/tasks were live-readable, but no live task was created
-  because the installed `uip tasks` CLI exposes no create verb.
-- No real payer submission, real PHI, live Maestro run, live Agent Builder run,
-  IXP mutation, or cross-project `AgentFactoryDemo` action was performed.
+- No real payer submission, real PHI, live Agent Builder run, IXP mutation,
+  browser portal UI automation, or cross-project `AgentFactoryDemo` action was
+  performed.

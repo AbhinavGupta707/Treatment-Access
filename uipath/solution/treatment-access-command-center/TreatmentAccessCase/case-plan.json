@@ -1,0 +1,51 @@
+{
+  "case": {
+    "completionConditions": [
+      {
+        "completionConditionType": "StagesCompleted",
+        "parameters": {
+          "stageNames": ["Clinical Validation"]
+        },
+        "ruleName": "Complete Rule 1"
+      }
+    ]
+  },
+  "stages": [
+    {
+      "name": "Clinical Validation",
+      "entryConditions": [
+        {
+          "entryConditionType": "CaseEntered",
+          "parameters": {},
+          "ruleName": "Entry Rule 1"
+        }
+      ],
+      "exitConditions": [],
+      "completionConditions": [
+        {
+          "completionConditionType": "TasksCompleted",
+          "parameters": {
+            "taskNames": ["Clinician validates evidence"]
+          },
+          "ruleName": "Complete Rule 1"
+        }
+      ],
+      "tasks": [
+        {
+          "name": "Clinician validates evidence",
+          "runOnlyOnce": true,
+          "entryConditions": [
+            {
+              "entryConditionType": "StageEntered",
+              "parameters": {
+                "stageNames": ["Clinical Validation"]
+              },
+              "ruleName": "Entry Rule 1"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "version": 1
+}

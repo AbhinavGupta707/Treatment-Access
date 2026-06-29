@@ -1,0 +1,39 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "TreatmentAccessCase",
+    "kind": "process",
+    "type": "caseManagement",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "cd554d6d-b3d8-4d73-a354-f1d4fd1d055d",
+    "isOverridable": true,
+    "dependencies": [
+      {
+        "kind": "package",
+        "name": "TreatmentAccessCase"
+      }
+    ],
+    "runtimeDependencies": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "type": "CaseManagement",
+      "name": "TreatmentAccessCase",
+      "package": {
+        "key": "466bca3a-533c-47a2-acc8-4a647d7de47e"
+      },
+      "packageName": "treatment-access-command-center.caseManagement.TreatmentAccessCase",
+      "targetFrameworkValue": "Portable",
+      "retentionAction": "Delete",
+      "retentionPeriod": 30,
+      "staleRetentionAction": "Delete",
+      "staleRetentionPeriod": 180
+    },
+    "locks": [],
+    "key": "5ea77041-9a0c-420e-ba4a-3baeba5379c7",
+    "files": []
+  }
+}

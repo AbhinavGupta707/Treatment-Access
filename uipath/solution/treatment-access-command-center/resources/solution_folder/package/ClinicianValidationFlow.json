@@ -1,0 +1,23 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "ClinicianValidationFlow",
+    "kind": "package",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "e642bbde-eb08-4b2d-8193-e942a9324b29",
+    "isOverridable": true,
+    "dependencies": [],
+    "runtimeDependencies": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "name": "ClinicianValidationFlow"
+    },
+    "locks": [],
+    "key": "9b4ae174-18b4-40ce-a8f9-14da2a3a64ba",
+    "files": []
+  }
+}

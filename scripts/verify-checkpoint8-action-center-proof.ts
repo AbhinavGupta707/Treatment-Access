@@ -64,11 +64,22 @@ type ProofManifest = {
   liveTaskClaim?: {
     status?: string;
     taskId?: unknown;
+    taskType?: string;
+    taskKey?: string;
+    folderId?: number;
+    externalTag?: string;
+    completedTime?: string;
     deepLink?: unknown;
+    inboxLink?: string;
     requirement?: string;
   };
   readOnlyDiscovery?: {
     commandsRun?: string[];
+    sideEffects?: string;
+  };
+  liveExecution?: {
+    commandsRun?: string[];
+    results?: string[];
     sideEffects?: string;
   };
   taskPayload?: {
@@ -94,6 +105,14 @@ type ProofManifest = {
       verifyCommand?: string;
       eventMirrorAction?: string;
     };
+  };
+  maestroInlineHitlStatus?: {
+    caseInstanceId?: string;
+    caseStatus?: string;
+    flowInstanceId?: string;
+    flowStatus?: string;
+    hitlNode?: string;
+    faultSummary?: string;
   };
   deepLinkRules?: {
     standalonePattern?: string;
@@ -169,13 +188,30 @@ try {
     "manifest must be synthetic only",
   );
   assert(
-    manifest.liveTaskClaim?.status === "not_claimed",
-    "manifest must not claim a live task by default",
+    manifest.liveTaskClaim?.status === "completed",
+    "manifest must claim the completed live Action Center task",
   );
   assert(
-    manifest.liveTaskClaim.taskId === null &&
-      manifest.liveTaskClaim.deepLink === null,
-    "manifest must not contain a task ID or deep link until live creation succeeds",
+    manifest.liveTaskClaim.taskId === 4401667 &&
+      manifest.liveTaskClaim.taskType === "ExternalTask" &&
+      manifest.liveTaskClaim.folderId === 7986316 &&
+      manifest.liveTaskClaim.externalTag === "TACC-2026-001",
+    "manifest must contain the live ExternalTask ID, type, folder, and external tag",
+  );
+  assert(
+    manifest.liveTaskClaim.taskKey === "93c09da5-3edb-455e-9679-d513113fd4fa" &&
+      manifest.liveTaskClaim.completedTime === "2026-06-29T19:44:16.577Z",
+    "manifest must contain the completed task key and completion timestamp",
+  );
+  assert(
+    typeof manifest.liveTaskClaim.deepLink === "string" &&
+      manifest.liveTaskClaim.deepLink.includes(
+        "/galacticus/DefaultTenant/actions_/current-task/tasks/4401667",
+      ) &&
+      manifest.liveTaskClaim.inboxLink?.includes(
+        "/galacticus/DefaultTenant/orchestrator_/actions/inbox/93c09da5-3edb-455e-9679-d513113fd4fa",
+      ),
+    "manifest must contain tenant-qualified live task deep links",
   );
   assert(
     manifest.liveTaskClaim.requirement?.includes("task ID") &&
@@ -260,6 +296,20 @@ try {
     manifest.readOnlyDiscovery?.sideEffects === "none",
     "read-only discovery must record no side effects",
   );
+  assertArrayContains(
+    manifest.liveExecution?.commandsRun,
+    [
+      "uip tasks assign 4401667 --user-id <task-eligible-user-id> --output json",
+      "uip tasks get 4401667 --task-type ExternalTask --folder-id 7986316 --output json",
+    ],
+    "live execution commands",
+  );
+  assert(
+    manifest.liveExecution?.sideEffects?.includes(
+      "one synthetic Action Center ExternalTask created",
+    ),
+    "manifest must record the approved live Action Center side effect",
+  );
   assert(
     manifest.taskPayload?.path ===
       "uipath/action-center/live-proof/clinician-validation-task-payload.json",
@@ -280,7 +330,7 @@ try {
   assert(
     manifest.approvalGatedLivePath?.assignment?.approvalRequired === true &&
       manifest.approvalGatedLivePath.assignment.commandTemplate?.includes(
-        "uip tasks assign <task-id>",
+        "uip tasks assign <task-id> --user-id",
       ),
     "task assignment command must be approval-gated",
   );
@@ -289,9 +339,22 @@ try {
       manifest.approvalGatedLivePath.completion.commandTemplate?.includes(
         "uip tasks complete <task-id>",
       ) &&
+      manifest.approvalGatedLivePath.completion.commandTemplate?.includes(
+        "--type ExternalTask",
+      ) &&
       manifest.approvalGatedLivePath.completion.eventMirrorAction ===
         "human.task.completed",
     "task completion command must be approval-gated",
+  );
+  assert(
+    manifest.maestroInlineHitlStatus?.caseInstanceId ===
+      "cad900ae-e4f9-4e59-a1c8-c6f15934f5bc" &&
+      manifest.maestroInlineHitlStatus.flowInstanceId ===
+        "4e17f6d2-a2d7-4730-b1ed-9d0dcadef9b0" &&
+      manifest.maestroInlineHitlStatus.hitlNode ===
+        "clinicianEvidenceReview1" &&
+      manifest.maestroInlineHitlStatus.faultSummary?.includes("ExternalTag"),
+    "manifest must record the live Maestro/HITL fault boundary",
   );
 
   for (const phrase of [
@@ -345,12 +408,14 @@ try {
   ].join("\n");
 
   for (const phrase of [
-    "Do not claim a live Action Center task unless",
+    "Live Action Center ExternalTask created, assigned, and completed",
+    "Task ID `4401667`",
+    "ExternalTag `TACC-2026-001`",
+    "inline Maestro Flow HITL QuickForm",
     "UiPath-controlled human gate fallback - no live Action Center task created",
     "uip tasks users 7986316 --output json",
     "uip tasks list --folder-id 7986316 --output json",
     "human_gate_fallback_recorded",
-    "No task was created",
   ]) {
     assert(docs.includes(phrase), `docs missing phrase: ${phrase}`);
   }

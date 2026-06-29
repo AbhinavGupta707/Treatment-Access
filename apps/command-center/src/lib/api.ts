@@ -795,7 +795,7 @@ function normalizeSharedApprovalGate(
       status: "required",
       owner: "Demo operator",
       reason:
-        "Live Action Center task creation, Data Service writes, robot jobs, and payer submissions remain approval-gated.",
+        "New live UiPath side effects remain approval-gated. Existing proof includes a completed Action Center task, Data Fabric records, solution deployment, and Orchestrator job.",
       source: "uipath",
     };
   }
@@ -1015,9 +1015,31 @@ function buildLocalProofManifest(
     },
     {
       label: "Action Center task ID",
-      value: "No live task created; create surface unavailable",
-      status: "blocked",
+      value: "4401667 - Completed ExternalTask",
+      status: "available",
       source: "human",
+      timestamp,
+    },
+    {
+      label: "Action Center task key",
+      value: "93c09da5-3edb-455e-9679-d513113fd4fa",
+      status: "available",
+      source: "human",
+      timestamp,
+    },
+    {
+      label: "Maestro Case instance",
+      value:
+        "cad900ae-e4f9-4e59-a1c8-c6f15934f5bc - faulted at action task binding",
+      status: "blocked",
+      source: "uipath",
+      timestamp,
+    },
+    {
+      label: "Maestro Flow instance",
+      value: "4e17f6d2-a2d7-4730-b1ed-9d0dcadef9b0 - HITL ExternalTag boundary",
+      status: "blocked",
+      source: "uipath",
       timestamp,
     },
     {
@@ -1048,7 +1070,7 @@ function buildLocalProofManifest(
     {
       label: "Safety status",
       value:
-        "Live UiPath proof recorded; no real payer submission or PHI. Action Center task creation and portal UIA are not claimed.",
+        "Live UiPath proof recorded; no real payer submission or PHI. Action Center ExternalTask completed; inline Maestro HITL and portal UIA remain production-hardening boundaries.",
       status: "available",
       source: "uipath",
       timestamp,

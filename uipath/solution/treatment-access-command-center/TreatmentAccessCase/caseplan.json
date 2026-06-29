@@ -1,0 +1,145 @@
+{
+  "id": "case-3F4W4WifhK",
+  "name": "Treatment Access Live Case",
+  "version": "20.0.0",
+  "description": "Synthetic treatment access case for live Maestro and Action Center proof.",
+  "bindings": [],
+  "variables": {
+    "inputOutputs": []
+  },
+  "metadata": {
+    "caseIdentifier": "TACC-2026-001",
+    "caseAppEnabled": true,
+    "caseIdentifierType": "constant",
+    "publishVersion": 2,
+    "caseUnifiedSchemaEnabled": true,
+    "caseDirectlyPassTaskOutputs": true,
+    "intsvcActivityConfig": "v2",
+    "caseExitRules": [
+      {
+        "id": "Condition_TACase",
+        "displayName": "Complete Rule 1",
+        "marksCaseComplete": true,
+        "rules": [
+          [
+            {
+              "id": "Rule_TACase",
+              "rule": "required-stages-completed"
+            }
+          ]
+        ]
+      }
+    ]
+  },
+  "nodes": [
+    {
+      "id": "Stage_JsT512",
+      "type": "case-management:Stage",
+      "position": {
+        "x": 100,
+        "y": 200
+      },
+      "style": {
+        "width": 304,
+        "opacity": 0.8
+      },
+      "measured": {
+        "width": 304,
+        "height": 128
+      },
+      "width": 304,
+      "zIndex": 1001,
+      "data": {
+        "label": "Clinical Validation",
+        "parentElement": {
+          "id": "root",
+          "type": "case-management:root"
+        },
+        "isInvalidDropTarget": false,
+        "isPendingParent": false,
+        "tasks": [
+          [
+            {
+              "id": "t933Tyv92",
+              "elementId": "Stage_JsT512-t933Tyv92",
+              "displayName": "Clinician validates evidence",
+              "shouldRunOnlyOnce": true,
+              "description": "Synthetic Action Center task: validate policy citation, evidence support, and clinician attestation before submission. Demo only; no real patient data.",
+              "isRequired": true,
+              "type": "action",
+              "entryConditions": [
+                {
+                  "id": "cTACC0001",
+                  "displayName": "Entry Rule 1",
+                  "rules": [
+                    [
+                      {
+                        "id": "rTACC0001",
+                        "rule": "current-stage-entered"
+                      }
+                    ]
+                  ]
+                }
+              ],
+              "data": {
+                "taskTitle": "Review Fictionalimab prior authorization evidence",
+                "priority": "High",
+                "labels": "synthetic,treatment-access,clinician-validation",
+                "assignmentCriteria": "user",
+                "recipient": {
+                  "Type": 2,
+                  "Value": "clinician.reviewer@example.com"
+                }
+              }
+            }
+          ]
+        ],
+        "entryConditions": [
+          {
+            "id": "Condition_TASt01",
+            "displayName": "Entry Rule 1",
+            "isInterrupting": false,
+            "rules": [
+              [
+                {
+                  "id": "Rule_TASt01",
+                  "rule": "case-entered"
+                }
+              ]
+            ]
+          }
+        ],
+        "exitConditions": [
+          {
+            "id": "Condition_TAExit",
+            "displayName": "Complete Rule 1",
+            "type": "exit-only",
+            "marksStageComplete": true,
+            "rules": [
+              [
+                {
+                  "id": "Rule_TAExit",
+                  "rule": "required-tasks-completed"
+                }
+              ]
+            ]
+          }
+        ],
+        "description": "Clinician reviews source-backed evidence and approves the synthetic prior authorization packet before submission.",
+        "isRequired": true
+      }
+    },
+    {
+      "id": "trigger_1",
+      "type": "case-management:Trigger",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "label": "Trigger 1"
+      }
+    }
+  ],
+  "edges": []
+}

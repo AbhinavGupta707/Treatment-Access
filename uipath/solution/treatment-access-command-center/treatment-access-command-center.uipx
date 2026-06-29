@@ -1,12 +1,22 @@
 {
-  "DocVersion": "1.0.0",
-  "StudioMinVersion": "2025.10.0",
-  "SolutionId": "dc9a71bf-83ad-4552-9e1c-b5a464b2b3fc",
-  "Projects": [
-    {
-      "Type": "Process",
-      "ProjectRelativePath": "PayerPortalFallback/project.uiproj",
-      "Id": "a48571ee-1a5c-43df-9d5e-1e419e5b4a1f"
-    }
-  ]
+    "DocVersion": "1.0.0",
+    "StudioMinVersion": "2025.10.0",
+    "SolutionId": "f2ee0258-b4a8-41af-9338-08ded37985a5",
+    "Projects": [
+        {
+            "Type": "Process",
+            "ProjectRelativePath": "PayerPortalFallback/project.uiproj",
+            "Id": "a48571ee-1a5c-43df-9d5e-1e419e5b4a1f"
+        },
+        {
+            "Type": "CaseManagement",
+            "ProjectRelativePath": "TreatmentAccessCase/project.uiproj",
+            "Id": "cd554d6d-b3d8-4d73-a354-f1d4fd1d055d"
+        },
+        {
+            "Type": "Flow",
+            "ProjectRelativePath": "ClinicianValidationFlow/project.uiproj",
+            "Id": "e642bbde-eb08-4b2d-8193-e942a9324b29"
+        }
+    ]
 }

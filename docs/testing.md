@@ -143,9 +143,10 @@ This smoke itself does not create Action Center tasks, Data Service records,
 Orchestrator jobs, deployments, robot runs, or payer submissions. The approved
 final live proof is documented separately in
 `docs/live-uipath-proof-closeout.md`: Data Fabric proof records, solution
-publish/deploy/activation, and one successful Orchestrator job. The UI and docs
-must still avoid claiming Action Center task creation, captured portal UI
-automation, real payer submission, or real PHI.
+publish/deploy/activation, one completed Action Center ExternalTask, Maestro
+debug-to-HITL evidence, and one successful Orchestrator job. The UI and docs
+must still avoid claiming captured portal UI automation, real payer submission,
+or real PHI.
 
 ## Checkpoint 4 Mock Payer Portal
 
@@ -587,8 +588,8 @@ Final live claims require visible evidence in `TreatmentAccessHackathon`. Curren
 approved evidence is recorded in `docs/live-uipath-proof-closeout.md`:
 
 - H1: UiPath-owned Data Fabric proof records and timestamps.
-- H2: Action Center read surface verified; no live task created because the
-  installed CLI has no task-create command.
+- H2: Action Center ExternalTask `4401667` created, assigned, completed, and
+  read back with synthetic clinician-attestation output.
 - H3: Orchestrator process/job evidence exists for `PayerPortalFallback`; portal
   UI automation and confirmation write-back are not claimed.
 - H4: solution package publish, deploy, and activation evidence exists.

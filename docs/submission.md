@@ -33,11 +33,11 @@ access teams, clinicians, and patients is clear.
 Keep these proof types separate in the Devpost text, video narration, and judge
 walkthrough:
 
-| Proof type            | Evidence to show                                                                                                                              | Claim boundary                                                                                                                                                                                                                                                    |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Local Synthetic Proof | Local Command Center, mock healthcare API, mock payer portal, deterministic agent runtime, screenshots, and smokes.                           | Proves the workflow semantics with synthetic data only.                                                                                                                                                                                                           |
-| Live Provider Proof   | Fireworks/LangSmith readiness or traces after provider smoke passes.                                                                          | Does not imply UiPath task, job, record, deployment, or payer submission.                                                                                                                                                                                         |
-| Live UiPath Proof     | `TreatmentAccessHackathon` folder evidence with event/record ID, job ID, solution deployment ID, timestamp, source labels, and safety status. | Claim only the live pieces documented in `docs/live-uipath-proof-closeout.md`: Data Fabric proof records, solution publish/deploy/activation, and one Orchestrator job. Do not claim Action Center task creation, portal UI automation, or real payer submission. |
+| Proof type            | Evidence to show                                                                                                                                       | Claim boundary                                                                                                                                                                                                                                                                                                                                                          |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Local Synthetic Proof | Local Command Center, mock healthcare API, mock payer portal, deterministic agent runtime, screenshots, and smokes.                                    | Proves the workflow semantics with synthetic data only.                                                                                                                                                                                                                                                                                                                 |
+| Live Provider Proof   | Fireworks/LangSmith readiness or traces after provider smoke passes.                                                                                   | Does not imply UiPath task, job, record, deployment, or payer submission.                                                                                                                                                                                                                                                                                               |
+| Live UiPath Proof     | `TreatmentAccessHackathon` folder evidence with event/record ID, task ID, job ID, solution deployment ID, timestamp, source labels, and safety status. | Claim only the live pieces documented in `docs/live-uipath-proof-closeout.md`: Data Fabric proof records, one completed Action Center ExternalTask, solution publish/deploy/activation, one Orchestrator job, and Maestro debug proof up to the HITL boundary. Do not claim portal UI automation, live Agent Builder execution, IXP mutation, or real payer submission. |
 
 ## Inspiration
 
@@ -95,18 +95,18 @@ Core implementation pieces:
 
 ## UiPath Components
 
-| Component                  | How it is used                                                                               | Current proof                                                                                                                                |
-| -------------------------- | -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| Maestro Case               | Coordinates the treatment access lifecycle and secondary exception stages.                   | SDD and case lifecycle documented under `uipath/maestro`.                                                                                    |
-| Agent Builder              | Hosts seven domain agents with distinct contracts and visible trace payloads.                | Local Agent Builder packets exist; static `uip agent validate` was recorded during Checkpoint 3.                                             |
-| API Workflows              | Calls mock EHR, payer, pharmacy, and event mirror endpoints.                                 | Workflow JSON artifacts exist and Checkpoint 2 validation was recorded.                                                                      |
-| Action Center              | Holds clinician evidence approval, appeal signoff, and exception review gates.               | Live users/tasks surface verified; no live task was created because this CLI has no task-create command.                                     |
-| Data Service/Data Fabric   | Stores case, evidence, task, decision, appeal, and audit shapes in the intended live system. | Live folder-scoped `TreatmentAccessProofEvent` entity and four synthetic proof records were created in `TreatmentAccessHackathon`.           |
-| Orchestrator               | Provides folder, runtime, assets, logs, and robot job governance.                            | Solution folder/process/machine assignment are live; job `6d9b9fa9-f582-4983-98fa-167e87d57f2a` completed successfully.                      |
-| Assistant/Robot            | Executes the payer portal fallback when payer API is unavailable.                            | `PayerPortalFallback` is deployed and job-runnable; current `Main.xaml` is scaffold-only, so captured portal UI automation is not claimed.   |
-| IXP/Document Understanding | Preferred production extraction path for policies, chart evidence, and denial letters.       | Service is reachable, but local CLI lacks `uip ixp`; fallback parser preserves source spans and confidence.                                  |
-| UiPath Apps                | Intended case intake/operator surface.                                                       | Intake contracts and launch workflow documentation exist.                                                                                    |
-| Solutions                  | Packages the live UiPath project boundary.                                                   | Published, deployed, and activated as `treatment-access-command-center@1.0.20260629` with deployment `46ec1e63-3b09-4308-8b44-ed4b65e4e7f7`. |
+| Component                  | How it is used                                                                               | Current proof                                                                                                                                          |
+| -------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Maestro Case               | Coordinates the treatment access lifecycle and secondary exception stages.                   | SDD and case lifecycle documented under `uipath/maestro`.                                                                                              |
+| Agent Builder              | Hosts seven domain agents with distinct contracts and visible trace payloads.                | Local Agent Builder packets exist; static `uip agent validate` was recorded during Checkpoint 3.                                                       |
+| API Workflows              | Calls mock EHR, payer, pharmacy, and event mirror endpoints.                                 | Workflow JSON artifacts exist and Checkpoint 2 validation was recorded.                                                                                |
+| Action Center              | Holds clinician evidence approval, appeal signoff, and exception review gates.               | Live ExternalTask `4401667` was created, assigned, completed, and read back in `TreatmentAccessHackathon` with synthetic clinician-attestation output. |
+| Data Service/Data Fabric   | Stores case, evidence, task, decision, appeal, and audit shapes in the intended live system. | Live folder-scoped `TreatmentAccessProofEvent` entity and four synthetic proof records were created in `TreatmentAccessHackathon`.                     |
+| Orchestrator               | Provides folder, runtime, assets, logs, and robot job governance.                            | Solution folder/process/machine assignment are live; job `6d9b9fa9-f582-4983-98fa-167e87d57f2a` completed successfully.                                |
+| Assistant/Robot            | Executes the payer portal fallback when payer API is unavailable.                            | `PayerPortalFallback` is deployed and job-runnable; current `Main.xaml` is scaffold-only, so captured portal UI automation is not claimed.             |
+| IXP/Document Understanding | Preferred production extraction path for policies, chart evidence, and denial letters.       | Service is reachable, but local CLI lacks `uip ixp`; fallback parser preserves source spans and confidence.                                            |
+| UiPath Apps                | Intended case intake/operator surface.                                                       | Intake contracts and launch workflow documentation exist.                                                                                              |
+| Solutions                  | Packages the live UiPath project boundary.                                                   | Published, deployed, and activated as `treatment-access-command-center@1.0.20260629` with deployment `46ec1e63-3b09-4308-8b44-ed4b65e4e7f7`.           |
 
 ## Seven-Agent Story
 
@@ -182,26 +182,28 @@ Use this path for the five-minute video and live judge walkthrough:
 For the final approved proof, say:
 
 > UiPath Automation Cloud now owns the final proof trail: Data Fabric proof
-> records, a published and activated solution, and a successful Orchestrator job
-> in `TreatmentAccessHackathon`. We are not claiming live Action Center task
-> creation or captured portal UI automation; those are visibly labelled as the
-> next production-hardening steps.
+> records, a completed Action Center ExternalTask, a published and activated
+> solution, a successful Orchestrator job, and Maestro debug proof up to the
+> HITL boundary in `TreatmentAccessHackathon`. We are not claiming captured
+> portal UI automation, live Agent Builder execution, IXP mutation, or real
+> payer submission; those are visibly labelled as the next production-hardening
+> steps.
 
 ## Mocked Vs Live Statement
 
 Use this as the Devpost transparency section:
 
-| Area                | What is working locally or after smoke                                                                                                                                              | What is not claimed                                                                                                             |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| Synthetic data      | Deterministic fictional patient, payer, policy, evidence, denial, and audit data.                                                                                                   | No real PHI, payer, provider, credential, or patient data.                                                                      |
-| Command Center      | Renders product dashboard, case state, evidence matrix, agent traces, fallback, denial, appeal, care, and proof manifest.                                                           | It is not claimed as the live system of record.                                                                                 |
-| Mock API            | Supports health, reset, toggles, event ingestion, payer unavailable behavior, portal fallback success, and state reads.                                                             | It is not a real payer/EHR/pharmacy integration.                                                                                |
-| Seven agents        | Local contracts and deterministic smoke runtime prove behavior and trace/audit payloads.                                                                                            | No live Agent Builder run/debug is claimed.                                                                                     |
-| Fireworks/LangSmith | Live provider readiness is claimed only after `CI=true pnpm smoke:checkpoint6-live-providers` passes or equivalent evidence exists.                                                 | No live LLM output or LangSmith trace is claimed from deterministic local proof alone.                                          |
-| UiPath workflows    | Maestro/API Workflow/Action Center/Data Service artifacts and runbooks exist; final manifest displays live folder, record, job, deployment, source, timestamp, and safety evidence. | No live Maestro run, Agent Builder run, or Action Center task creation is claimed.                                              |
-| Portal fallback     | Mock payer portal, local fallback smoke, and real UiPath RPA project/solution shell prove the API-down-to-portal handoff boundary.                                                  | A live scaffold Orchestrator job completed; captured portal UI automation and external payer portal submission are not claimed. |
-| IXP/DU              | Fallback parser keeps source spans and confidence so IXP can be swapped in later.                                                                                                   | No IXP project mutation or live extraction deployment is claimed.                                                               |
-| Solution            | Local solution shell includes `PayerPortalFallback`, packs, publishes, deploys, and activates in UiPath.                                                                            | No cross-project or `AgentFactoryDemo` deployment is claimed.                                                                   |
+| Area                | What is working locally or after smoke                                                                                                                                                                  | What is not claimed                                                                                                                                               |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Synthetic data      | Deterministic fictional patient, payer, policy, evidence, denial, and audit data.                                                                                                                       | No real PHI, payer, provider, credential, or patient data.                                                                                                        |
+| Command Center      | Renders product dashboard, case state, evidence matrix, agent traces, fallback, denial, appeal, care, and proof manifest.                                                                               | It is not claimed as the live system of record.                                                                                                                   |
+| Mock API            | Supports health, reset, toggles, event ingestion, payer unavailable behavior, portal fallback success, and state reads.                                                                                 | It is not a real payer/EHR/pharmacy integration.                                                                                                                  |
+| Seven agents        | Local contracts and deterministic smoke runtime prove behavior and trace/audit payloads.                                                                                                                | No live Agent Builder run/debug is claimed.                                                                                                                       |
+| Fireworks/LangSmith | Live provider readiness is claimed only after `CI=true pnpm smoke:checkpoint6-live-providers` passes or equivalent evidence exists.                                                                     | No live LLM output or LangSmith trace is claimed from deterministic local proof alone.                                                                            |
+| UiPath workflows    | Maestro/API Workflow/Action Center/Data Service artifacts and runbooks exist; final manifest displays live folder, record, Action Center task, job, deployment, source, timestamp, and safety evidence. | Live Maestro debug reached the HITL/action-task boundary but faulted there; no live Agent Builder run, portal UI automation, or real payer submission is claimed. |
+| Portal fallback     | Mock payer portal, local fallback smoke, and real UiPath RPA project/solution shell prove the API-down-to-portal handoff boundary.                                                                      | A live scaffold Orchestrator job completed; captured portal UI automation and external payer portal submission are not claimed.                                   |
+| IXP/DU              | Fallback parser keeps source spans and confidence so IXP can be swapped in later.                                                                                                                       | No IXP project mutation or live extraction deployment is claimed.                                                                                                 |
+| Solution            | Local solution shell includes `PayerPortalFallback`, packs, publishes, deploys, and activates in UiPath.                                                                                                | No cross-project or `AgentFactoryDemo` deployment is claimed.                                                                                                     |
 
 Checkpoint 6 adds `CI=true pnpm uipath:readiness` as the no-side-effect UiPath
 readiness sweep. It verifies registration/discovery state, RPA validate/build,
@@ -233,7 +235,7 @@ Live approval gates:
 - Agent Builder run/debug.
 - Maestro debug/run.
 - IXP project creation, upload, publish, or mutation.
-- Action Center task creation.
+- New Action Center task creation beyond completed proof task `4401667`.
 - Data Service writes.
 - Any payer submission outside the local synthetic mock.
 
@@ -360,9 +362,9 @@ the dependency and list the narrower local check that was run instead.
 - Real RPA project creation is unblocked locally. `PayerPortalFallback` exists
   as a UiPath project shell, validates, builds with `scripts/uipath-with-dotnet8.sh`,
   is imported into the local solution, and passes solution pack dry-run.
-- Live RPA execution, Orchestrator job start, solution deployment, Action Center
-  task creation, Data Service writes, IXP mutation, Agent Builder run/debug, and
-  Maestro run/debug remain explicit approval-gated steps.
+- Additional live RPA execution, Orchestrator job start, solution deployment,
+  Action Center task creation, Data Service writes, IXP mutation, Agent Builder
+  run/debug, and Maestro run/debug remain explicit approval-gated steps.
 - The local UI and mock API prove the workflow semantics with synthetic data,
   not production integrations.
 - The extraction fallback is deterministic and source-spanned, but it is not a
