@@ -5,6 +5,7 @@ import {
   AppealPacketAgentOutputSchema,
   DenialRescueAgentOutputSchema,
   EvidenceRetrievalAgentOutputSchema,
+  LiveProofRunSchema,
   MissingEvidenceAgentOutputSchema,
   type DemoFixture,
   SubmissionPacketAgentOutputSchema,
@@ -18,6 +19,7 @@ import {
   runTreatmentAccessGraph,
   runTreatmentAccessAgent,
   runTreatmentAccessAgents,
+  runTreatmentAccessLiveProof,
 } from "../src/index";
 
 describe("agent runtime", () => {
@@ -362,5 +364,46 @@ describe("agent runtime", () => {
     );
     expect(run.mode).toBe("live");
     expect(run.steps.every((step) => step.validated)).toBe(true);
+  });
+
+  it("creates a Checkpoint 7 live proof run with seven validated agent outputs and mirror stages", async () => {
+    const run = LiveProofRunSchema.parse(
+      await runTreatmentAccessLiveProof({
+        mode: "deterministic",
+        runId: "live-proof-unit-test",
+      }),
+    );
+
+    expect(run.steps.map((step) => step.stage)).toEqual([
+      "case_live_proof_started",
+      "policy_checked",
+      "evidence_mapped",
+      "human_gate_required",
+      "submission_packet_ready_or_blocked",
+      "payer_api_unavailable_or_not_attempted",
+      "live_proof_completed_or_waiting_for_approval",
+    ]);
+    expect(run.step_runs.map((step) => step.agent_id)).toEqual(
+      listTreatmentAccessAgents(),
+    );
+    expect(run.mirror_events.map((event) => event.action)).toEqual(
+      run.steps.map((step) => step.stage),
+    );
+    expect(run.submission_attempts[0]).toEqual(
+      expect.objectContaining({
+        status: "fallback_required",
+        error_code: "PAYER_API_DOWN",
+      }),
+    );
+    expect(run.approval_gates).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          gate_type: "exception_review",
+          status: "pending",
+        }),
+      ]),
+    );
+    expect(run.no_live_uipath_side_effects).toBe(true);
+    expect(run.no_real_payer_submission).toBe(true);
   });
 });

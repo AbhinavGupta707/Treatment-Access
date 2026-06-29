@@ -7,15 +7,20 @@ import {
 } from "@tacc/demo-data";
 import {
   AgentDisplayNameById,
+  AgentRunSchema,
   AgentOutputSchema,
+  AgentStepRunSchema,
   AgentRuntimeSummarySchema,
   DemoTogglesSchema,
+  LiveProofRunSchema,
+  ToolCallSchema,
   type AgentId,
   type AgentTrace,
   type DenialReasonCategory,
   type AgentOutput,
   type AgentRuntimeResult,
   type AgentRuntimeSummary,
+  type AgentRun,
   type AppealPacket,
   type AuditEvent,
   type ClinicalAssertionReview,
@@ -23,13 +28,30 @@ import {
   type DemoToggles,
   type EvidenceMapping,
   type HumanTask,
+  type LiveProofApprovalGate,
+  type LiveProofRun,
+  type LiveProofStage,
+  type LiveProofStep,
+  type LiveProofTrace,
   type PayerDecision,
   type PharmacyHandoff,
   type PolicyCriterion,
   type SafetyFlag,
+  type ToolCall,
+  type UiPathEvidenceRef,
   type SubmissionAttempt,
   type SubmissionPacket,
 } from "@tacc/shared-schemas";
+import {
+  resolveAgentRuntimeConfig,
+  type AgentRuntimeConfig,
+  type RuntimeEnv,
+} from "./config.js";
+import { createFireworksClient } from "./fireworks.js";
+import {
+  createLangSmithTraceLink,
+  langSmithTracingEnabled,
+} from "./langsmith.js";
 
 export * from "./config.js";
 export * from "./fireworks.js";
@@ -235,6 +257,16 @@ export type TreatmentAccessGraphRun = {
   no_real_payer_submission: true;
   synthetic_data_disclaimer: string;
 };
+
+export type TreatmentAccessLiveProofOptions =
+  TreatmentAccessAgentRuntimeOptions & {
+    requestedBy?: string;
+    runId?: string;
+    env?: RuntimeEnv;
+    mode?: TreatmentAccessGraphMode;
+    provider?: TreatmentAccessStructuredProvider;
+    langsmithRunUrl?: string;
+  };
 
 const treatmentAccessGraphNodes: TreatmentAccessGraphNodeId[] = [
   "coverage-requirement",
@@ -756,6 +788,225 @@ async function runGraphAgentStep(
   };
 }
 
+export function createFireworksStructuredProvider(
+  runtimeConfig: AgentRuntimeConfig,
+): TreatmentAccessStructuredProvider {
+  const client = createFireworksClient(runtimeConfig);
+
+  return {
+    provider_name: "fireworks",
+    async invokeAgentNode(input) {
+      const response = await client.chatCompletionsCreate({
+        model: runtimeConfig.fireworks.agentModel,
+        messages: [
+          {
+            role: "system",
+            content: [
+              "You are a schema-bounded treatment access agent for a synthetic demo.",
+              "Return JSON only. Do not include medical or legal advice.",
+              "Every clinical assertion must stay source-backed, policy-cited, or routed to human approval.",
+            ].join(" "),
+          },
+          {
+            role: "user",
+            content: JSON.stringify({
+              agent_id: input.agent_id,
+              display_name: input.display_name,
+              task: input.prompt,
+              output_schema: input.output_schema,
+              synthetic_only: true,
+              deterministic_output_to_preserve: input.deterministic_output,
+            }),
+          },
+        ],
+        temperature: 0,
+        max_tokens: 1800,
+        response_format: { type: "json_object" },
+      });
+      const content = response.choices?.[0]?.message?.content;
+      if (!content) {
+        throw new Error(
+          `Fireworks returned an empty response for ${input.agent_id}.`,
+        );
+      }
+
+      return AgentOutputSchema.parse(parseJsonObject(content));
+    },
+  };
+}
+
+export async function runTreatmentAccessLiveProof(
+  options: TreatmentAccessLiveProofOptions = {},
+): Promise<LiveProofRun> {
+  const validation = resolveAgentRuntimeConfig(options.env);
+  const requestedMode = options.mode ?? validation.config.mode;
+  if (requestedMode === "live" && !validation.ok) {
+    throw new Error(
+      `Live proof runtime configuration is invalid: ${validation.errors.join(
+        "; ",
+      )}`,
+    );
+  }
+
+  const mode: TreatmentAccessGraphMode =
+    requestedMode === "live" ? "live" : "deterministic";
+  const provider =
+    mode === "live"
+      ? (options.provider ??
+        createFireworksStructuredProvider(validation.config))
+      : undefined;
+  const fixture = options.fixture ?? treatmentAccessDemoFixture;
+  const toggles = DemoTogglesSchema.parse({
+    ...fixture.demoToggles,
+    payer_api_unavailable: true,
+    ...options.toggles,
+  });
+  const context = createGraphRuntimeContext(
+    { fixture, toggles },
+    "approved",
+  );
+  const startedAt = new Date().toISOString();
+  const runId =
+    options.runId ??
+    `live-proof-${fixture.case.case_id}-${startedAt.replace(/[:.]/g, "-")}`;
+  const graphOptions: TreatmentAccessGraphOptions = {
+    fixture,
+    toggles,
+    mode,
+    provider,
+    langsmith: {
+      project: validation.config.langSmith.projectName,
+      trace_id: `trace-${runId}`,
+      run_url: options.langsmithRunUrl,
+    },
+  };
+  const agentSteps: TreatmentAccessGraphStep[] = [];
+
+  for (const agentId of agentOrder) {
+    agentSteps.push(
+      await runGraphAgentStep(agentId, context, {
+        mode,
+        provider,
+        runId,
+        options: graphOptions,
+      }),
+    );
+  }
+
+  const traces = uniqueBy(
+    agentSteps.map((step) =>
+      liveProofTraceFromMetadata(
+        step.trace_metadata,
+        validation.config,
+        options.langsmithRunUrl,
+        startedAt,
+      ),
+    ),
+    (trace) => trace.trace_id,
+  );
+  const uipathEvidenceRefs = createUiPathEvidenceRefs(
+    runId,
+    mode,
+    validation.config,
+    options.langsmithRunUrl,
+    startedAt,
+  );
+  const approvalGates = createLiveProofApprovalGates(
+    runId,
+    fixture.case.case_id,
+    traces[0],
+  );
+  const proofSteps = createLiveProofSteps({
+    runId,
+    caseId: fixture.case.case_id,
+    mode,
+    startedAt,
+    agentSteps,
+    traces,
+    uipathEvidenceRefs,
+    payerApiUnavailable: toggles.payer_api_unavailable,
+  });
+  const mirrorEvents = createLiveProofMirrorEvents({
+    runId,
+    caseId: fixture.case.case_id,
+    maestroCaseId: fixture.case.maestro_case_id,
+    steps: proofSteps,
+    traces,
+  });
+  const agentRun = AgentRunSchema.parse({
+    run_id: runId,
+    case_id: fixture.case.case_id,
+    maestro_case_id: fixture.case.maestro_case_id,
+    mode,
+    orchestrator: validation.config.orchestrator,
+    status: "needs_human",
+    started_at: startedAt,
+    completed_at: startedAt,
+    requested_by: options.requestedBy ?? "Command Center live proof",
+    current_stage: "submission",
+    active_secondary_stages: toggles.payer_api_unavailable
+      ? ["api_failure_portal_fallback", "human_exception_review"]
+      : ["human_exception_review"],
+    trace_link: createLangSmithTraceLink({
+      traceId: `trace-${runId}`,
+      runId,
+      url: options.langsmithRunUrl,
+      runtimeConfig: validation.config,
+      metadata: { case_id: fixture.case.case_id, live_proof: true },
+    }),
+    safety_summary:
+      "Synthetic proof only; payer submission and UiPath side effects remain approval-gated.",
+  } satisfies AgentRun);
+
+  return LiveProofRunSchema.parse({
+    run_id: runId,
+    case_id: fixture.case.case_id,
+    requested_by: options.requestedBy ?? "Command Center live proof",
+    mode,
+    status: "waiting_for_approval",
+    current_stage: "live_proof_completed_or_waiting_for_approval",
+    started_at: startedAt,
+    completed_at: startedAt,
+    steps: proofSteps,
+    approval_gates: approvalGates,
+    traces,
+    uipath_evidence_refs: uipathEvidenceRefs,
+    agent_run: agentRun,
+    step_runs: createLiveProofStepRuns(
+      runId,
+      fixture.case.case_id,
+      agentSteps,
+    ),
+    tool_calls: createLiveProofToolCalls(
+      runId,
+      fixture.case.case_id,
+      agentSteps,
+    ),
+    submission_attempts: [
+      createSubmissionAttempt(
+        context,
+        runId,
+        toggles.payer_api_unavailable ? "fallback_required" : "submitted",
+      ),
+    ],
+    mirror_events: mirrorEvents,
+    source_labels: [
+      mode === "live"
+        ? "Fireworks structured model outputs"
+        : "Deterministic runtime fallback",
+      langSmithTracingEnabled(validation.config.langSmith)
+        ? options.langsmithRunUrl
+          ? "LangSmith trace URL captured"
+          : "LangSmith trace metadata captured"
+        : "LangSmith not configured",
+      "UiPath event mirror records (synthetic)",
+      "No live UiPath side effects",
+    ],
+    no_live_uipath_side_effects: true,
+    no_real_payer_submission: true,
+  });
+}
+
 function finalizeGraphRun(input: {
   runId: string;
   mode: TreatmentAccessGraphMode;
@@ -803,6 +1054,389 @@ function finalizeGraphRun(input: {
     synthetic_data_disclaimer:
       "Synthetic LangGraph workflow runtime; no live UiPath execution or real payer submission.",
   };
+}
+
+function createLiveProofSteps(input: {
+  runId: string;
+  caseId: string;
+  mode: TreatmentAccessGraphMode;
+  startedAt: string;
+  agentSteps: TreatmentAccessGraphStep[];
+  traces: LiveProofTrace[];
+  uipathEvidenceRefs: UiPathEvidenceRef[];
+  payerApiUnavailable: boolean;
+}): LiveProofStep[] {
+  const coverage = requireAgentStep(input.agentSteps, "coverage-requirement");
+  const evidence = requireAgentStep(input.agentSteps, "evidence-retrieval");
+  const missing = requireAgentStep(input.agentSteps, "missing-evidence");
+  const submission = requireAgentStep(input.agentSteps, "submission-packet");
+  const trace = input.traces[0];
+  const sourceRefs = input.uipathEvidenceRefs;
+  const stages: Array<{
+    stage: LiveProofStage;
+    title: string;
+    summary: string;
+    actor_type: LiveProofStep["actor_type"];
+    actor_name: string;
+    status: LiveProofStep["status"];
+    output_schema?: string;
+    evidence_refs?: string[];
+    trace?: LiveProofTrace;
+  }> = [
+    {
+      stage: "case_live_proof_started",
+      title: "Synthetic live proof started",
+      summary:
+        input.mode === "live"
+          ? "Command Center requested a live Fireworks-backed synthetic proof run."
+          : "Command Center requested a deterministic synthetic proof run because live model mode is not active.",
+      actor_type: "system",
+      actor_name: "Treatment Access API",
+      status: "completed",
+      trace,
+    },
+    {
+      stage: "policy_checked",
+      title: "Policy checked",
+      summary: coverage.summary,
+      actor_type: "agent",
+      actor_name: AgentDisplayNameById["coverage-requirement"],
+      status: "completed",
+      output_schema: coverage.output_schema,
+      evidence_refs: coverage.agent_result?.trace.evidence_refs,
+      trace: liveProofTraceForStep(coverage, input.traces),
+    },
+    {
+      stage: "evidence_mapped",
+      title: "Evidence mapped",
+      summary: evidence.summary,
+      actor_type: "agent",
+      actor_name: AgentDisplayNameById["evidence-retrieval"],
+      status: "completed",
+      output_schema: evidence.output_schema,
+      evidence_refs: evidence.agent_result?.trace.evidence_refs,
+      trace: liveProofTraceForStep(evidence, input.traces),
+    },
+    {
+      stage: "human_gate_required",
+      title: "Human gate required",
+      summary:
+        "A clinician approval gate is required for the high-impact clinical assertion before any payer-facing submission.",
+      actor_type: "human",
+      actor_name: "Demo GI Clinician",
+      status: "waiting_for_approval",
+      output_schema: missing.output_schema,
+      evidence_refs: missing.agent_result?.trace.evidence_refs,
+      trace: liveProofTraceForStep(missing, input.traces),
+    },
+    {
+      stage: "submission_packet_ready_or_blocked",
+      title: "Submission packet ready or blocked",
+      summary: submission.summary,
+      actor_type: "agent",
+      actor_name: AgentDisplayNameById["submission-packet"],
+      status:
+        submission.status === "blocked" ? "blocked" : "waiting_for_approval",
+      output_schema: submission.output_schema,
+      evidence_refs: submission.agent_result?.trace.evidence_refs,
+      trace: liveProofTraceForStep(submission, input.traces),
+    },
+    {
+      stage: "payer_api_unavailable_or_not_attempted",
+      title: "Payer API unavailable or not attempted",
+      summary: input.payerApiUnavailable
+        ? "Synthetic payer API is unavailable; UiPath robot fallback request is prepared but no live job is started."
+        : "Payer API call was not attempted because live payer submission remains approval-gated.",
+      actor_type: "api_workflow",
+      actor_name: "UiPath API Workflow",
+      status: "waiting_for_approval",
+      trace,
+    },
+    {
+      stage: "live_proof_completed_or_waiting_for_approval",
+      title: "Live proof completed or waiting for approval",
+      summary:
+        "The synthetic proof run completed local validation and is waiting for clinician/UiPath approval gates before side effects.",
+      actor_type: "system",
+      actor_name: "Treatment Access API",
+      status: "waiting_for_approval",
+      trace,
+    },
+  ];
+
+  return stages.map((stage, index) => ({
+    step_id: `${input.runId}-stage-${String(index + 1).padStart(2, "0")}`,
+    run_id: input.runId,
+    case_id: input.caseId,
+    stage: stage.stage,
+    status: stage.status,
+    title: stage.title,
+    summary: stage.summary,
+    actor_type: stage.actor_type,
+    actor_name: stage.actor_name,
+    started_at: input.startedAt,
+    completed_at: input.startedAt,
+    trace: stage.trace,
+    evidence_refs: stage.evidence_refs ?? [],
+    uipath_evidence_refs: sourceRefs.filter(
+      (ref) =>
+        ref.source === "uipath_event_mirror" ||
+        ref.source === "langsmith" ||
+        (input.mode === "live" && ref.source === "fireworks"),
+    ),
+    output_schema: stage.output_schema,
+    validated: true,
+    synthetic: true,
+  }));
+}
+
+function createLiveProofApprovalGates(
+  runId: string,
+  caseId: string,
+  trace?: LiveProofTrace,
+): LiveProofApprovalGate[] {
+  const gates: LiveProofApprovalGate[] = [
+    {
+      gate_id: `${runId}-clinical-assertion-gate`,
+      gate_type: "clinical_assertion",
+      status: "approved_for_demo",
+      assigned_role: "Demo GI Clinician",
+      reason:
+        "Clinician approval is required for high-impact clinical assertion language; this synthetic proof marks the gate approved only to continue local validation.",
+      source_stage: "human_gate_required",
+      trace,
+      synthetic: true,
+    },
+    {
+      gate_id: `${runId}-payer-side-effect-gate`,
+      gate_type: "exception_review",
+      status: "pending",
+      assigned_role: "Treatment Access Coordinator",
+      reason:
+        "Live UiPath job start, Action Center task creation, Data Service writes, and payer submission remain explicit-approval gated.",
+      source_stage: "live_proof_completed_or_waiting_for_approval",
+      trace,
+      synthetic: true,
+    },
+  ];
+  return gates.map((gate) => ({
+    ...gate,
+    gate_id: `${caseId}-${gate.gate_id}`,
+  }));
+}
+
+function createLiveProofMirrorEvents(input: {
+  runId: string;
+  caseId: string;
+  maestroCaseId?: string;
+  steps: LiveProofStep[];
+  traces: LiveProofTrace[];
+}): AuditEvent[] {
+  return input.steps.map((step, index) => ({
+    event_id: `event-${input.runId}-${String(index + 1).padStart(2, "0")}`,
+    case_id: input.caseId,
+    maestro_case_id: input.maestroCaseId,
+    actor_type: step.actor_type,
+    actor_name: step.actor_name,
+    task_or_agent_name: step.actor_name,
+    action: step.stage,
+    input_summary:
+      index === 0
+        ? "Command Center requested a synthetic live proof run."
+        : `Live proof stage ${step.stage} started.`,
+    output_summary: step.summary,
+    evidence_refs: step.evidence_refs,
+    trace_id: step.trace?.trace_id ?? input.traces[0]?.trace_id,
+    payer_status:
+      step.stage === "payer_api_unavailable_or_not_attempted"
+        ? "unavailable"
+        : undefined,
+    timestamp: step.completed_at ?? step.started_at,
+  }));
+}
+
+function createLiveProofStepRuns(
+  runId: string,
+  caseId: string,
+  agentSteps: TreatmentAccessGraphStep[],
+) {
+  return agentSteps.map((step) => {
+    if (!step.agent_id) {
+      throw new Error(`Live proof step ${step.node_id} is missing agent_id.`);
+    }
+    return AgentStepRunSchema.parse({
+      step_run_id: `${runId}-${step.node_id}`,
+      run_id: runId,
+      case_id: caseId,
+      agent_id: step.agent_id,
+      agent_name: step.agent_id ? AgentDisplayNameById[step.agent_id] : "",
+      status: runtimeStatusForGraphStep(step.status),
+      input_summary: step.agent_result?.trace.input_summary ?? step.summary,
+      output_summary: step.summary,
+      started_at: generatedAt,
+      completed_at: generatedAt,
+      tool_call_ids: step.tool_results.map((tool) => tool.tool_call_id),
+      evidence_refs: step.agent_result?.trace.evidence_refs ?? [],
+      safety_flags: step.agent_result?.output.safety_flags ?? [],
+      trace_link: createLangSmithTraceLink({
+        traceId: step.trace_metadata.langsmith_trace_id,
+        runId,
+        url: step.trace_metadata.langsmith_run_url,
+        metadata: {
+          case_id: caseId,
+          node_id: step.node_id,
+          synthetic: true,
+        },
+      }),
+      synthetic: true,
+    });
+  });
+}
+
+function createLiveProofToolCalls(
+  runId: string,
+  caseId: string,
+  agentSteps: TreatmentAccessGraphStep[],
+): ToolCall[] {
+  return agentSteps.flatMap((step) =>
+    step.tool_results.map((tool) =>
+      ToolCallSchema.parse({
+        tool_call_id: tool.tool_call_id,
+        run_id: runId,
+        step_run_id: `${runId}-${step.node_id}`,
+        case_id: caseId,
+        tool_name: tool.tool_name,
+        arguments_hash: `sha256-syn-${tool.tool_call_id}`,
+        arguments_summary: tool.arguments_summary,
+        result_summary: tool.result_summary,
+        status:
+          tool.status === "completed"
+            ? "succeeded"
+            : tool.status === "blocked"
+              ? "failed"
+              : "skipped",
+        started_at: generatedAt,
+        completed_at: generatedAt,
+        trace_link: createLangSmithTraceLink({
+          traceId: tool.trace_metadata.langsmith_trace_id,
+          runId,
+          url: tool.trace_metadata.langsmith_run_url,
+          metadata: {
+            case_id: caseId,
+            tool_name: tool.tool_name,
+            synthetic: true,
+          },
+        }),
+        synthetic: true,
+      }),
+    ),
+  );
+}
+
+function createUiPathEvidenceRefs(
+  runId: string,
+  mode: TreatmentAccessGraphMode,
+  config: AgentRuntimeConfig,
+  langsmithRunUrl: string | undefined,
+  capturedAt: string,
+): UiPathEvidenceRef[] {
+  return [
+    {
+      evidence_ref_id: `${runId}-event-mirror`,
+      source: "uipath_event_mirror",
+      label: "Synthetic UiPath event mirror records prepared",
+      external_id: runId,
+      captured_at: capturedAt,
+      synthetic: true,
+    },
+    {
+      evidence_ref_id: `${runId}-runtime-provider`,
+      source: mode === "live" ? "fireworks" : "deterministic_runtime",
+      label:
+        mode === "live"
+          ? "Fireworks structured model provider invoked"
+          : "Deterministic runtime fallback used",
+      captured_at: capturedAt,
+      synthetic: true,
+    },
+    {
+      evidence_ref_id: `${runId}-trace`,
+      source: "langsmith",
+      label: langSmithTracingEnabled(config.langSmith)
+        ? langsmithRunUrl
+          ? "LangSmith trace URL captured"
+          : "LangSmith trace metadata captured"
+        : "LangSmith tracing not configured",
+      url: langsmithRunUrl,
+      captured_at: capturedAt,
+      synthetic: true,
+    },
+  ];
+}
+
+function liveProofTraceFromMetadata(
+  metadata: TreatmentAccessTraceMetadata,
+  config: AgentRuntimeConfig,
+  langsmithRunUrl: string | undefined,
+  capturedAt: string,
+): LiveProofTrace {
+  const langsmithEnabled = langSmithTracingEnabled(config.langSmith);
+  return {
+    trace_id: metadata.langsmith_trace_id ?? metadata.trace_id,
+    provider: langsmithEnabled ? "langsmith" : "local",
+    status: langsmithRunUrl
+      ? "available"
+      : langsmithEnabled
+        ? "metadata_only"
+        : "not_configured",
+    project_name: metadata.langsmith_project,
+    url: langsmithRunUrl,
+    metadata: compactTraceMetadata({
+      ...metadata.metadata,
+      local_trace_id: metadata.trace_id,
+      langsmith_configured: langsmithEnabled,
+    }),
+    captured_at: capturedAt,
+    synthetic: true,
+  };
+}
+
+function liveProofTraceForStep(
+  step: TreatmentAccessGraphStep,
+  traces: LiveProofTrace[],
+): LiveProofTrace | undefined {
+  return traces.find(
+    (trace) =>
+      trace.trace_id ===
+      (step.trace_metadata.langsmith_trace_id ?? step.trace_metadata.trace_id),
+  );
+}
+
+function requireAgentStep(
+  steps: TreatmentAccessGraphStep[],
+  agentId: AgentId,
+): TreatmentAccessGraphStep {
+  const step = steps.find((candidate) => candidate.agent_id === agentId);
+  if (!step) {
+    throw new Error(`Live proof did not produce ${agentId} step.`);
+  }
+  return step;
+}
+
+function runtimeStatusForGraphStep(
+  status: TreatmentAccessGraphStep["status"],
+): AgentRun["status"] {
+  switch (status) {
+    case "completed":
+      return "completed";
+    case "needs_human":
+    case "fallback_requested":
+      return "needs_human";
+    case "blocked":
+      return "failed";
+    case "skipped":
+      return "cancelled";
+  }
 }
 
 function createHumanGate(
@@ -1751,6 +2385,43 @@ function criterionLabel(criterionId: string): string {
 
 function unique<T>(items: T[]): T[] {
   return [...new Set(items)];
+}
+
+function uniqueBy<T>(items: T[], keyForItem: (item: T) => string): T[] {
+  const seen = new Set<string>();
+  const uniqueItems: T[] = [];
+  for (const item of items) {
+    const key = keyForItem(item);
+    if (!seen.has(key)) {
+      seen.add(key);
+      uniqueItems.push(item);
+    }
+  }
+  return uniqueItems;
+}
+
+function parseJsonObject(content: string): unknown {
+  try {
+    return JSON.parse(content);
+  } catch {
+    const start = content.indexOf("{");
+    const end = content.lastIndexOf("}");
+    if (start >= 0 && end > start) {
+      return JSON.parse(content.slice(start, end + 1));
+    }
+    throw new Error("Provider response did not contain a JSON object.");
+  }
+}
+
+function compactTraceMetadata(
+  metadata: Record<string, string | number | boolean | undefined>,
+): Record<string, string | number | boolean> {
+  return Object.fromEntries(
+    Object.entries(metadata).filter((entry): entry is [
+      string,
+      string | number | boolean,
+    ] => entry[1] !== undefined),
+  );
 }
 
 export const runtimeScenarioFixtures = {

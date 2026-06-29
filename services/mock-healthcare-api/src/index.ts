@@ -1,6 +1,7 @@
 import cors from "@fastify/cors";
 import Fastify, { type FastifyInstance, type FastifyReply } from "fastify";
 import { z } from "zod";
+import { runTreatmentAccessLiveProof } from "@tacc/agent-runtime";
 import {
   defaultDemoToggles,
   seedAuditEvents,
@@ -13,9 +14,11 @@ import {
 import {
   AuditEventSchema,
   DemoTogglesSchema,
+  LiveProofRunSchema,
   type AuditEvent,
   type DemoToggles,
   type EvidenceMapping,
+  type LiveProofRun,
   type TreatmentAccessCase,
 } from "@tacc/shared-schemas";
 
@@ -33,6 +36,13 @@ const EventIngestSchema = AuditEventSchema.partial({
   actor_name: z.string().min(1),
   task_or_agent_name: z.string().min(1),
   action: z.string().min(1),
+});
+
+const LiveProofRunRequestSchema = z.object({
+  requested_by: z.string().min(1).default("Command Center live proof"),
+  mode: z.enum(["deterministic", "live"]).optional(),
+  langsmith_run_url: z.string().url().optional(),
+  toggles: DemoTogglesSchema.partial().optional(),
 });
 
 const SafetyScreeningSchema = z.object({
@@ -131,6 +141,7 @@ type MockState = {
   appeals: AppealSubmission[];
   handoffs: PharmacyHandoff[];
   schedulingTasks: SchedulingTask[];
+  liveProofRuns: LiveProofRun[];
   safetyScreeningOverride: SafetyScreening | null;
   counters: {
     event: number;
@@ -261,6 +272,56 @@ export function createServer(): FastifyInstance {
     );
     return { ok: true, toggles: state.toggles, syntheticDataOnly: true };
   });
+
+  server.post("/live-proof-runs", async (request) => {
+    const liveProofRequest = LiveProofRunRequestSchema.parse(
+      request.body ?? {},
+    );
+    const run = LiveProofRunSchema.parse(
+      await runTreatmentAccessLiveProof({
+        requestedBy: liveProofRequest.requested_by,
+        mode: liveProofRequest.mode,
+        langsmithRunUrl: liveProofRequest.langsmith_run_url,
+        toggles: liveProofRequest.toggles,
+      }),
+    );
+
+    state.liveProofRuns = [run, ...state.liveProofRuns];
+    state.auditEvents = [...state.auditEvents, ...run.mirror_events];
+
+    return {
+      ok: true,
+      live_proof_run: run,
+      events_written: run.mirror_events.length,
+      syntheticDataOnly: true,
+    };
+  });
+
+  server.get("/live-proof-runs", async () => ({
+    live_proof_runs: state.liveProofRuns,
+    syntheticDataOnly: true,
+  }));
+
+  server.get<{ Params: { runId: string } }>(
+    "/live-proof-runs/:runId",
+    async (request, reply) => {
+      const run = state.liveProofRuns.find(
+        (candidate) => candidate.run_id === request.params.runId,
+      );
+      if (!run) {
+        return notFound(
+          reply,
+          "LIVE_PROOF_RUN_NOT_FOUND",
+          `No synthetic live proof run found for ${request.params.runId}.`,
+        );
+      }
+
+      return {
+        live_proof_run: run,
+        syntheticDataOnly: true,
+      };
+    },
+  );
 
   server.get("/cases", async () => ({
     cases: [caseSnapshot(state)],
@@ -786,6 +847,7 @@ function createInitialState(): MockState {
     appeals: [],
     handoffs: [],
     schedulingTasks: [],
+    liveProofRuns: [],
     safetyScreeningOverride: null,
     counters: {
       event: 0,
@@ -809,6 +871,7 @@ function stateSnapshot(state: MockState) {
     appeals: state.appeals,
     handoffs: state.handoffs,
     schedulingTasks: state.schedulingTasks,
+    liveProofRuns: state.liveProofRuns,
     events: state.auditEvents,
     syntheticDataOnly: true,
   };
@@ -826,10 +889,13 @@ function caseSnapshot(state: MockState): TreatmentAccessCase {
   const hasSubmission = state.submissions.some(
     (submission) => submission.status === "submitted",
   );
+  const latestLiveProof = state.liveProofRuns[0];
 
   return {
     ...seedCase,
-    status: hasHandoff
+    status: latestLiveProof
+      ? "Live proof waiting for approval"
+      : hasHandoff
       ? "Pharmacy handoff created"
       : hasAppeal
         ? "Appeal approved"
@@ -838,7 +904,9 @@ function caseSnapshot(state: MockState): TreatmentAccessCase {
           : state.toggles.missing_safety_lab
             ? "Missing evidence"
             : seedCase.status,
-    current_stage: hasHandoff
+    current_stage: latestLiveProof
+      ? "submission"
+      : hasHandoff
       ? "care_continuity"
       : hasAppeal
         ? "care_continuity"
@@ -848,15 +916,23 @@ function caseSnapshot(state: MockState): TreatmentAccessCase {
             ? "policy_evidence"
             : seedCase.current_stage,
     active_secondary_stages: [
-      ...(state.toggles.missing_safety_lab
-        ? (["missing_evidence"] as const)
-        : []),
-      ...(hasUnavailableSubmission
-        ? (["api_failure_portal_fallback"] as const)
-        : []),
-      ...(hasSubmission && !hasAppeal
-        ? (["denial_rescue_appeal"] as const)
-        : []),
+      ...new Set([
+        ...(state.toggles.missing_safety_lab
+          ? (["missing_evidence"] as const)
+          : []),
+        ...(hasUnavailableSubmission
+          ? (["api_failure_portal_fallback"] as const)
+          : []),
+        ...(latestLiveProof
+          ? ([
+              "api_failure_portal_fallback",
+              "human_exception_review",
+            ] as const)
+          : []),
+        ...(hasSubmission && !hasAppeal
+          ? (["denial_rescue_appeal"] as const)
+          : []),
+      ]),
     ],
     last_event_at: latestEvent?.timestamp ?? seedCase.last_event_at,
   };

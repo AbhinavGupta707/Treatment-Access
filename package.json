@@ -23,6 +23,7 @@
     "smoke:checkpoint6-live-providers": "node --import tsx/esm scripts/verify-checkpoint6-readiness.ts --live-providers",
     "smoke:checkpoint6-readiness": "node --import tsx/esm scripts/verify-checkpoint6-readiness.ts",
     "smoke:checkpoint6-ui": "node --import tsx/esm scripts/verify-checkpoint6-readiness.ts --ui-smoke",
+    "smoke:checkpoint7-live-proof": "CI=true pnpm build:contracts && CI=true pnpm --filter @tacc/mock-healthcare-api build && node --import tsx/esm scripts/verify-checkpoint7-live-proof.ts",
     "smoke:agents": "CI=true pnpm build:contracts && node --import tsx/esm scripts/verify-agents.ts",
     "smoke:live-agents": "CI=true pnpm build:contracts && node --import tsx/esm scripts/verify-live-agent-readiness.ts",
     "test": "CI=true pnpm build:contracts && CI=true vitest run scripts/*.test.ts && CI=true pnpm -r --if-present test",
