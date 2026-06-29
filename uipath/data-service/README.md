@@ -16,3 +16,13 @@ Use `.agents/skills/uipath-platform/SKILL.md` for live Data Fabric operations.
 
 Do not create, update, or delete live Data Fabric entities without explicit
 orchestrator approval.
+
+Safe discovery is included in:
+
+```bash
+CI=true pnpm uipath:readiness -- cloud
+```
+
+Record writes must stay behind the explicit approval-gated command blocks in
+`../live-wiring-runbook.md`, and every event must preserve the synthetic data
+disclaimer from `event-mirror-contract.md`.

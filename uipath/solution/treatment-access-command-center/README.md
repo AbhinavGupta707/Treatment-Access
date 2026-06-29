@@ -21,6 +21,12 @@ uip solution resource refresh --solution-folder "uipath/solution/treatment-acces
 scripts/uipath-with-dotnet8.sh uip solution pack "uipath/solution/treatment-access-command-center" --dry-run --output json
 ```
 
+The same no-side-effect local checks are wrapped by:
+
+```bash
+CI=true pnpm uipath:readiness -- local
+```
+
 Results: `PayerPortalFallback` is listed as a `Process`, resource refresh
 reported no warnings, and solution pack dry-run returned `Status: Valid`. No
 upload, publish, deploy, or activation side effect was performed.

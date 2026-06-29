@@ -71,6 +71,17 @@ Findings:
 
 No real tasks were created, assigned, completed, or modified.
 
+Checkpoint 6 safe wrapper:
+
+```bash
+CI=true pnpm uipath:readiness -- cloud
+```
+
+This lists task-eligible users and current tasks only. The current CLI surface
+does not expose a direct `uip tasks create` command; live task creation must be
+triggered by an approved Maestro/HITL node, Action App, or workflow that binds
+one of the contracts above. Keep task creation and completion approval-gated.
+
 ## Integration Notes
 
 Maestro should create each task at the named pause point and wait only on the

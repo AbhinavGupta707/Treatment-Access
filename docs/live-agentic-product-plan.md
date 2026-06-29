@@ -164,6 +164,12 @@ Use a hybrid that is strong for the hackathon and still practical:
 5. Mirror every live agent node into the same shared schemas already used by the
    UI and smoke tests.
 
+Checkpoint 6 live wiring keeps this choice execution-ready but unexecuted:
+`uipath/live-wiring-runbook.md` documents the exact `uip codedagent new` path
+and approval-gated Agent Builder/Coded Agent run commands. The safe readiness
+wrapper, `CI=true pnpm uipath:readiness`, verifies command discovery, folder
+state, RPA validate/build, and solution dry-run without live side effects.
+
 ### Why LangGraph
 
 LangGraph is a good fit because this workflow is not a single prompt. It needs

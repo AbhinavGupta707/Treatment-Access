@@ -177,6 +177,10 @@ Use this as the Devpost transparency section:
 | IXP/DU           | Fallback parser keeps source spans and confidence so IXP can be swapped in later.                                                  | No IXP project mutation or live extraction deployment is claimed.                                        |
 | Solution         | Local solution shell includes `PayerPortalFallback` and passes pack dry-run.                                                       | No solution upload, publish, deploy, or activation is claimed.                                           |
 
+Checkpoint 6 adds `CI=true pnpm uipath:readiness` as the no-side-effect UiPath
+readiness sweep. It verifies registration/discovery state, RPA validate/build,
+and solution dry-run without running live UiPath side effects.
+
 ## Safety And Privacy
 
 Submission wording:
@@ -282,6 +286,7 @@ Run these before final submission:
 
 ```bash
 CI=true pnpm verify:setup
+CI=true pnpm uipath:readiness -- local
 CI=true pnpm format:check
 git diff --check
 ```
