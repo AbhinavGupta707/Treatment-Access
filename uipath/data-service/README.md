@@ -23,6 +23,21 @@ Safe discovery is included in:
 CI=true pnpm uipath:readiness -- cloud
 ```
 
+Checkpoint 8 H1 event-state bridge validation is local and has no UiPath side
+effects:
+
+```bash
+node --import tsx/esm scripts/verify-checkpoint8-event-bridge.ts
+```
+
+For live Data Service discovery, stay read-only unless approval is granted:
+
+```bash
+uip login status --output json
+uip df entities list --include-folders --output json
+uip df entities list --folder-key 4fba2fa1-012b-469a-b6aa-e5be3811c173 --output json
+```
+
 Record writes must stay behind the explicit approval-gated command blocks in
 `../live-wiring-runbook.md`, and every event must preserve the synthetic data
 disclaimer from `event-mirror-contract.md`.

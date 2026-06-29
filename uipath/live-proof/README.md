@@ -60,6 +60,22 @@ The sample event mirror payload is in
 The sample request is in
 [`samples/live-proof-request.sample.json`](./samples/live-proof-request.sample.json).
 
+Checkpoint 8 H1 adds a stricter event-state bridge sample in
+[`samples/uipath-written-event-state.sample.json`](./samples/uipath-written-event-state.sample.json).
+It may be mirrored into the mock healthcare API only after validation confirms
+`source_verification=live_uipath_written`, a UiPath `source_system`, the
+`TreatmentAccessHackathon` folder key, and at least one UiPath record/task/job
+identifier. The negative sample
+[`samples/local-overclaim-event-state.invalid.sample.json`](./samples/local-overclaim-event-state.invalid.sample.json)
+proves that a Command Center or local mock event cannot claim live UiPath
+authorship without those identifiers.
+
+Local no-side-effect verification:
+
+```bash
+node --import tsx/esm scripts/verify-checkpoint8-event-bridge.ts
+```
+
 ## Evidence Rules
 
 - UiPath is the writer of live case state.

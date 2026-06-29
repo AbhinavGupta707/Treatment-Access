@@ -25,6 +25,7 @@ import {
   ToolCallSchema,
   TraceLinkSchema,
   TreatmentAccessCaseSchema,
+  UiPathEventStateRecordSchema,
 } from "../src/index";
 
 describe("shared schemas", () => {
@@ -142,6 +143,52 @@ describe("shared schemas", () => {
         started_at: "2026-06-28T22:00:00.000Z",
       }).tool_calls,
     ).toEqual([]);
+  });
+
+  it("distinguishes live UiPath-written event state from local mirror events", () => {
+    const liveRecord = UiPathEventStateRecordSchema.parse({
+      event_id: "evt-uipath-syn-001",
+      case_id: "case-syn-001",
+      event_type: "case.h1_proof.created",
+      event_action: "uipath_h1_event_written",
+      timestamp: "2026-06-29T18:00:00.000Z",
+      actor_type: "api_workflow",
+      actor_name: "UiPath API Workflow",
+      task_or_agent_name: "WriteTreatmentAccessEvent",
+      input_summary: "Synthetic H1 event accepted by UiPath.",
+      output_summary:
+        "Data Service record was written in TreatmentAccessHackathon.",
+      provenance: {
+        source_system: "uipath_data_service",
+        source_actor: "UiPath API Workflow",
+        source_verification: "live_uipath_written",
+        uipath_folder_name: "TreatmentAccessHackathon",
+        uipath_folder_key: "4fba2fa1-012b-469a-b6aa-e5be3811c173",
+        uipath_record_id: "ds-record-syn-001",
+        uipath_record_type: "TaccAuditEvent",
+        confirmation_status: "created",
+        source_labels: ["uipath_data_service", "checkpoint8_h1"],
+        safety_labels: ["synthetic_data_only", "clinician_review_required"],
+        captured_at: "2026-06-29T18:00:00.000Z",
+      },
+    });
+
+    expect(liveRecord.provenance.source_verification).toBe(
+      "live_uipath_written",
+    );
+
+    expect(() =>
+      UiPathEventStateRecordSchema.parse({
+        ...liveRecord,
+        event_id: "evt-overclaim-syn-001",
+        provenance: {
+          ...liveRecord.provenance,
+          source_system: "command_center_ui",
+          source_actor: "Command Center UI",
+          uipath_record_id: undefined,
+        },
+      }),
+    ).toThrow(/live_uipath_written events must use a UiPath source_system/);
   });
 
   it("validates the aggregate fixture contract shape", () => {
