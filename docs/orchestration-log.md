@@ -722,3 +722,38 @@ Remaining approval-gated live work:
 - Those live side-effecting steps are important for a stronger final production
   proof, but they still require explicit user approval and should be executed
   from the `TreatmentAccessHackathon` folder only.
+
+## 2026-06-29 - Checkpoint 7 Live UiPath Proof Prep
+
+Prepared Checkpoint 7 after reviewing the Checkpoint 6 product state, local
+UiPath skill guidance, current package scripts, project memory, and official
+UiPath docs for Maestro, Agents, coded agents, Action Center, Data Service, and
+Orchestrator jobs.
+
+Critical analysis:
+
+- Checkpoint 6 is a strong product shell with premium UI, Fireworks/LangSmith
+  readiness, LangGraph-shaped agents, and UiPath local readiness.
+- The remaining credibility gap is a user-triggered live proof run: one action
+  that executes live agent work, captures trace evidence, writes synthetic
+  governed events, and updates the Command Center with honest source labels.
+- Full production deployment is not the right next step yet. A narrow, safe,
+  auditable live proof is the right Checkpoint 7 target.
+
+Added control docs:
+
+- `docs/live-uipath-proof-plan.md`
+- `docs/checkpoint-7-live-uipath-proof-orchestrator.md`
+
+Planned Checkpoint 7 lanes:
+
+| Merge order | Lane                                       |
+| ----------- | ------------------------------------------ |
+| 1           | Live Proof Schemas, API, and Agent Runtime |
+| 2           | UiPath Coded Agent and Governed Hooks      |
+| 3           | RPA Portal Fallback Live-Smoke Hardening   |
+| 4           | Command Center Live Proof UX               |
+| 5           | Checkpoint 7 QA, Demo, and Submission      |
+
+Safety remains unchanged: no live UiPath side-effect commands, payer
+submission, or real health data without explicit user approval.

@@ -430,3 +430,48 @@ Remaining live-readiness work:
   submission remain explicit user-approval-gated actions.
 - Keep using only synthetic data and the `TreatmentAccessHackathon` UiPath
   folder for this project.
+
+## Checkpoint 7 Launch Prep
+
+Checkpoint 7 target: a narrow live UiPath proof slice that turns the premium
+Checkpoint 6 product into a user-triggered live run. The run should execute
+Fireworks-backed agent work, capture LangSmith trace metadata when available,
+write synthetic governed events, and let the Command Center show progress and
+approval gates as a real product flow.
+
+New control docs:
+
+- `docs/live-uipath-proof-plan.md`
+- `docs/checkpoint-7-live-uipath-proof-orchestrator.md`
+
+Planned lanes:
+
+| Merge order | Lane                                       | Ownership                                                                                                     |
+| ----------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| 1           | Live Proof Schemas, API, and Agent Runtime | `packages/shared-schemas/**`, `packages/agent-runtime/**`, `services/mock-healthcare-api/**`, focused scripts |
+| 2           | UiPath Coded Agent and Governed Hooks      | `uipath/coded-agents/**`, `uipath/live-proof/**`, UiPath hook docs/scripts                                    |
+| 3           | RPA Portal Fallback Live-Smoke Hardening   | `uipath/robots/**`, `apps/mock-payer-portal/**`, RPA readiness docs/scripts                                   |
+| 4           | Command Center Live Proof UX               | `apps/command-center/**`                                                                                      |
+| 5           | Checkpoint 7 QA, Demo, and Submission      | `scripts/**`, `docs/**`, final smoke/readiness documentation                                                  |
+
+Critical product framing:
+
+- The demo should lead with healthcare value: less manual chart review, fewer
+  preventable denials, faster submission, safer appeal preparation, and
+  auditable human gates.
+- The UI should remain a customer-facing product surface. Technical proof
+  belongs in details, trace drawers, readiness logs, and docs.
+- The custom UI visualizes governed state. UiPath remains the orchestration and
+  governance layer.
+
+Live side effects remain approval-gated:
+
+- No live `uip agent debug` or live agent run/debug.
+- No Maestro run/debug.
+- No Action Center task creation, assignment, or completion.
+- No Data Service/Data Fabric writes.
+- No Orchestrator job start.
+- No RPA run/debug or UiPath Assistant robot execution.
+- No solution upload, publish, deploy, or activate.
+- No IXP mutation.
+- No payer submission.
