@@ -1,0 +1,43 @@
+{
+  "contract_name": "schema-compatible fallback parser",
+  "version": "1.0.0",
+  "purpose": "Runtime extraction path when IXP/Document Understanding is unavailable or not yet activated for Agent Builder.",
+  "allowed_document_classes": [
+    "payer_policy",
+    "progress_note",
+    "lab_report",
+    "safety_screening",
+    "denial_letter"
+  ],
+  "output_schema": "uipath/agents/extraction/schemas/fallback-extraction-output.schema.json",
+  "shared_schema_mapping": {
+    "EvidenceArtifact": {
+      "extraction_method": "fallback_parser",
+      "extraction_confidence": "aggregate confidence across extracted fields",
+      "structured_fields": "fields[] reduced by field_id/value/confidence/source_span",
+      "source_hash": "hash of synthetic fixture document content"
+    },
+    "EvidenceMapping": {
+      "source_span": "source_span from the supporting extracted field",
+      "confidence": "field confidence unless human override exists",
+      "needs_human_review": "true for confidence < 0.82, contradiction, or clinical assertion requiring attestation"
+    },
+    "PayerDecision": {
+      "denial_code": "denial_letter.field denial_code",
+      "appeal_deadline": "denial_letter.field appeal_deadline",
+      "source_artifact_id": "artifact_id from denial extraction"
+    }
+  },
+  "fallback_behavior": [
+    "Read only synthetic fixture documents from fixture:// sources or repo-local sample files.",
+    "Extract deterministic field labels with source spans: source_uri, section_label, line numbers when available, char offsets when available, and a short excerpt.",
+    "Preserve per-field confidence and aggregate confidence; never silently promote low confidence to found.",
+    "Return extraction_method fallback_parser so later IXP outputs can swap behind the same shared schemas.",
+    "Route low-confidence or contradictory fields to human_exception_review or the relevant clinical validation task."
+  ],
+  "prohibited_behavior": [
+    "No real patient, payer, provider, credential, or PHI data.",
+    "No manual clinical assertion without source evidence, policy citation, or human approval.",
+    "No IXP project creation, upload, delete, publish, or prompt mutation without explicit approval."
+  ]
+}

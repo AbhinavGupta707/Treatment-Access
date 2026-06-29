@@ -1,0 +1,132 @@
+{
+  "packet_status": "audit_ready",
+  "auditPacketManifest": {
+    "packet_id": "audit-packet-case-syn-001-v1",
+    "case_id": "case-syn-001",
+    "generated_at": "2026-06-28T22:45:00.000Z",
+    "version": "1",
+    "sections": [
+      {
+        "section_id": "case_summary",
+        "title": "Case Summary",
+        "record_refs": [
+          "case-syn-001"
+        ]
+      },
+      {
+        "section_id": "policy_and_evidence",
+        "title": "Policy Criteria And Evidence",
+        "record_refs": [
+          "criterion-diagnosis",
+          "mapping-diagnosis",
+          "criterion-step-therapy",
+          "mapping-step-therapy"
+        ]
+      },
+      {
+        "section_id": "human_decisions",
+        "title": "Human Decisions",
+        "record_refs": [
+          "task-clinician-evidence-approval",
+          "task-appeal-signoff"
+        ]
+      },
+      {
+        "section_id": "submission_and_payer",
+        "title": "Submission And Payer Events",
+        "record_refs": [
+          "packet-syn-001",
+          "attempt-portal-rpa",
+          "decision-appeal-approved-syn-001"
+        ]
+      },
+      {
+        "section_id": "care_continuity",
+        "title": "Approval Handoff",
+        "record_refs": [
+          "pharmacy-handoff-syn-001",
+          "scheduling-task-syn-001"
+        ]
+      }
+    ],
+    "included_record_refs": [
+      "event-policy-001",
+      "event-care-handoff-completed-001",
+      "trace-coverage-agent-001",
+      "trace-care-continuity-agent-001"
+    ],
+    "approval_refs": [
+      "decision-appeal-approved-syn-001"
+    ],
+    "handoff_refs": [
+      "pharmacy-handoff-syn-001",
+      "scheduling-task-syn-001"
+    ],
+    "disclaimers": [
+      "Synthetic fictional demo data only; no real PHI.",
+      "Appeal text is an administrative draft and requires clinician approval before submission.",
+      "Packet manifest is for audit demonstration and is not medical or legal advice."
+    ]
+  },
+  "completenessChecks": [
+    {
+      "check_id": "source_or_human_support",
+      "status": "passed",
+      "summary": "Clinical assertions have citations or clinician approval."
+    },
+    {
+      "check_id": "handoff_reference_present",
+      "status": "passed",
+      "summary": "Pharmacy handoff and scheduling refs are present."
+    },
+    {
+      "check_id": "synthetic_only",
+      "status": "passed",
+      "summary": "Fixture refs and synthetic labels are present."
+    }
+  ],
+  "unsupportedClaimFindings": [],
+  "humanDecisionLedger": [
+    {
+      "task_id": "task-clinician-evidence-approval",
+      "decision": "completed",
+      "role": "clinician-reviewer"
+    },
+    {
+      "task_id": "task-appeal-signoff",
+      "decision": "completed",
+      "role": "clinician-reviewer"
+    }
+  ],
+  "eventPayload": {
+    "event_id": "event-audit-packet-generated-case-syn-001",
+    "case_id": "case-syn-001",
+    "actor_type": "agent",
+    "actor_name": "Audit Packet Agent",
+    "task_or_agent_name": "Audit Packet Agent",
+    "action": "audit_packet_generated",
+    "input_summary": "Compiled synthetic case records, agent traces, human decisions, payer events, appeal refs, and handoff refs.",
+    "output_summary": "Audit-ready packet manifest audit-packet-case-syn-001-v1 generated.",
+    "evidence_refs": [
+      "packet-syn-001",
+      "appeal-syn-001",
+      "pharmacy-handoff-syn-001"
+    ],
+    "payer_status": "appeal_approved",
+    "timestamp": "2026-06-28T22:45:00.000Z"
+  },
+  "traceSummary": {
+    "agent_name": "Audit Packet Agent",
+    "status": "completed",
+    "tool_calls": [
+      "audit_completeness_validator",
+      "unsupported_claim_checker"
+    ],
+    "evidence_refs": [
+      "packet-syn-001",
+      "appeal-syn-001",
+      "pharmacy-handoff-syn-001"
+    ]
+  },
+  "synthetic_data_disclaimer": "Synthetic fictional demo packet; no real patient, payer, provider, credential, or PHI data."
+}

@@ -1,0 +1,43 @@
+{
+  "extraction_id": "extract-policy-fallback-001",
+  "case_id": "case-syn-001",
+  "artifact_id": "artifact-policy",
+  "document_class": "payer_policy",
+  "extraction_method": "fallback_parser",
+  "extraction_confidence": 0.91,
+  "parser_version": "fallback-parser-contract-1.0.0",
+  "fields": [
+    {
+      "field_id": "criterion-diagnosis",
+      "label": "Diagnosis criterion",
+      "value": "Specialist note documenting moderate-to-severe fictional disease activity is required.",
+      "normalized_value": "specialist_note_required",
+      "confidence": 0.93,
+      "source_span": {
+        "artifact_id": "artifact-policy",
+        "source_uri": "fixture://policies/aurora-vale-fictionalimab-policy.md",
+        "section_label": "Diagnosis and severity",
+        "excerpt": "Fictional policy requires specialist documentation of diagnosis and disease activity."
+      },
+      "evidence_ref": "policy-citation-diagnosis",
+      "requires_human_validation": true
+    },
+    {
+      "field_id": "criterion-safety-screen",
+      "label": "Safety screening criterion",
+      "value": "Negative TB and hepatitis screening within six months is required.",
+      "normalized_value": "tb_hepatitis_screen_required",
+      "confidence": 0.9,
+      "source_span": {
+        "artifact_id": "artifact-policy",
+        "source_uri": "fixture://policies/aurora-vale-fictionalimab-policy.md",
+        "section_label": "Safety screening",
+        "excerpt": "Fictional policy requires negative TB and hepatitis screening within six months."
+      },
+      "evidence_ref": "policy-citation-safety",
+      "requires_human_validation": false
+    }
+  ],
+  "warnings": [],
+  "synthetic_data_disclaimer": "Synthetic policy fixture extraction; no real payer policy text."
+}

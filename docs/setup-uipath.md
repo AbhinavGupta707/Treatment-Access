@@ -33,6 +33,35 @@ The following services were discovered as enabled or reachable:
 - Test Manager
 - Automation Solutions
 
+## IXP / Document Understanding Setup
+
+Document Understanding is listed above as reachable in this tenant, but the
+current local CLI surface does not expose the Checkpoint 3 `uip ixp` commands.
+
+Read-only discovery attempted on 2026-06-29:
+
+```bash
+uip ixp projects list --output json
+```
+
+Result:
+
+```text
+ValidationError: unknown command 'ixp'
+```
+
+Layer-order diagnosis: this is a CLI command registration/tool-surface blocker,
+not evidence of an IXP project permission or runtime extraction failure. Before
+debugging IXP project access, install or update the UiPath CLI/tooling that
+registers the `ixp` command prefix, then rerun read-only discovery. Do not
+create, upload, label, delete, publish, or mutate IXP projects until explicitly
+approved.
+
+Checkpoint 3 fallback artifacts live in
+`uipath/agents/extraction/fallback-parser-contract.json` and preserve
+`extraction_method = "fallback_parser"`, source spans, and confidence values so
+later IXP/Document Understanding output can swap into the same shared schemas.
+
 ## Folder Separation
 
 Use this folder for Treatment Access work:

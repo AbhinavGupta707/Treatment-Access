@@ -1,0 +1,81 @@
+{
+  "handoff_status": "failed",
+  "workflowInvocation": {
+    "workflow": "uipath/api-workflows/pharmacy-scheduling-handoff.workflow.json",
+    "input": {
+      "apiBaseUrl": "http://127.0.0.1:8787",
+      "caseId": "case-syn-001",
+      "patientId": "patient-syn-001",
+      "orderId": "order-syn-001",
+      "approvalReference": "approval-syn-appeal-001",
+      "requestedBy": "Care Continuity Agent",
+      "taskType": "patient_access_coordination"
+    },
+    "side_effecting": true,
+    "requires_maestro_or_api_workflow_execution": true
+  },
+  "pharmacyHandoff": {
+    "handoff_id": "pharmacy-handoff-failed-case-syn-001",
+    "case_id": "case-syn-001",
+    "status": "failed",
+    "pharmacy_name": "Demo Specialty Pharmacy",
+    "assigned_coordinator_role": "patient-access-coordinator",
+    "benefits_summary": "Synthetic approval is present, but handoff transmission failed.",
+    "next_step": "Create human exception review and retry the pharmacy handoff workflow after coordinator review.",
+    "created_at": "2026-06-28T22:35:00.000Z",
+    "updated_at": "2026-06-28T22:36:00.000Z"
+  },
+  "schedulingTask": {
+    "status": "not_created",
+    "reason": "handoff_failure"
+  },
+  "coordinatorNotification": {
+    "assigned_role": "patient-access-coordinator",
+    "message": "Synthetic handoff failed; review and retry before closure."
+  },
+  "handoffFailureState": {
+    "active": true,
+    "retryable": true,
+    "secondary_stage": "human_exception_review",
+    "failure_code": "PHARMACY_HANDOFF_FAILED"
+  },
+  "closureReadiness": {
+    "closure_ready": false,
+    "next_stage": "care_continuity",
+    "blockers": [
+      "pharmacy_handoff_failed"
+    ],
+    "required_events_before_audit": [
+      "pharmacy_handoff_completed",
+      "human_exception_resolved"
+    ]
+  },
+  "eventPayloads": [
+    {
+      "event_id": "event-care-handoff-failed-case-syn-001",
+      "case_id": "case-syn-001",
+      "actor_type": "agent",
+      "actor_name": "Care Continuity Agent",
+      "task_or_agent_name": "Care Continuity Agent",
+      "action": "pharmacy_handoff_failed",
+      "input_summary": "Approval reference approval-syn-appeal-001 was ready for handoff.",
+      "output_summary": "Synthetic pharmacy handoff failed; human exception review required.",
+      "evidence_refs": [
+        "decision-appeal-approved-syn-001"
+      ],
+      "payer_status": "appeal_approved",
+      "timestamp": "2026-06-28T22:36:00.000Z"
+    }
+  ],
+  "traceSummary": {
+    "agent_name": "Care Continuity Agent",
+    "status": "failed",
+    "tool_calls": [
+      "pharmacy_scheduling_handoff_api_workflow_failed"
+    ],
+    "evidence_refs": [
+      "decision-appeal-approved-syn-001"
+    ]
+  },
+  "synthetic_data_disclaimer": "Synthetic fictional demo data; failed handoff requires governed human exception handling."
+}

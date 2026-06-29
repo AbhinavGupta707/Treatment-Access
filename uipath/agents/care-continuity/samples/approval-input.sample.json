@@ -1,0 +1,55 @@
+{
+  "apiBaseUrl": "http://127.0.0.1:8787",
+  "caseId": "case-syn-001",
+  "patientId": "patient-syn-001",
+  "orderId": "order-syn-001",
+  "approvalReference": "approval-syn-appeal-001",
+  "approvalDecision": {
+    "decision_id": "decision-appeal-approved-syn-001",
+    "case_id": "case-syn-001",
+    "submission_attempt_id": "attempt-portal-rpa",
+    "status": "appeal_approved",
+    "reason": "Synthetic appeal approval issued after clinician-reviewed administrative appeal.",
+    "raw_response": "Synthetic approval response for demo use only."
+  },
+  "treatmentOrder": {
+    "order_id": "order-syn-001",
+    "service_type": "specialty_medication",
+    "medication_name": "Fictionalimab",
+    "dose": "160 mg induction, then 80 mg every 8 weeks",
+    "route": "subcutaneous",
+    "site_of_care": "home administration after specialty pharmacy onboarding",
+    "diagnosis": "Moderate-to-severe fictional inflammatory bowel condition",
+    "ordering_provider": "Demo GI Clinician A",
+    "requested_start_date": "2026-07-03"
+  },
+  "patientSnapshot": {
+    "patient_id": "patient-syn-001",
+    "age": 34,
+    "synthetic_name": "Synthetic Patient TAC-001",
+    "diagnosis_codes": [
+      "K50.90"
+    ],
+    "coverage_plan": "Aurora Vale Fictional Health Premier PPO",
+    "provider_id": "provider-syn-gi-001",
+    "preferred_contact_channel": "portal",
+    "synthetic_data_disclaimer": "Synthetic fictional patient for demo use only."
+  },
+  "pharmacyRequirements": {
+    "pharmacy_name": "Demo Specialty Pharmacy",
+    "assigned_coordinator_role": "patient-access-coordinator",
+    "task_type": "patient_access_coordination",
+    "benefits_summary": "Synthetic approval and benefit notes are ready for pharmacy onboarding."
+  },
+  "demoToggles": {
+    "pharmacy_handoff_failure": false
+  },
+  "caseTimeline": [
+    {
+      "event_id": "event-appeal-approved-001",
+      "action": "appeal_approved",
+      "actor_type": "human",
+      "timestamp": "2026-06-28T22:34:00.000Z"
+    }
+  ]
+}

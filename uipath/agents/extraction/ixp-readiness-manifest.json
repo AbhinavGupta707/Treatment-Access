@@ -1,0 +1,46 @@
+{
+  "checked_at": "2026-06-29T00:00:00.000Z",
+  "cli_version_observed": "1.195.1",
+  "tenant_context": {
+    "organization": "galacticus",
+    "tenant": "DefaultTenant",
+    "folder": "TreatmentAccessHackathon",
+    "folder_key": "4fba2fa1-012b-469a-b6aa-e5be3811c173"
+  },
+  "layer_order_diagnosis": [
+    {
+      "layer": "service setup docs",
+      "finding": "docs/setup-uipath.md records Document Understanding as enabled or reachable."
+    },
+    {
+      "layer": "CLI command registration",
+      "finding": "uip --help and uip tools list do not list an ixp command prefix in CLI 1.195.1."
+    },
+    {
+      "layer": "read-only project discovery",
+      "command": "uip ixp projects list --output json",
+      "result": "not_supported_by_current_cli",
+      "blocker": "ValidationError: unknown command 'ixp'"
+    }
+  ],
+  "project_discovery_result": {
+    "attempted": true,
+    "read_only": true,
+    "projects_listed": false,
+    "blocker": "The installed uip CLI does not expose the ixp command, so no IXP project list could be obtained. This is a registration/tool-surface blocker, not an IXP project permission finding."
+  },
+  "mutation_steps_intentionally_not_run": [
+    "IXP project create",
+    "IXP document upload",
+    "IXP taxonomy import",
+    "IXP labelling confirm/unconfirm",
+    "IXP prompt update",
+    "IXP publish/tag/unpublish"
+  ],
+  "activation_next_steps": [
+    "Update/install a UiPath CLI build or plugin that exposes uip ixp, then rerun uip tools list --output json.",
+    "Rerun uip ixp projects list --output json as read-only discovery.",
+    "If projects are listed, verify a synthetic Treatment Access project or create one only after explicit approval.",
+    "Bind the published IXP/DU model into Maestro/Agent Builder and keep fallback_parser output schema as the compatibility contract."
+  ]
+}
