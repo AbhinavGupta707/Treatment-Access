@@ -243,14 +243,14 @@ Checkpoint 3 outcome:
 - Keep local verification deterministic through shared schemas, synthetic fixtures, and agent smoke checks.
 - Prepare UiPath Agent Builder/IXP artifacts and runbooks without running live side-effecting UiPath debug/publish/deploy steps.
 
-Planned isolated lanes:
+Active isolated lanes:
 
-| Merge order | Lane                                    | Ownership                                                                                                                 |
-| ----------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| 1           | Shared Agent Contracts & Runtime        | `packages/shared-schemas/**`, `packages/agent-runtime/**`, agent smoke scripts                                            |
-| 2           | Policy/Evidence/Missing Evidence Agents | `uipath/agents/coverage-requirement/**`, `uipath/agents/evidence-retrieval/**`, `uipath/agents/missing-evidence/**`       |
-| 3           | Submission/Denial/Appeal Agents         | `uipath/agents/submission-packet/**`, `uipath/agents/denial-rescue/**`, `uipath/agents/appeal-packet/**`                  |
-| 4           | Care Continuity/Audit/Extraction        | `uipath/agents/care-continuity/**`, `uipath/agents/audit-packet/**`, `uipath/agents/extraction/**`, extraction setup docs |
+| Merge order | Lane                                    | Thread ID                              | Worktree path                                                | Ownership                                                                                                                 |
+| ----------- | --------------------------------------- | -------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| 1           | Shared Agent Contracts & Runtime        | `019f10b3-b8cb-7911-96d9-b1f186c15717` | `/Users/abhinavgupta/.codex/worktrees/64e0/Treatment Access` | `packages/shared-schemas/**`, `packages/agent-runtime/**`, agent smoke scripts                                            |
+| 2           | Policy/Evidence/Missing Evidence Agents | `019f10b4-1074-76b1-871e-4e59780e4bd0` | `/Users/abhinavgupta/.codex/worktrees/00e2/Treatment Access` | `uipath/agents/coverage-requirement/**`, `uipath/agents/evidence-retrieval/**`, `uipath/agents/missing-evidence/**`       |
+| 3           | Submission/Denial/Appeal Agents         | `019f10b4-6b34-77c2-98de-1aab237a998a` | `/Users/abhinavgupta/.codex/worktrees/f839/Treatment Access` | `uipath/agents/submission-packet/**`, `uipath/agents/denial-rescue/**`, `uipath/agents/appeal-packet/**`                  |
+| 4           | Care Continuity/Audit/Extraction        | `019f10b4-cda5-73a1-8ec4-cad9b3470ac4` | `/Users/abhinavgupta/.codex/worktrees/04aa/Treatment Access` | `uipath/agents/care-continuity/**`, `uipath/agents/audit-packet/**`, `uipath/agents/extraction/**`, extraction setup docs |
 
 Control runbook: `docs/checkpoint-3-orchestrator.md`.
 

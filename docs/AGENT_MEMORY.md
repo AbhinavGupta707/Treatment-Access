@@ -87,13 +87,13 @@ Base commit: `9a78504 Finalize checkpoint 2 integration`.
 
 Control runbook: `docs/checkpoint-3-orchestrator.md`.
 
-Planned lanes:
+Active lanes:
 
-| Lane                                    | Ownership                                                                                |
-| --------------------------------------- | ---------------------------------------------------------------------------------------- |
-| Shared Agent Contracts & Runtime        | Shared agent schemas, deterministic local agent runtime, agent smoke checks              |
-| Policy/Evidence/Missing Evidence Agents | Coverage Requirement, Evidence Retrieval, and Missing Evidence agent artifacts           |
-| Submission/Denial/Appeal Agents         | Submission Packet, Denial Rescue, and Appeal Packet agent artifacts                      |
-| Care Continuity/Audit/Extraction        | Care Continuity, Audit Packet, IXP/Document Understanding readiness, extraction fallback |
+| Lane                                    | Thread ID                              | Worktree path                                                |
+| --------------------------------------- | -------------------------------------- | ------------------------------------------------------------ |
+| Shared Agent Contracts & Runtime        | `019f10b3-b8cb-7911-96d9-b1f186c15717` | `/Users/abhinavgupta/.codex/worktrees/64e0/Treatment Access` |
+| Policy/Evidence/Missing Evidence Agents | `019f10b4-1074-76b1-871e-4e59780e4bd0` | `/Users/abhinavgupta/.codex/worktrees/00e2/Treatment Access` |
+| Submission/Denial/Appeal Agents         | `019f10b4-6b34-77c2-98de-1aab237a998a` | `/Users/abhinavgupta/.codex/worktrees/f839/Treatment Access` |
+| Care Continuity/Audit/Extraction        | `019f10b4-cda5-73a1-8ec4-cad9b3470ac4` | `/Users/abhinavgupta/.codex/worktrees/04aa/Treatment Access` |
 
 Runtime safety remains unchanged: live UiPath agent debug, publish/deploy/upload, IXP project mutation, Action Center task creation, Maestro debug, and Data Service writes require explicit user approval. Checkpoint 3 workers may perform static/local authoring and read-only UiPath discovery.
