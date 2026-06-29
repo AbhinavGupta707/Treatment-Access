@@ -1,0 +1,26 @@
+{
+  "name": "@tacc/agent-runtime",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "CI=true pnpm --filter @tacc/shared-schemas build && CI=true pnpm --filter @tacc/demo-data build && vitest run",
+    "typecheck": "CI=true pnpm --filter @tacc/shared-schemas build && CI=true pnpm --filter @tacc/demo-data build && tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@tacc/demo-data": "workspace:*",
+    "@tacc/shared-schemas": "workspace:*"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.8"
+  }
+}

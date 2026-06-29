@@ -8,7 +8,7 @@
   "type": "module",
   "scripts": {
     "build": "CI=true pnpm -r --sort build",
-    "build:contracts": "CI=true pnpm --filter @tacc/shared-schemas build && CI=true pnpm --filter @tacc/demo-data build",
+    "build:contracts": "CI=true pnpm --filter @tacc/shared-schemas build && CI=true pnpm --filter @tacc/demo-data build && CI=true pnpm --filter @tacc/agent-runtime build",
     "dev": "pnpm -r --parallel dev",
     "dev:api": "pnpm --filter @tacc/mock-healthcare-api dev",
     "dev:command-center": "pnpm --filter @tacc/command-center dev",
@@ -19,13 +19,16 @@
     "seed:apply": "CI=true pnpm build:contracts && node --import tsx/esm scripts/seed-demo-data.ts --apply",
     "reset": "node --import tsx/esm scripts/reset-demo.ts",
     "smoke:checkpoint1": "CI=true pnpm build:contracts && CI=true pnpm --filter @tacc/mock-healthcare-api build && node --import tsx/esm scripts/verify-demo.ts --start-api",
+    "smoke:agents": "CI=true pnpm build:contracts && node --import tsx/esm scripts/verify-agents.ts",
     "test": "CI=true pnpm build:contracts && CI=true vitest run scripts/*.test.ts && CI=true pnpm -r --if-present test",
     "typecheck": "CI=true pnpm build:contracts && CI=true pnpm -r --if-present typecheck",
     "verify": "CI=true pnpm typecheck && CI=true pnpm test && CI=true pnpm build && pnpm verify:setup",
     "verify:setup": "node --import tsx/esm scripts/check-setup.ts"
   },
   "dependencies": {
-    "@tacc/demo-data": "workspace:*"
+    "@tacc/agent-runtime": "workspace:*",
+    "@tacc/demo-data": "workspace:*",
+    "@tacc/shared-schemas": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

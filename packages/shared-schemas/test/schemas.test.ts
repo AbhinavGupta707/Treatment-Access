@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  AgentDisplayNameById,
+  AgentIdSchema,
+  AgentRuntimeResultSchema,
+  AppealPacketAgentOutputSchema,
   AgentTraceSchema,
   AuditEventSchema,
+  CoverageRequirementAgentInputSchema,
   DemoFixtureSchema,
   DemoTogglesSchema,
   EvidenceArtifactSchema,
@@ -134,5 +139,119 @@ describe("shared schemas", () => {
     });
 
     expect(parsed.demoToggles?.denial_reason).toBe("step_therapy");
+  });
+
+  it("defines seven distinct agent IDs and runtime result contracts", () => {
+    const agentIds = AgentIdSchema.options;
+
+    expect(agentIds).toEqual([
+      "coverage-requirement",
+      "evidence-retrieval",
+      "missing-evidence",
+      "submission-packet",
+      "denial-rescue",
+      "appeal-packet",
+      "care-continuity",
+    ]);
+    expect(
+      agentIds.map((agentId) => AgentDisplayNameById[agentId]),
+    ).toHaveLength(7);
+
+    expect(() =>
+      CoverageRequirementAgentInputSchema.parse({
+        agent_id: "coverage-requirement",
+        case: {
+          case_id: "case-001",
+          patient_id: "patient-001",
+          order_id: "order-001",
+          payer_id: "payer-001",
+          service_type: "specialty_medication",
+          medication_name: "Fictionalimab",
+          urgency: "urgent",
+          status: "Evidence assembly",
+          current_stage: "policy_evidence",
+          sla_due_at: "2026-07-01T12:00:00.000Z",
+          sla_state: "on_track",
+          last_event_at: "2026-06-28T22:00:00.000Z",
+        },
+        patient: {
+          patient_id: "patient-001",
+          age: 34,
+          synthetic_name: "Synthetic Patient",
+          diagnosis_codes: ["K50.90"],
+          coverage_plan: "Synthetic plan",
+          provider_id: "provider-syn-001",
+        },
+        order: {
+          order_id: "order-001",
+          service_type: "specialty_medication",
+          medication_name: "Fictionalimab",
+          dose: "demo dose",
+          diagnosis: "Synthetic diagnosis",
+          ordering_provider: "Demo Clinician",
+          requested_start_date: "2026-07-03",
+        },
+        demo_toggles: {},
+        payer_policy: {
+          policy_id: "policy-001",
+          payer_id: "payer-001",
+          payer_name: "Synthetic payer",
+          policy_name: "Synthetic policy",
+          version: "1",
+          effective_date: "2026-01-01",
+          source_uri: "fixture://policy.md",
+          summary: "Synthetic policy summary.",
+          submission_channels: ["payer_api"],
+        },
+        criteria: [],
+      }),
+    ).not.toThrow();
+
+    const appealOutput = AppealPacketAgentOutputSchema.parse({
+      agent_id: "appeal-packet",
+      appeal_packet: {
+        appeal_id: "appeal-001",
+        case_id: "case-001",
+        denial_reason: "Synthetic denial reason.",
+        appeal_strategy: "Administrative draft strategy.",
+        evidence_used: [],
+        draft_text:
+          "Administrative draft for clinician review; not medical or legal advice.",
+        clinician_approved: false,
+        version: "1",
+      },
+      administrative_draft_only: true,
+      clinician_review_required: true,
+      unsupported_claim_warnings: ["Clinician approval is required."],
+    });
+    expect(appealOutput.administrative_draft_only).toBe(true);
+
+    expect(() =>
+      AgentRuntimeResultSchema.parse({
+        agent_id: "appeal-packet",
+        trace: {
+          trace_id: "trace-appeal-001",
+          case_id: "case-001",
+          agent_name: "Appeal Packet Agent",
+          status: "needs_human",
+          input_summary: "Synthetic denial.",
+          output_summary: "Administrative appeal draft prepared.",
+          started_at: "2026-06-28T22:00:00.000Z",
+        },
+        audit_event: {
+          event_id: "event-appeal-001",
+          case_id: "case-001",
+          actor_type: "agent",
+          actor_name: "Appeal Packet Agent",
+          task_or_agent_name: "Appeal Packet Agent",
+          action: "appeal_packet_drafted",
+          input_summary: "Synthetic denial.",
+          output_summary: "Administrative appeal draft prepared.",
+          trace_id: "trace-appeal-001",
+          timestamp: "2026-06-28T22:00:00.000Z",
+        },
+        output: appealOutput,
+      }),
+    ).not.toThrow();
   });
 });
