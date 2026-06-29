@@ -1,6 +1,7 @@
-# Checkpoint 7 Live Proof Governed Hooks
+# Checkpoint 7-8 Live Proof Governed Hooks
 
-This folder documents the UiPath-owned proof hooks for Checkpoint 7. It keeps
+This folder documents the UiPath-owned proof hooks for the Checkpoint 7 local
+live-proof contract and the Checkpoint 8 live UiPath evidence bridge. It keeps
 the project rule explicit: diagnose registration, discovery, and install state
 first; then official activation flows; then permissions and runtime behavior.
 

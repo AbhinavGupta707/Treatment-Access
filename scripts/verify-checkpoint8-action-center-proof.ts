@@ -164,7 +164,10 @@ try {
 
   assert(payload.syntheticDataOnly === true, "payload must be synthetic only");
   assert(payload.noPhi === true, "payload must explicitly mark noPhi");
-  assert(manifest.scope?.syntheticDataOnly === true, "manifest must be synthetic only");
+  assert(
+    manifest.scope?.syntheticDataOnly === true,
+    "manifest must be synthetic only",
+  );
   assert(
     manifest.liveTaskClaim?.status === "not_claimed",
     "manifest must not claim a live task by default",
@@ -194,10 +197,7 @@ try {
       contract.uiPath?.taskType === "FormTask",
     "payload and contract must use FormTask",
   );
-  assert(
-    payload.task?.formType === "QuickForm",
-    "payload must use QuickForm",
-  );
+  assert(payload.task?.formType === "QuickForm", "payload must use QuickForm");
 
   assert(
     payload.caseContext?.caseId === "case-syn-001" &&
@@ -220,10 +220,18 @@ try {
     "payload must include at least two evidence refs",
   );
   for (const ref of payload.clinicalGate?.evidenceRefs ?? []) {
-    assert(ref.sourceUri?.startsWith("fixture://"), "evidence refs must be fixture URIs");
-    assert(ref.sourceSpan?.startsWith("fixture://"), "evidence spans must be fixture URIs");
     assert(
-      typeof ref.confidence === "number" && ref.confidence >= 0 && ref.confidence <= 1,
+      ref.sourceUri?.startsWith("fixture://"),
+      "evidence refs must be fixture URIs",
+    );
+    assert(
+      ref.sourceSpan?.startsWith("fixture://"),
+      "evidence spans must be fixture URIs",
+    );
+    assert(
+      typeof ref.confidence === "number" &&
+        ref.confidence >= 0 &&
+        ref.confidence <= 1,
       "evidence confidence must be between 0 and 1",
     );
   }
@@ -286,9 +294,14 @@ try {
     "task completion command must be approval-gated",
   );
 
-  for (const phrase of ["numeric task ID", "tenant-qualified Action Center deep link"]) {
+  for (const phrase of [
+    "numeric task ID",
+    "tenant-qualified Action Center deep link",
+  ]) {
     assert(
-      manifest.approvalGatedLivePath.creation.evidenceRequired?.includes(phrase),
+      manifest.approvalGatedLivePath.creation.evidenceRequired?.includes(
+        phrase,
+      ),
       `creation evidence must include ${phrase}`,
     );
   }
@@ -313,7 +326,8 @@ try {
     "fallback UI label must be exact",
   );
   assert(
-    manifest.fallback.requiredEvent?.action === "human_gate_fallback_recorded" &&
+    manifest.fallback.requiredEvent?.action ===
+      "human_gate_fallback_recorded" &&
       manifest.fallback.requiredEvent.actor_type === "api_workflow",
     "fallback event must be a UiPath-controlled event mirror action",
   );
@@ -386,8 +400,14 @@ function assertScope(
     | undefined,
   label: string,
 ) {
-  assert(scope?.organization === "galacticus", `${label} org must be galacticus`);
-  assert(scope?.tenant === "DefaultTenant", `${label} tenant must be DefaultTenant`);
+  assert(
+    scope?.organization === "galacticus",
+    `${label} org must be galacticus`,
+  );
+  assert(
+    scope?.tenant === "DefaultTenant",
+    `${label} tenant must be DefaultTenant`,
+  );
   assert(
     scope?.folderName === "TreatmentAccessHackathon",
     `${label} folder must be TreatmentAccessHackathon`,

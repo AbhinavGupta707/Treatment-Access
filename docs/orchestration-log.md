@@ -885,3 +885,61 @@ Launched Checkpoint 8 lanes:
 
 Safety remains unchanged: no live UiPath side-effect command, payer submission,
 or real health data without explicit user approval.
+
+## 2026-06-29 - Checkpoint 8 Final Integration
+
+Reviewed all five Checkpoint 8 worker handoffs, inspected worktree diffs, and
+merged the lanes into `main` in the prescribed order:
+
+| Merge order | Lane                                                    | Worker commit |
+| ----------- | ------------------------------------------------------- | ------------- |
+| 1           | Cloud Discovery, Permissions, and Approval Matrix       | `9d7d673`     |
+| 2           | UiPath Event State and Data Service Bridge              | `4a18739`     |
+| 3           | Action Center Human Gate Proof                          | `0f610d8`     |
+| 4           | Orchestrator RPA Portal Fallback Proof                  | `219a5ad`     |
+| 5           | Final Demo UX, Evidence Manifest, and Submission Claims | `0aa7dd2`     |
+
+Integration results:
+
+- Added a read-only UiPath discovery and approval matrix for
+  `TreatmentAccessHackathon`.
+- Added a strict H1 UiPath event-state bridge that accepts live UiPath-written
+  records and rejects local/UI overclaims.
+- Added H2 Action Center clinician-validation proof payload, manifest,
+  fallback wording, and verifier.
+- Added H3 RPA/Orchestrator proof preflight for `PayerPortalFallback`, while
+  keeping UIA capture and live robot/job execution approval-gated.
+- Added a final Command Center proof manifest drawer and final readiness smoke.
+- Added the three-minute final demo script as a concise recording option.
+
+Live status remains honest: no live UiPath task, Data Fabric record,
+Orchestrator job, robot run, solution deployment, Maestro run, Agent Builder
+run, IXP mutation, or payer submission was executed during integration.
+Checkpoint 8 is therefore final software-ready state plus approval-gated live
+proof path, not an unapproved Cloud mutation.
+
+Final verification passed:
+
+- `CI=true pnpm verify`
+- `CI=true pnpm format:check`
+- `CI=true pnpm seed`
+- `CI=true pnpm verify:checkpoint6`
+- `CI=true pnpm smoke:checkpoint6-live-providers`
+- `CI=true pnpm smoke:checkpoint7-live-proof`
+- `CI=true pnpm smoke:agents`
+- `DEBUG_SMOKE=1 CI=true pnpm smoke:checkpoint4 -- --port 8894`
+- `CI=true pnpm smoke:checkpoint8-live-uipath`
+- `CI=true pnpm smoke:checkpoint8-action-center-proof`
+- `CI=true pnpm verify:rpa-portal-fallback`
+- `node --import tsx/esm scripts/verify-checkpoint8-uipath-discovery.ts`
+- `node --import tsx/esm scripts/verify-checkpoint8-event-bridge.ts`
+- `UIPATH_OPTIONAL_TIMEOUT_SECONDS=10 CI=true pnpm uipath:readiness local`
+- `set -a; source .env.local; set +a; CI=true AGENT_MODE=live
+LANGSMITH_TRACING=true pnpm smoke:live-agents -- --require-live
+--call-model`
+- `git diff --check`
+
+Live provider note: Fireworks authenticated and completed a live model call;
+LangSmith authenticated, tracing was enabled for the live-agent smoke, and no
+secret values were printed. The provider checks created no UiPath, payer, Action
+Center, Data Fabric, Orchestrator, robot, or solution side effects.

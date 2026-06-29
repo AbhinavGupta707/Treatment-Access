@@ -573,3 +573,57 @@ Safety:
   orchestrator thread.
 - Keep all work in `TreatmentAccessHackathon`.
 - Keep synthetic data only.
+
+## Checkpoint 8 Closeout
+
+Checkpoint 8 final integration has merged into `main`.
+
+Integrated lanes:
+
+| Lane                                                    | Worker commit |
+| ------------------------------------------------------- | ------------- |
+| Cloud Discovery, Permissions, and Approval Matrix       | `9d7d673`     |
+| UiPath Event State and Data Service Bridge              | `4a18739`     |
+| Action Center Human Gate Proof                          | `0f610d8`     |
+| Orchestrator RPA Portal Fallback Proof                  | `219a5ad`     |
+| Final Demo UX, Evidence Manifest, and Submission Claims | `0aa7dd2`     |
+
+End-state product scope:
+
+- Local synthetic product flow is complete: mock API, Command Center, mock
+  payer portal, deterministic agents, event mirror, denial/appeal/care handoff,
+  and proof drawer.
+- Live provider readiness exists for Fireworks/LangSmith when local ignored
+  credentials are configured.
+- UiPath final proof path is prepared: read-only discovery matrix, H1 strict
+  event-state bridge, H2 Action Center proof packet, H3 RPA/Orchestrator
+  preflight, and final proof manifest.
+- Live side-effecting UiPath execution still requires explicit approval before
+  any task creation, Data Fabric write, Orchestrator job, RPA run, solution
+  deploy/activate, Maestro run, Agent Builder run, IXP mutation, or payer
+  submission.
+
+Closeout verification passed:
+
+- `CI=true pnpm verify`
+- `CI=true pnpm format:check`
+- `CI=true pnpm seed`
+- `CI=true pnpm verify:checkpoint6`
+- `CI=true pnpm smoke:checkpoint6-live-providers`
+- `CI=true pnpm smoke:checkpoint7-live-proof`
+- `CI=true pnpm smoke:agents`
+- `DEBUG_SMOKE=1 CI=true pnpm smoke:checkpoint4 -- --port 8894`
+- `CI=true pnpm smoke:checkpoint8-live-uipath`
+- `CI=true pnpm smoke:checkpoint8-action-center-proof`
+- `CI=true pnpm verify:rpa-portal-fallback`
+- `node --import tsx/esm scripts/verify-checkpoint8-uipath-discovery.ts`
+- `node --import tsx/esm scripts/verify-checkpoint8-event-bridge.ts`
+- `UIPATH_OPTIONAL_TIMEOUT_SECONDS=10 CI=true pnpm uipath:readiness local`
+- Live provider/model smoke with `.env.local` exported:
+  `CI=true AGENT_MODE=live LANGSMITH_TRACING=true pnpm smoke:live-agents -- --require-live --call-model`
+- `git diff --check`
+
+Live provider smoke result: Fireworks authenticated and completed a live model
+call; LangSmith authenticated/tracing configuration was active. No UiPath,
+payer, Action Center, Data Fabric, Orchestrator, RPA, solution, or IXP side
+effects were executed.

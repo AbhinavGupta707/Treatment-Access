@@ -558,6 +558,36 @@ All fixture data is synthetic. The current smoke does not require live UiPath
 access; UiPath checks remain discovery/setup checks until Checkpoint 2 wires
 Maestro, API Workflows, Action Center, and Orchestrator into the live runtime.
 
+## Checkpoint 8 Final UiPath Proof Readiness
+
+Checkpoint 8 is the final integration layer. It prepares the repository for
+live UiPath evidence capture while keeping every side-effecting Cloud action
+approval-gated.
+
+Run the no-side-effect final readiness gates:
+
+```bash
+CI=true pnpm smoke:checkpoint8-live-uipath
+CI=true pnpm smoke:checkpoint8-action-center-proof
+CI=true pnpm verify:rpa-portal-fallback
+node --import tsx/esm scripts/verify-checkpoint8-uipath-discovery.ts
+node --import tsx/esm scripts/verify-checkpoint8-event-bridge.ts
+```
+
+These checks verify the final proof manifest, Action Center H2 packet, RPA H3
+preflight, read-only Cloud discovery matrix, and strict UiPath event-state
+bridge. They do not create tasks, write Data Fabric records, start Orchestrator
+jobs, run robots, deploy solutions, or submit payer packets.
+
+Final live claims require visible evidence in `TreatmentAccessHackathon`:
+
+- H1: UiPath-owned event/record ID and timestamp.
+- H2: live Action Center task ID/deep link or an explicitly labeled
+  UiPath-controlled fallback.
+- H3: Orchestrator/Assistant job or robot execution evidence plus portal
+  confirmation write-back.
+- H4: solution package/deploy/activate evidence, if approved and available.
+
 UiPath setup checks:
 
 ```bash
