@@ -160,7 +160,7 @@ start, solution upload/publish/deploy/activate, agent debug, Maestro debug, IXP
 mutation, Action Center task creation, Data Service writes, and payer submission
 require explicit user approval.
 
-Checkpoint 4 merge progress:
+Checkpoint 4 interim merge progress before final closeout:
 
 - Mock Payer Portal merged into `main` as `c82780b`; `portal_fallback` now
   succeeds while `payer_api_unavailable=true`, while direct `channel="api"`
@@ -169,8 +169,63 @@ Checkpoint 4 merge progress:
   solution shell, robot contract, Studio indication checklist, and validation
   notes. A real RPA project is not yet created because `uip rpa init` is blocked
   by the local missing .NET SDK/Helm restore prerequisite.
-- Command Center Demo UX remains active in
+- Command Center Demo UX was still active in
   `/Users/abhinavgupta/.codex/worktrees/2a44/Treatment Access`.
-- Integration QA & Demo Proof committed `c1c518b` and is reviewed but not merged
-  yet; merge it after the Command Center UX lane, then rerun the CP4 smoke
-  against integrated `main`.
+- Integration QA & Demo Proof committed `c1c518b` and was reviewed but held
+  until the Command Center UX lane landed.
+
+Checkpoint 4 is now merged and locally verified on `main`.
+
+Integrated commits:
+
+- `c82780b` merged the Mock Payer Portal fallback lane.
+- `2e9979a` merged the UiPath robot/runtime wiring lane.
+- `59ca800` merged the Command Center demo UX lane.
+- `0f5c383` merged the Integration QA/demo-proof lane.
+
+Main-branch integration fixes:
+
+- Robot runtime docs/contract were formatted for repository-wide Prettier.
+- Checkpoint 4 smoke and demo docs now use the integrated portal confirmation
+  format `AVFH-PORTAL-SYN-*`.
+
+Closeout verification passed:
+
+- `CI=true pnpm verify`
+- `CI=true pnpm format:check`
+- `CI=true pnpm verify:setup`
+- `CI=true pnpm seed`
+- `DEBUG_SMOKE=1 CI=true pnpm smoke:checkpoint1 -- --port 8878`
+- `CI=true pnpm smoke:agents`
+- `DEBUG_SMOKE=1 CI=true pnpm smoke:checkpoint4 -- --port 8894`
+- `git diff --check`
+- Integrated Chrome headless browser smoke through DevTools Protocol:
+  `Live event mirror`, 7 agent cards, evidence matrix rows, fallback panel,
+  mobile fallback state, no horizontal overflow, and mock payer portal
+  confirmation `AVFH-PORTAL-SYN-001`.
+
+Browser smoke screenshots:
+
+- `/private/tmp/tacc-cp4-integrated/chrome-command-center-desktop.png`
+- `/private/tmp/tacc-cp4-integrated/chrome-command-center-mobile-fallback.png`
+- `/private/tmp/tacc-cp4-integrated/chrome-mock-payer-confirmation.png`
+
+Checkpoint 4 delivered:
+
+- API-down payer path remains unavailable for direct `channel="api"`.
+- `channel="portal_fallback"` succeeds under the same API-down toggle and
+  records robot/fallback-flavored event state.
+- Command Center displays a polished judge walkthrough for the seven agents,
+  evidence, Action Center gates, API failure, portal robot fallback, denial
+  rescue, appeal/care handoff, and audit timeline.
+- Mock Payer Portal has stable robot selectors and deterministic synthetic
+  receipt state.
+- `CI=true pnpm smoke:checkpoint4` proves the local fallback story without live
+  UiPath side effects.
+
+Known remaining blocker:
+
+- The UiPath robot lane could not create a real RPA project because
+  `uip rpa init` fails on this Mac with no .NET SDK available to the local
+  UiPath Assistant/Robot restore path. This is a setup prerequisite for
+  Checkpoint 5, not hidden demo behavior.

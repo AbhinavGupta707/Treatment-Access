@@ -156,7 +156,7 @@ Mock Payer Portal checks:
 - the portal opens on `Northstar Health Plan Prior Authorization Portal`;
 - the form contains synthetic defaults only;
 - submit the form and confirm the page shows `Submission received` and
-  confirmation ID `PORTAL-SYN-001`;
+  confirmation ID `AVFH-PORTAL-SYN-001`;
 - this browser-only portal submit does not write live UiPath state by itself.
 
 If the Command Center cannot reach the API, diagnose in layer order:

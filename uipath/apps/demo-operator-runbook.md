@@ -74,7 +74,7 @@ Local rehearsal path, safe without live approvals:
 2. Confirm the Payer Status card says `Portal fallback armed` and shows
    `PAYER_API_DOWN`.
 3. In the Mock Payer Portal, submit the synthetic prior authorization form.
-4. Confirm `Submission received` and `PORTAL-SYN-001`.
+4. Confirm `Submission received` and `AVFH-PORTAL-SYN-001`.
 5. If `CI=true pnpm smoke:checkpoint4` has run, filter the Command Center
    timeline to `Robot` and show `portal_fallback_submitted`.
 

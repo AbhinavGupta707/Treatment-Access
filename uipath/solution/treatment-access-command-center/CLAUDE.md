@@ -10,16 +10,16 @@ This file is a static snapshot, scaffolded by the `uip` CLI version `1.195.0`. I
 
 ```json
 {
-    "DocVersion": "1.0.0",
-    "StudioMinVersion": "2025.10.0",
-    "SolutionId": "<uuid>",
-    "Projects": [
-        {
-            "Type": "Process",
-            "ProjectRelativePath": "MyProcess/project.json",
-            "Id": "<uuid>"
-        }
-    ]
+  "DocVersion": "1.0.0",
+  "StudioMinVersion": "2025.10.0",
+  "SolutionId": "<uuid>",
+  "Projects": [
+    {
+      "Type": "Process",
+      "ProjectRelativePath": "MyProcess/project.json",
+      "Id": "<uuid>"
+    }
+  ]
 }
 ```
 
@@ -41,32 +41,32 @@ my-solution/
 
 You must manage membership via the CLI, never by editing the manifest. All these operations work entirely on local files (`.uipx` plus the solution-builder artefacts on disk) and do not require `uip login` — auth is only needed once you reach `pack` / `publish` / `deploy` / `upload`.
 
-| Intent | Command |
-|---|---|
-| Create a solution | `uip solution init <name>` |
-| Register an existing subfolder of the solution dir as a project (no copying — use after scaffolding *inside* the solution dir, e.g. `uip rpa create-project --location <solution-dir>`) | `uip solution project add <project-path> [<solution-file>]` |
-| Add a project from outside the solution — copies the folder at `<path>` into the solution dir and registers it (`<path>` is a local filesystem path) | `uip solution project import --source <path>` |
-| Unregister a project (does not delete the project files on disk) | `uip solution project remove <project-path> [<solution-file>]` |
-| List projects in the solution | `uip solution project list` |
+| Intent                                                                                                                                                                                  | Command                                                        |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| Create a solution                                                                                                                                                                       | `uip solution init <name>`                                     |
+| Register an existing subfolder of the solution dir as a project (no copying — use after scaffolding _inside_ the solution dir, e.g. `uip rpa create-project --location <solution-dir>`) | `uip solution project add <project-path> [<solution-file>]`    |
+| Add a project from outside the solution — copies the folder at `<path>` into the solution dir and registers it (`<path>` is a local filesystem path)                                    | `uip solution project import --source <path>`                  |
+| Unregister a project (does not delete the project files on disk)                                                                                                                        | `uip solution project remove <project-path> [<solution-file>]` |
+| List projects in the solution                                                                                                                                                           | `uip solution project list`                                    |
 
 ## Project Types
 
 A solution can contain multiple projects of different types. The table below lists each project type and the `uip` command that scaffolds a fresh one (or marks the row when no scaffolding command exists).
 
-| Type | Description | Scaffold with | Skill |
-|---|---|---|---|
-| `Process` | RPA process — Studio workflow (XAML, Coded C#, or Hybrid) | `uip rpa create-project --name <name>` | `uipath-rpa` |
-| `Library` | Reusable RPA library | `uip rpa create-project --template-id LibraryProcessTemplate --name <name>` | `uipath-rpa` |
-| `Tests` | Test Automation project | `uip rpa create-project --template-id TestAutomationProjectTemplate --name <name>` | `uipath-rpa` |
-| `Flow` | Maestro Flow — long-running orchestrated workflow | `uip maestro flow init <name>` | `uipath-maestro-flow` |
-| `CaseManagement` | Maestro Case — stateful business process (SLA, approvals, HITL) | `uip maestro case init <name>` | `uipath-maestro-case` |
-| `ProcessOrchestration` | Maestro BPMN — long-running orchestrated process | `uip maestro bpmn init <name>` | `uipath-maestro-bpmn` |
-| `Agent` | LLM agent project — **low-code** (configured via `agent.json`; no Python) or **coded** (Python: LangGraph / LlamaIndex / OpenAI Agents). Both subtypes share `ProjectType: "Agent"`; the discriminator is `agent.json#type`. | `uip agent init <path>` (low-code) · `uip codedagent new [name]` (coded — see the `uipath-agents` skill for the full flow) | `uipath-agents` |
-| `AppV2` | Coded App — web application | `uip codedapp init <path>` | `uipath-coded-apps` |
-| `Function` | UiPath Function (JS / TS / Python) | `uip functions new [name]` | none |
-| `Api` | API Workflow project | no CLI scaffolding | none |
-| `Connector` | Integration Service connector | no CLI scaffolding — use `uip is connectors` to list / get / export existing connectors | none |
-| `WebApp` | Legacy low-code UiPath App (the coded variant is `AppV2`) | no CLI scaffolding | none |
+| Type                   | Description                                                                                                                                                                                                                  | Scaffold with                                                                                                              | Skill                 |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| `Process`              | RPA process — Studio workflow (XAML, Coded C#, or Hybrid)                                                                                                                                                                    | `uip rpa create-project --name <name>`                                                                                     | `uipath-rpa`          |
+| `Library`              | Reusable RPA library                                                                                                                                                                                                         | `uip rpa create-project --template-id LibraryProcessTemplate --name <name>`                                                | `uipath-rpa`          |
+| `Tests`                | Test Automation project                                                                                                                                                                                                      | `uip rpa create-project --template-id TestAutomationProjectTemplate --name <name>`                                         | `uipath-rpa`          |
+| `Flow`                 | Maestro Flow — long-running orchestrated workflow                                                                                                                                                                            | `uip maestro flow init <name>`                                                                                             | `uipath-maestro-flow` |
+| `CaseManagement`       | Maestro Case — stateful business process (SLA, approvals, HITL)                                                                                                                                                              | `uip maestro case init <name>`                                                                                             | `uipath-maestro-case` |
+| `ProcessOrchestration` | Maestro BPMN — long-running orchestrated process                                                                                                                                                                             | `uip maestro bpmn init <name>`                                                                                             | `uipath-maestro-bpmn` |
+| `Agent`                | LLM agent project — **low-code** (configured via `agent.json`; no Python) or **coded** (Python: LangGraph / LlamaIndex / OpenAI Agents). Both subtypes share `ProjectType: "Agent"`; the discriminator is `agent.json#type`. | `uip agent init <path>` (low-code) · `uip codedagent new [name]` (coded — see the `uipath-agents` skill for the full flow) | `uipath-agents`       |
+| `AppV2`                | Coded App — web application                                                                                                                                                                                                  | `uip codedapp init <path>`                                                                                                 | `uipath-coded-apps`   |
+| `Function`             | UiPath Function (JS / TS / Python)                                                                                                                                                                                           | `uip functions new [name]`                                                                                                 | none                  |
+| `Api`                  | API Workflow project                                                                                                                                                                                                         | no CLI scaffolding                                                                                                         | none                  |
+| `Connector`            | Integration Service connector                                                                                                                                                                                                | no CLI scaffolding — use `uip is connectors` to list / get / export existing connectors                                    | none                  |
+| `WebApp`               | Legacy low-code UiPath App (the coded variant is `AppV2`)                                                                                                                                                                    | no CLI scaffolding                                                                                                         | none                  |
 
 All skill should be installed by running the command: `uip skills install`. The general-purpose `uipath-platform` skill covers what isn't in a type-specific skill.
 
@@ -128,7 +128,7 @@ uip solution deploy uninstall <deployment-name>    # remove the deployment + its
 
 ## Studio Web (Browser Editing)
 
-Studio Web is a separate target from the Orchestrator deploy chain — it hosts a browser-based collaborative editor for solutions. The `solution upload` command pushes the local solution there and returns a `DesignerUrl` to open the solution in a browser; this is independent of `pack` / `publish` / `deploy` and does *not* produce a runtime-deployable artifact.
+Studio Web is a separate target from the Orchestrator deploy chain — it hosts a browser-based collaborative editor for solutions. The `solution upload` command pushes the local solution there and returns a `DesignerUrl` to open the solution in a browser; this is independent of `pack` / `publish` / `deploy` and does _not_ produce a runtime-deployable artifact.
 
 ```bash
 uip solution upload .                      # upload solution dir to Studio Web as a new solution; returns DesignerUrl
@@ -159,7 +159,7 @@ uip solution resource list        # everything declared in this solution
 
 ## Deployment Configuration
 
-The deploy config is a JSON file fetched from Orchestrator that lists every resource the solution will provision (or reuse) and every property you can override. It is **separate from `bindings_v2.json`** — bindings declare *what a project needs*, the deploy config decides *how that maps to Orchestrator at deploy time*.
+The deploy config is a JSON file fetched from Orchestrator that lists every resource the solution will provision (or reuse) and every property you can override. It is **separate from `bindings_v2.json`** — bindings declare _what a project needs_, the deploy config decides _how that maps to Orchestrator at deploy time_.
 
 ```bash
 # Fetch the default config to a file
@@ -231,30 +231,30 @@ For concept or API documentation beyond CLI usage, fetch `https://docs.uipath.co
 
 Adjacent groups commonly used alongside solutions:
 
-| Group | Purpose |
-|---|---|
-| `uip login`, `uip login tenant` | Authenticate, switch tenants |
-| `uip or folders` | Manage Orchestrator folders |
-| `uip or assets`, `uip or queues`, `uip or buckets`, `uip or bucket-files`, `uip or libraries`, `uip or queue-items`, `uip or triggers`, `uip or webhooks` | Manage Orchestrator resources directly |
-| `uip rpa` | RPA workflow lifecycle (compile, validate, execute, scaffold) |
-| `uip maestro` | Maestro Flow / Case / BPMN scaffolding |
-| `uip agent`, `uip codedagent` | Coded agent lifecycle |
-| `uip codedapp` | Coded Apps lifecycle |
-| `uip functions` | UiPath Functions |
-| `uip tm` | Test Manager (test projects, sets, executions) |
-| `uip is` | Integration Service (connectors, connections) |
-| `uip tools` | Manage CLI tool extensions |
+| Group                                                                                                                                                     | Purpose                                                       |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `uip login`, `uip login tenant`                                                                                                                           | Authenticate, switch tenants                                  |
+| `uip or folders`                                                                                                                                          | Manage Orchestrator folders                                   |
+| `uip or assets`, `uip or queues`, `uip or buckets`, `uip or bucket-files`, `uip or libraries`, `uip or queue-items`, `uip or triggers`, `uip or webhooks` | Manage Orchestrator resources directly                        |
+| `uip rpa`                                                                                                                                                 | RPA workflow lifecycle (compile, validate, execute, scaffold) |
+| `uip maestro`                                                                                                                                             | Maestro Flow / Case / BPMN scaffolding                        |
+| `uip agent`, `uip codedagent`                                                                                                                             | Coded agent lifecycle                                         |
+| `uip codedapp`                                                                                                                                            | Coded Apps lifecycle                                          |
+| `uip functions`                                                                                                                                           | UiPath Functions                                              |
+| `uip tm`                                                                                                                                                  | Test Manager (test projects, sets, executions)                |
+| `uip is`                                                                                                                                                  | Integration Service (connectors, connections)                 |
+| `uip tools`                                                                                                                                               | Manage CLI tool extensions                                    |
 
 ## Troubleshooting Quick Map
 
-| Symptom | First thing to check |
-|---|---|
-| `Not authenticated` / 401 | `uip login`, then re-run |
-| Command targets the wrong tenant | `uip login tenant set <tenant>`; verify with `uip login status` |
-| Pack succeeds but publish 409s | Version conflict — bump the version (`uip solution pack . ./out -v <new-version>`) or delete the colliding version with `uip solution packages delete <package-name> <version>` (only if intentional) |
-| `deploy run` fails on a resource conflict | `uip solution deploy config link config.json <resource> --name <existing> --folder-path <path>` to map to the existing one, or change `conflictFixingAction` via `config set` |
-| `Resource not found` after deploy | `uip solution resource refresh` to re-sync from each project's `bindings_v2.json`; if still missing, the resource was never declared in any project |
-| Output looks empty | You may have redirected stderr — confirmations and errors go there. Re-run without `2>` |
+| Symptom                                   | First thing to check                                                                                                                                                                                  |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Not authenticated` / 401                 | `uip login`, then re-run                                                                                                                                                                              |
+| Command targets the wrong tenant          | `uip login tenant set <tenant>`; verify with `uip login status`                                                                                                                                       |
+| Pack succeeds but publish 409s            | Version conflict — bump the version (`uip solution pack . ./out -v <new-version>`) or delete the colliding version with `uip solution packages delete <package-name> <version>` (only if intentional) |
+| `deploy run` fails on a resource conflict | `uip solution deploy config link config.json <resource> --name <existing> --folder-path <path>` to map to the existing one, or change `conflictFixingAction` via `config set`                         |
+| `Resource not found` after deploy         | `uip solution resource refresh` to re-sync from each project's `bindings_v2.json`; if still missing, the resource was never declared in any project                                                   |
+| Output looks empty                        | You may have redirected stderr — confirmations and errors go there. Re-run without `2>`                                                                                                               |
 
 ---
 

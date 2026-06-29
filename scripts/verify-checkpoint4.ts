@@ -186,7 +186,7 @@ try {
   }
 
   const robotEventId = `event-cp4-robot-${Date.now()}`;
-  const portalConfirmationId = "PORTAL-SYN-001";
+  const portalConfirmationId = "AVFH-PORTAL-SYN-001";
   const robotEvent = await postJson("/events", {
     event_id: robotEventId,
     case_id: cleanState.case.case_id,

@@ -63,22 +63,14 @@
   },
   "portalContract": {
     "form": "prior authorization submission form",
-    "fields": [
-      "member ID",
-      "medication",
-      "diagnosis"
-    ],
+    "fields": ["member ID", "medication", "diagnosis"],
     "submit": "submit button",
     "confirmation": "confirmation region containing confirmation ID"
   },
   "outputs": {
     "status": {
       "type": "string",
-      "allowedValues": [
-        "submitted",
-        "needs_capture",
-        "failed"
-      ]
+      "allowedValues": ["submitted", "needs_capture", "failed"]
     },
     "confirmationId": {
       "type": "string",

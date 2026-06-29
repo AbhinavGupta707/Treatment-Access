@@ -36,7 +36,7 @@ Intake` app launching a synthetic case in `TreatmentAccessHackathon`.
 7. Launch the approved portal fallback robot or show the locally rehearsed
    portal fallback proof if live robot execution is not approved.
 8. In the Mock Payer Portal, show the synthetic form and confirmation
-   `PORTAL-SYN-001`.
+   `AVFH-PORTAL-SYN-001`.
 9. Return to the Command Center timeline and show the robot
    `portal_fallback_submitted` event with the fallback secondary stage.
 10. Trigger denial rescue, show the appeal strategy, and approve the appeal in
