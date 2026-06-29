@@ -18,7 +18,9 @@ event records.
 ## Current Status
 
 This repository is demo-ready for the local synthetic proof path after
-Checkpoints 1-4, with Checkpoint 5 submission packaging in progress.
+Checkpoints 1-5. Checkpoint 5 added truthful Devpost packaging, local screenshot
+evidence, final QA/readiness gates, a demo script, a deck outline, and updated
+RPA live-readiness documentation.
 
 Already implemented:
 

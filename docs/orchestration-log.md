@@ -502,3 +502,62 @@ Launch constraints:
   is fixed. It must not hand-write fake XAML or fake UiPath project metadata.
 - Submission/docs lanes must clearly separate local synthetic proof from live
   UiPath actions that have not run.
+
+## 2026-06-29 - Checkpoint 5 Integrated Closeout
+
+Merged into `main`:
+
+- `3f332fe Merge checkpoint 5 RPA runtime readiness`, after validating
+  `c56b40e` with `CI=true pnpm verify:setup` and `git diff --check`.
+- `53d6e93 Merge checkpoint 5 evidence and QA`, after validating `e6876c1`
+  with screenshot review, `CI=true pnpm verify:setup`,
+  `CI=true pnpm format:check`, `CI=true pnpm verify:submission-readiness`, and
+  `git diff --check`.
+- `f2c380c Merge checkpoint 5 README and submission package`, after validating
+  `055c067` with `CI=true pnpm verify:setup`, `CI=true pnpm format:check`, and
+  `git diff --check`.
+- `2cd1e19 Merge checkpoint 5 demo script and deck outline`, after validating
+  `cd5bae8` with `CI=true pnpm verify:setup`, `CI=true pnpm format:check`,
+  `git diff --check`, and an overclaim/safety text scan.
+
+Integration fixes made directly on `main`:
+
+- Updated repository status wording so README, project memory, and the
+  Checkpoint 5 runbook describe the merged/verified state rather than an active
+  checkpoint.
+
+Final verification passed:
+
+- `CI=true pnpm verify`
+- `CI=true pnpm format:check`
+- `CI=true pnpm verify:setup`
+- `CI=true pnpm verify:submission-readiness`
+- `CI=true pnpm seed`
+- `DEBUG_SMOKE=1 CI=true pnpm smoke:checkpoint1 -- --port 8878`
+- `CI=true pnpm smoke:agents`
+- `DEBUG_SMOKE=1 CI=true pnpm smoke:checkpoint4 -- --port 8894`
+- `git diff --check`
+
+Checkpoint 5 result:
+
+- Devpost-facing README and `docs/submission.md` now describe the product,
+  UiPath role, seven agents, setup/smoke commands, mocked-vs-live status,
+  safety/privacy posture, limitations, and production next steps.
+- `docs/demo-script.md`, `docs/architecture.md`, and `docs/deck-outline.md`
+  provide a truthful five-minute narrative and deck structure.
+- `uipath/screenshots` contains local synthetic Command Center and Mock Payer
+  Portal evidence plus a manifest that distinguishes local proof from manual
+  live UiPath captures.
+- `CI=true pnpm verify:submission-readiness` statically checks required
+  submission artifacts, safety wording, and mocked-vs-live disclosures.
+- RPA setup docs record the current real blocker rather than fabricating UiPath
+  artifacts: `uip rpa init` still reaches a missing .NET SDK restore failure.
+
+Remaining manual/live work:
+
+- Install a .NET SDK visible to UiPath Assistant/Robot's headless Studio restore
+  path before creating the real `PayerPortalFallback` RPA project.
+- Live RPA run/debug, Orchestrator job start, solution upload/publish/deploy,
+  Action Center task creation, Data Service writes, Agent Builder/Maestro
+  debug, IXP mutation, and real payer submission remain explicit approval-gated
+  actions.

@@ -1,5 +1,8 @@
 # Checkpoint 5 Orchestrator
 
+Status: merged and locally verified on `main`. This file is now the historical
+control runbook for the Checkpoint 5 orchestration.
+
 Checkpoint 5 outcome: finish production/demo readiness for Devpost while
 closing the live-readiness gap left by Checkpoint 4. The repo should become a
 truthful submission package with clear setup, video/deck guidance, evidence

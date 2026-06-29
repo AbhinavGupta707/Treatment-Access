@@ -122,7 +122,7 @@ Runtime safety remains unchanged: live UiPath agent debug/run, solution upload/p
 
 ## Checkpoint 4 Status
 
-Checkpoint 4 orchestration is active on `main`.
+Checkpoint 4 is merged and locally verified on `main`.
 
 Launch prep commit: `d2500bd Launch checkpoint 4 orchestration prep`.
 
@@ -232,7 +232,7 @@ Known remaining blocker:
 
 ## Checkpoint 5 Status
 
-Checkpoint 5 orchestration is active on `main`.
+Checkpoint 5 is merged and locally verified on `main`.
 
 Launch base commit: `2142714`.
 Launch commit and worker base: `97413b9`.
@@ -248,7 +248,7 @@ Checkpoint 5 outcome:
   screenshots/evidence, and final QA proof.
 - Keep all live UiPath side effects behind explicit approval.
 
-Active isolated lanes:
+Integrated lanes:
 
 | Merge order | Lane                          | Thread ID                              | Worktree path                                                | Ownership                                                              |
 | ----------- | ----------------------------- | -------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------- |
@@ -256,6 +256,52 @@ Active isolated lanes:
 | 2           | Evidence Capture & Final QA   | `019f1111-dcf9-7ae3-9dbf-c92a53b13d79` | `/Users/abhinavgupta/.codex/worktrees/5d6a/Treatment Access` | `uipath/screenshots/**`, `docs/testing.md`, final QA scripts/docs      |
 | 3           | README & Submission Package   | `019f1111-dcd9-7411-b1d7-cbed628604b0` | `/Users/abhinavgupta/.codex/worktrees/284a/Treatment Access` | `README.md`, `docs/submission.md`, license/submission checklist        |
 | 4           | Demo Script & Deck Outline    | `019f1111-df2e-7991-aaab-4643545917ea` | `/Users/abhinavgupta/.codex/worktrees/55e8/Treatment Access` | `docs/demo-script.md`, `docs/architecture.md`, deck/video outline docs |
+
+Integrated commits:
+
+- `3f332fe` merged RPA runtime readiness documentation from `c56b40e`.
+- `53d6e93` merged evidence capture and final QA from `e6876c1`.
+- `f2c380c` merged README and Devpost submission packaging from `055c067`.
+- `2cd1e19` merged demo script and deck outline from `cd5bae8`.
+
+Checkpoint 5 delivered:
+
+- Updated RPA/solution/setup notes with fresh `uip rpa init` evidence and an
+  approval-gated live smoke path. No fake XAML, fake RPA `project.json`, or fake
+  solution metadata was added.
+- Added local synthetic screenshots and an evidence manifest under
+  `uipath/screenshots`.
+- Added `CI=true pnpm verify:submission-readiness` as a static final-submission
+  guard.
+- Replaced stale scaffold README/submission text with judge-readable setup,
+  UiPath component, mocked-vs-live, safety, and Devpost answer-bank content.
+- Added a five-minute demo script, expanded architecture story, and deck outline.
+
+Closeout verification passed:
+
+- `CI=true pnpm verify`
+- `CI=true pnpm format:check`
+- `CI=true pnpm verify:setup`
+- `CI=true pnpm verify:submission-readiness`
+- `CI=true pnpm seed`
+- `DEBUG_SMOKE=1 CI=true pnpm smoke:checkpoint1 -- --port 8878`
+- `CI=true pnpm smoke:agents`
+- `DEBUG_SMOKE=1 CI=true pnpm smoke:checkpoint4 -- --port 8894`
+- `git diff --check`
+
+Checkpoint 5 evidence screenshots:
+
+- `uipath/screenshots/command-center-local.png`
+- `uipath/screenshots/mock-payer-portal-local.png`
+- `uipath/screenshots/mock-payer-portal-confirmation-local.png`
+
+Known remaining blocker:
+
+- The real `PayerPortalFallback` UiPath RPA project still cannot be created on
+  this Mac because `uip rpa init` reaches the headless Studio restore path, but
+  the UiPath Assistant-bundled `dotnet` runtime has no SDK available. The exact
+  remediation and approval-gated smoke path are documented under
+  `uipath/robots/payer-portal-fallback`.
 
 Runtime safety remains unchanged: live RPA run/debug, Orchestrator job start,
 solution upload/publish/deploy/activate, agent debug, Maestro debug, IXP
