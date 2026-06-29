@@ -954,6 +954,7 @@ export async function runTreatmentAccessLiveProof(
       runtimeConfig: validation.config,
       metadata: { case_id: fixture.case.case_id, live_proof: true },
     }),
+    synthetic: true,
     safety_summary:
       "Synthetic proof only; payer submission and UiPath side effects remain approval-gated.",
   } satisfies AgentRun);
