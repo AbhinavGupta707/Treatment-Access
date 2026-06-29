@@ -24,7 +24,8 @@
     "test": "CI=true pnpm build:contracts && CI=true vitest run scripts/*.test.ts && CI=true pnpm -r --if-present test",
     "typecheck": "CI=true pnpm build:contracts && CI=true pnpm -r --if-present typecheck",
     "verify": "CI=true pnpm typecheck && CI=true pnpm test && CI=true pnpm build && pnpm verify:setup",
-    "verify:setup": "node --import tsx/esm scripts/check-setup.ts"
+    "verify:setup": "node --import tsx/esm scripts/check-setup.ts",
+    "verify:submission-readiness": "node --import tsx/esm scripts/verify-submission-readiness.ts"
   },
   "dependencies": {
     "@tacc/agent-runtime": "workspace:*",

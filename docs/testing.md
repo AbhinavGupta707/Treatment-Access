@@ -181,6 +181,109 @@ the orchestrator or user before running:
 - Payer submission: any live workflow step that submits a prior authorization,
   appeal, or portal packet outside the local synthetic mock.
 
+## Checkpoint 5 Final QA
+
+Run the final non-live setup and repository checks from a clean worktree:
+
+```bash
+CI=true pnpm verify:setup
+CI=true pnpm format:check
+CI=true pnpm verify:submission-readiness
+git diff --check
+```
+
+Run the strongest local deterministic smokes available before recording or
+submitting the demo:
+
+```bash
+CI=true pnpm seed
+DEBUG_SMOKE=1 CI=true pnpm smoke:checkpoint1 -- --port 8878
+CI=true pnpm smoke:agents
+DEBUG_SMOKE=1 CI=true pnpm smoke:checkpoint4 -- --port 8894
+```
+
+These commands use synthetic data only. They do not run live UiPath RPA,
+Orchestrator jobs, solution upload/publish/deploy/activate, Agent Builder
+debug, Maestro debug, Action Center task creation, Data Service writes, IXP
+mutation, or payer submission.
+
+### Local Reset
+
+Before every recorded demo pass:
+
+1. Run `CI=true pnpm seed` to rebuild and inspect the deterministic fixture.
+2. Start the mock API and run `node --import tsx/esm scripts/reset-demo.ts --json`
+   against the demo API if a server is already running.
+3. Confirm `GET /demo/state` returns `case-syn-001`, zero submissions, and
+   `payer_api_unavailable=false`.
+4. Open the Command Center and confirm the case queue shows the synthetic case
+   `TACC-2026-001`.
+
+### Browser QA
+
+Use local browser evidence for the custom apps:
+
+```bash
+CI=true pnpm dev:api
+CI=true pnpm dev:command-center
+CI=true pnpm dev:mock-payer
+```
+
+Capture Command Center proof at `http://127.0.0.1:5173` after reset. The proof
+should show `Live event mirror`, synthetic case data, evidence matrix rows,
+agent traces, Action Center gates, and the mocked-vs-live boundary.
+
+Capture Mock Payer Portal proof at `http://127.0.0.1:5174` after submitting the
+default synthetic form. The proof should show `Submission received`,
+confirmation `AVFH-PORTAL-SYN-001`, and the warning that no real patient,
+provider, payer, credential, or health data may be entered.
+
+Store final evidence under `uipath/screenshots` and update
+`uipath/screenshots/manifest.md` with the exact command or manual path used for
+each capture.
+
+### Privacy And Safety Scan
+
+Review submission-facing text and screenshots before handoff:
+
+```bash
+rg -n "real patient|real PHI|SSN|DOB|MRN|policyholder|credential|password|medical advice|legal advice" README.md docs uipath apps packages services scripts
+CI=true pnpm verify:submission-readiness
+```
+
+Expected result: only synthetic-data warnings, fixture IDs, and safety
+boundaries appear. Do not add real patient, payer, provider, credential, or
+personal health data. Appeal content must remain an administrative draft for
+clinician review and must say it is not autonomous medical or legal advice.
+
+### Mocked-Vs-Live Disclosure
+
+Before the submission is called complete, confirm the docs and screenshots make
+these boundaries visible:
+
+- Local synthetic proof: Command Center rendering, mock healthcare API state,
+  mock payer portal receipt, deterministic smoke tests, and event mirror data.
+- Live UiPath proof: only captures performed in the `TreatmentAccessHackathon`
+  folder after explicit approval.
+- Manual live gaps: Maestro Case, Action Center, Orchestrator, Agent Builder,
+  Data Service, solution deployment, and RPA robot run screenshots remain manual
+  capture requirements until the user approves those account/browser actions.
+
+### Live UiPath Approval Gates
+
+Do not run these during final QA without explicit approval:
+
+- `uip rpa run`, `uip rpa debug`, Studio Web debug, Assistant robot execution,
+  or Orchestrator job start.
+- `uip solution upload`, publish, deploy, or activate.
+- Agent Builder debug/run, Maestro debug/run, IXP mutation, Action Center task
+  creation, or Data Service writes.
+- Any real payer, EHR, pharmacy, or patient-facing submission.
+
+If a live UiPath feature is missing or unavailable, diagnose in layer order:
+confirm command registration, discovery/install state, and official activation
+flow first; only debug permissions or runtime after the feature is present.
+
 If the mock API is already running, run the smoke against it directly:
 
 ```bash
