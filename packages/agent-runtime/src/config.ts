@@ -49,8 +49,7 @@ export function resolveAgentRuntimeConfig(
     env.AGENT_MODE ?? "deterministic",
   );
   const mode = modeParse.success ? modeParse.data : "deterministic";
-  const orchestrator =
-    env.AGENT_ORCHESTRATOR === "uipath" ? "uipath" : "local";
+  const orchestrator = env.AGENT_ORCHESTRATOR === "uipath" ? "uipath" : "local";
   const tracingEnabled = parseBoolean(env.LANGSMITH_TRACING);
   const config: AgentRuntimeConfig = {
     mode,
@@ -67,8 +66,7 @@ export function resolveAgentRuntimeConfig(
     langSmith: {
       tracingEnabled,
       apiKey: emptyToUndefined(env.LANGSMITH_API_KEY),
-      projectName:
-        env.LANGSMITH_PROJECT ?? "Treatment Access Command Center",
+      projectName: env.LANGSMITH_PROJECT ?? "Treatment Access Command Center",
       endpoint: emptyToUndefined(env.LANGSMITH_ENDPOINT),
       workspaceId: emptyToUndefined(env.LANGSMITH_WORKSPACE_ID),
       callbacksBackground: parseBoolean(
@@ -133,7 +131,10 @@ export function secretState(value: string | undefined): "set" | "missing" {
   return value ? "set" : "missing";
 }
 
-function parseBoolean(value: string | undefined, defaultValue = false): boolean {
+function parseBoolean(
+  value: string | undefined,
+  defaultValue = false,
+): boolean {
   if (value === undefined || value.trim() === "") {
     return defaultValue;
   }

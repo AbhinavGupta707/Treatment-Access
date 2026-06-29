@@ -1,9 +1,4 @@
-import {
-  Annotation,
-  END,
-  START,
-  StateGraph,
-} from "@langchain/langgraph";
+import { Annotation, END, START, StateGraph } from "@langchain/langgraph";
 import {
   denialLetterScenarios,
   missingEvidenceMappings,
@@ -100,10 +95,7 @@ export function runTreatmentAccessAgent(
 export type TreatmentAccessGraphMode = "deterministic" | "live";
 
 export type TreatmentAccessGraphNodeId =
-  | AgentId
-  | "human-gate"
-  | "robot-fallback-request"
-  | "audit-packet";
+  AgentId | "human-gate" | "robot-fallback-request" | "audit-packet";
 
 export type TreatmentAccessGraphBranch =
   | "complete_evidence_to_submission"
@@ -145,11 +137,7 @@ export type TreatmentAccessGraphStep = {
   node_id: TreatmentAccessGraphNodeId;
   agent_id?: AgentId;
   status:
-    | "completed"
-    | "needs_human"
-    | "blocked"
-    | "fallback_requested"
-    | "skipped";
+    "completed" | "needs_human" | "blocked" | "fallback_requested" | "skipped";
   summary: string;
   output_schema: string;
   validated: boolean;
@@ -234,10 +222,7 @@ export type TreatmentAccessGraphRun = {
   case_id: string;
   mode: TreatmentAccessGraphMode;
   status:
-    | "completed"
-    | "waiting_human"
-    | "blocked"
-    | "robot_fallback_requested";
+    "completed" | "waiting_human" | "blocked" | "robot_fallback_requested";
   graph: TreatmentAccessGraphDefinition;
   steps: TreatmentAccessGraphStep[];
   events: TreatmentAccessGraphEvent[];
@@ -288,7 +273,8 @@ const treatmentAccessGraphDefinition: TreatmentAccessGraphDefinition = {
       from: "missing-evidence",
       to: "submission-packet",
       branch: "complete_evidence_to_submission",
-      condition: "evidence is complete and required human approvals are present",
+      condition:
+        "evidence is complete and required human approvals are present",
     },
     {
       from: "submission-packet",
@@ -329,7 +315,10 @@ export function getTreatmentAccessGraphDefinition(): TreatmentAccessGraphDefinit
 
 export function createTreatmentAccessLangGraph(): unknown {
   const graph = new StateGraph(LangGraphSkeletonState) as {
-    addNode: (name: TreatmentAccessGraphNodeId, action: () => unknown) => unknown;
+    addNode: (
+      name: TreatmentAccessGraphNodeId,
+      action: () => unknown,
+    ) => unknown;
     addEdge: (
       from: TreatmentAccessGraphNodeId | typeof START,
       to: TreatmentAccessGraphNodeId | typeof END,
@@ -836,13 +825,7 @@ function createHumanGate(
         : "Treatment Access Coordinator",
     reason,
     source_node_id: sourceNodeId,
-    trace_metadata: traceMetadata(
-      "human-gate",
-      context,
-      runId,
-      mode,
-      options,
-    ),
+    trace_metadata: traceMetadata("human-gate", context, runId, mode, options),
   };
 }
 

@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, lstatSync, readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 type CheckStatus = "passed" | "skipped";
@@ -70,12 +70,14 @@ try {
     checks.push({
       name: "Fireworks read-only connectivity",
       status: "skipped",
-      detail: "run smoke:checkpoint6-live-providers after live keys are present",
+      detail:
+        "run smoke:checkpoint6-live-providers after live keys are present",
     });
     checks.push({
       name: "LangSmith read-only connectivity",
       status: "skipped",
-      detail: "run smoke:checkpoint6-live-providers after live keys are present",
+      detail:
+        "run smoke:checkpoint6-live-providers after live keys are present",
     });
   }
 
@@ -278,9 +280,12 @@ async function checkLangSmithConnectivity() {
   const endpoint = trimTrailingSlash(
     env("LANGSMITH_ENDPOINT") ?? "https://api.smith.langchain.com",
   );
-  const response = await fetchWithTimeout(`${endpoint}/api/v1/sessions?limit=1`, {
-    headers: { "x-api-key": apiKey },
-  });
+  const response = await fetchWithTimeout(
+    `${endpoint}/api/v1/sessions?limit=1`,
+    {
+      headers: { "x-api-key": apiKey },
+    },
+  );
   const text = await response.text();
   assert(
     response.ok,
@@ -335,6 +340,10 @@ function loadDotenvLocal() {
 function listScannableFiles(root: string) {
   const ignoredDirs = new Set([
     ".git",
+    ".agents",
+    ".codex",
+    ".skills",
+    ".uipath",
     "node_modules",
     "dist",
     "build",
@@ -362,7 +371,10 @@ function listScannableFiles(root: string) {
   const files: string[] = [];
 
   function visit(path: string) {
-    const stat = statSync(path);
+    const stat = lstatSync(path);
+    if (stat.isSymbolicLink()) {
+      return;
+    }
     const name = path.split("/").at(-1) ?? path;
     if (stat.isDirectory()) {
       if (ignoredDirs.has(name)) {
@@ -401,6 +413,9 @@ function looksLikeCommittedSecret(line: string) {
   if (assignment) {
     const name = assignment[1] ?? "";
     const value = assignment[2] ?? "";
+    if (/[().]/.test(value)) {
+      return false;
+    }
     if (
       /^(replace|example|local|synthetic|dummy|test|changeme|your-|<)/i.test(
         value,

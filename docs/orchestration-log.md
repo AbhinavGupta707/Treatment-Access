@@ -632,3 +632,93 @@ Launch safety:
   run/debug, Action Center task creation, Data Service/Data Fabric writes,
   Orchestrator job start, RPA run/debug, solution upload/publish/deploy/activate,
   IXP mutation, and payer submission.
+
+## 2026-06-29 - Checkpoint 6 Integrated Closeout
+
+Merged into `main`:
+
+- `aa9a697 Merge checkpoint 6 live agent runtime`, after reviewing
+  `25b6f2b` and running `CI=true pnpm verify:setup` plus `git diff --check`.
+- `e118098 Merge checkpoint 6 LangGraph workflow runtime`, after reviewing
+  `26aa32d` and running `CI=true pnpm verify:setup` plus `git diff --check`.
+- `22db000 Merge checkpoint 6 premium product UI`, after reviewing `2e9d32c`
+  with command-center typecheck/build, worker CDP screenshots, worker viewport
+  checks, `CI=true pnpm verify:setup`, and `git diff --check`.
+- `6e7e656 Merge checkpoint 6 UiPath live readiness gates`, after reviewing
+  `b253417` with local script/runbook checks, `CI=true pnpm verify:setup`, and
+  `git diff --check`.
+- `3110eda Merge checkpoint 6 demo readiness`, after reviewing `29ae549`,
+  resolving `docs/testing.md`, and running `CI=true pnpm verify:setup` plus
+  `git diff --check`.
+
+Integration fixes made directly on `main`:
+
+- Ran repository Prettier over merged Checkpoint 6 files, including UiPath JSON
+  metadata touched by local build/pack checks.
+- Hardened `scripts/verify-checkpoint6-readiness.ts` so the no-secret scanner
+  skips generated local skill/cache trees and symlink loops, while still
+  scanning committed workspace text.
+- Replaced dummy test secret-looking values in
+  `packages/agent-runtime/test/agent-runtime.test.ts` with clearly inert dummy
+  keys.
+- Quoted the ignored local `.env.local` LangSmith project name so shell-sourced
+  live smokes no longer trip over spaces; no secret was printed or committed.
+
+Final verification passed:
+
+- `CI=true pnpm verify`
+- `CI=true pnpm format:check`
+- `CI=true pnpm verify:checkpoint6`
+- `CI=true pnpm seed`
+- `CI=true pnpm smoke:agents`
+- `DEBUG_SMOKE=1 CI=true pnpm smoke:checkpoint4 -- --port 8894`
+- `CI=true pnpm smoke:checkpoint6-live-providers`
+- `CI=true pnpm smoke:live-agents -- --require-live --call-model` after
+  loading ignored local `.env.local`
+- `CI=true pnpm smoke:checkpoint6-ui`
+- `CI=true pnpm uipath:readiness local`
+- `git diff --check`
+
+Checkpoint 6 evidence:
+
+- Fireworks read-only `/models` connectivity passed with no inference call.
+- LangSmith read-only project/session connectivity passed with no trace
+  creation.
+- Fireworks live synthetic model call passed against
+  `accounts/fireworks/models/deepseek-v4-pro` and the output path remained
+  schema/readiness validated.
+- LangSmith runtime configuration is enabled for project
+  `Treatment Access Command Center`; the smoke verifies trace metadata shape
+  without creating a trace.
+- Command Center UI smoke passed for `/`, `/dashboard`, `/cases`, and
+  `/analytics` at `http://127.0.0.1:5173`.
+- Premium UI screenshots reviewed:
+  `/tmp/tacc-command-center-desktop-cdp.png` and
+  `/tmp/tacc-command-center-mobile-cdp.png`.
+- UiPath local readiness passed without live side effects: `uip rpa validate`
+  reported no diagnostics, `uip rpa build` succeeded, and
+  `uip solution pack ... --dry-run` returned `Status: Valid`.
+
+Checkpoint 6 delivered:
+
+- Premium customer-facing dark SaaS Command Center with dashboard, cases,
+  evidence, submissions, appeals, analytics, and audit-style drill-downs.
+- Live-provider runtime config for Fireworks and LangSmith with safe env
+  summaries and no secret printing.
+- LangGraph-shaped seven-agent workflow with deterministic and live modes,
+  branch records for human gates, payer API fallback, denial-to-appeal, and
+  care handoff, plus schema-validated outputs.
+- Readiness scripts for deterministic local proof, live provider checks, live
+  model smoke, UI shell smoke, and UiPath no-side-effect local readiness.
+- Demo/submission docs updated to keep the screen product-clean while verbally
+  explaining the complex UiPath/agentic backend.
+
+Remaining approval-gated live work:
+
+- No live Agent Builder/Coded Agent run/debug, Maestro run/debug, Action Center
+  task creation, Data Service/Data Fabric write, Orchestrator job start, RPA
+  run/debug, solution upload/publish/deploy/activate, IXP mutation, or payer
+  submission was run.
+- Those live side-effecting steps are important for a stronger final production
+  proof, but they still require explicit user approval and should be executed
+  from the `TreatmentAccessHackathon` folder only.

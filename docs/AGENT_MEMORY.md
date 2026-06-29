@@ -330,7 +330,7 @@ require explicit user approval.
 
 ## Checkpoint 6 Status
 
-Checkpoint 6 is active under orchestration.
+Checkpoint 6 is merged and locally verified on `main`.
 
 Prep/base commit: `6e1648f`.
 
@@ -348,24 +348,85 @@ Checkpoint 6 outcome:
   visualization surface for governed state.
 - Keep all live UiPath side effects behind explicit user approval.
 
-Active isolated lanes:
+Integrated lanes:
 
-| Merge order | Lane                                  | Thread ID                              | Worktree path                                                | Ownership                                  |
-| ----------- | ------------------------------------- | -------------------------------------- | ------------------------------------------------------------ | ------------------------------------------ |
+| Merge order | Lane                                  | Thread ID                              | Worktree path                                                | Ownership                                                                    |
+| ----------- | ------------------------------------- | -------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------- |
 | 1           | Live Agent Provider & Runtime Schemas | `019f130f-ec37-7e01-9d7b-0efe8670ccda` | `/Users/abhinavgupta/.codex/worktrees/7465/Treatment Access` | `packages/shared-schemas/**`, `packages/agent-runtime/**`, readiness scripts |
-| 2           | LangGraph Multi-Agent Workflow        | `019f1310-5cbd-7d13-81ad-0a1e4b4171f7` | `/Users/abhinavgupta/.codex/worktrees/64fd/Treatment Access` | `packages/agent-runtime/**`, workflow smoke |
-| 3           | Premium Product UI                    | `019f1310-e132-7e60-9577-31d66b79b61c` | `/Users/abhinavgupta/.codex/worktrees/99a4/Treatment Access` | `apps/command-center/**`                  |
-| 4           | UiPath Live Wiring & Safe Hooks       | `019f1311-7436-7503-925a-0a9ac79883fc` | `/Users/abhinavgupta/.codex/worktrees/d3d4/Treatment Access` | `uipath/**`, UiPath readiness docs/scripts |
-| 5           | Live Demo QA & Submission Readiness   | `019f1312-0bc3-7b72-98e7-49e743de79d5` | `/Users/abhinavgupta/.codex/worktrees/f649/Treatment Access` | `scripts/**`, demo/submission/testing docs |
+| 2           | LangGraph Multi-Agent Workflow        | `019f1310-5cbd-7d13-81ad-0a1e4b4171f7` | `/Users/abhinavgupta/.codex/worktrees/64fd/Treatment Access` | `packages/agent-runtime/**`, workflow smoke                                  |
+| 3           | Premium Product UI                    | `019f1310-e132-7e60-9577-31d66b79b61c` | `/Users/abhinavgupta/.codex/worktrees/99a4/Treatment Access` | `apps/command-center/**`                                                     |
+| 4           | UiPath Live Wiring & Safe Hooks       | `019f1311-7436-7503-925a-0a9ac79883fc` | `/Users/abhinavgupta/.codex/worktrees/d3d4/Treatment Access` | `uipath/**`, UiPath readiness docs/scripts                                   |
+| 5           | Live Demo QA & Submission Readiness   | `019f1312-0bc3-7b72-98e7-49e743de79d5` | `/Users/abhinavgupta/.codex/worktrees/f649/Treatment Access` | `scripts/**`, demo/submission/testing docs                                   |
 
 Launch constraints:
 
 - The user has created local `.env.local` with Fireworks and LangSmith keys;
   the file is ignored by git and must never be printed or committed.
-- Worker worktrees should not require secrets. Live provider testing should be
-  performed in the integration worktree after merge unless a worker explicitly
-  has a safe ignored env file.
 - Do not run live `uip agent debug`, Maestro run/debug, Action Center task
   creation, Data Service/Data Fabric writes, Orchestrator job start, RPA
   run/debug, solution upload/publish/deploy/activate, IXP mutation, or payer
   submission without explicit user approval.
+
+Integrated commits:
+
+- `aa9a697` merged live provider/runtime schemas from `25b6f2b`.
+- `e118098` merged the LangGraph multi-agent workflow from `26aa32d`.
+- `22db000` merged the premium product UI from `2e9d32c`.
+- `6e7e656` merged UiPath live wiring/readiness gates from `b253417`.
+- `3110eda` merged demo QA/submission readiness from `29ae549`.
+
+Checkpoint 6 delivered:
+
+- Premium customer-facing Command Center with dark SaaS dashboard, case,
+  evidence, submission, appeal, analytics, and audit surfaces inspired by the
+  supplied UI references.
+- Fireworks/LangSmith runtime configuration with safe env summaries,
+  deterministic/live modes, and no secret printing.
+- LangGraph-shaped seven-agent workflow with schema-validated agent outputs,
+  human gates, robot fallback request records, denial-to-appeal branching, and
+  care handoff branching.
+- Checkpoint 6 readiness scripts:
+  `smoke:checkpoint6-readiness`, `smoke:checkpoint6-live-providers`,
+  `smoke:checkpoint6-ui`, and `verify:checkpoint6`.
+- UiPath no-side-effect readiness wrapper for command discovery, RPA
+  validate/build, and solution pack dry-run.
+
+Closeout verification passed:
+
+- `CI=true pnpm verify`
+- `CI=true pnpm format:check`
+- `CI=true pnpm verify:checkpoint6`
+- `CI=true pnpm seed`
+- `CI=true pnpm smoke:agents`
+- `DEBUG_SMOKE=1 CI=true pnpm smoke:checkpoint4 -- --port 8894`
+- `CI=true pnpm smoke:checkpoint6-live-providers`
+- `CI=true pnpm smoke:live-agents -- --require-live --call-model` after
+  loading ignored local `.env.local`
+- `CI=true pnpm smoke:checkpoint6-ui`
+- `CI=true pnpm uipath:readiness local`
+- `git diff --check`
+
+Checkpoint 6 evidence:
+
+- Fireworks read-only `/models` connectivity passed.
+- LangSmith read-only project/session connectivity passed.
+- A tiny synthetic Fireworks model call passed with
+  `accounts/fireworks/models/deepseek-v4-pro`; no UiPath, payer, Action Center,
+  or Data Service side effects were invoked.
+- Command Center UI smoke passed for `/`, `/dashboard`, `/cases`, and
+  `/analytics` on `http://127.0.0.1:5173`.
+- Premium UI screenshots reviewed:
+  `/tmp/tacc-command-center-desktop-cdp.png` and
+  `/tmp/tacc-command-center-mobile-cdp.png`.
+- UiPath local readiness passed: `uip rpa validate` reported no diagnostics,
+  `uip rpa build` succeeded, and `uip solution pack ... --dry-run` returned
+  `Status: Valid`.
+
+Remaining live-readiness work:
+
+- Live Agent Builder/Coded Agent run/debug, Maestro run/debug, Action Center
+  task creation, Data Service/Data Fabric writes, Orchestrator job start, RPA
+  run/debug, solution upload/publish/deploy/activate, IXP mutation, and payer
+  submission remain explicit user-approval-gated actions.
+- Keep using only synthetic data and the `TreatmentAccessHackathon` UiPath
+  folder for this project.

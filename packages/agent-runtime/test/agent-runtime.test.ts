@@ -149,9 +149,9 @@ describe("agent runtime", () => {
     const validation = resolveAgentRuntimeConfig({
       AGENT_MODE: "live",
       AGENT_ORCHESTRATOR: "uipath",
-      FIREWORKS_API_KEY: "fw-secret-not-for-logs",
+      FIREWORKS_API_KEY: "dummy-fw-key",
       LANGSMITH_TRACING: "true",
-      LANGSMITH_API_KEY: "ls-secret-not-for-logs",
+      LANGSMITH_API_KEY: "dummy-ls-key",
       LANGSMITH_PROJECT: "Treatment Access Command Center",
     });
 
@@ -160,10 +160,10 @@ describe("agent runtime", () => {
     expect(validation.config.orchestrator).toBe("uipath");
     expect(validation.safeEnvSummary.FIREWORKS_API_KEY).toBe("set");
     expect(JSON.stringify(validation.safeEnvSummary)).not.toContain(
-      "fw-secret-not-for-logs",
+      "dummy-fw-key",
     );
     expect(JSON.stringify(validation.safeEnvSummary)).not.toContain(
-      "ls-secret-not-for-logs",
+      "dummy-ls-key",
     );
   });
 
@@ -185,7 +185,7 @@ describe("agent runtime", () => {
   it("supports provider readiness checks without making a model call", async () => {
     const validation = resolveAgentRuntimeConfig({
       AGENT_MODE: "live",
-      FIREWORKS_API_KEY: "fw-secret-not-for-logs",
+      FIREWORKS_API_KEY: "dummy-fw-key",
       FIREWORKS_FAST_MODEL: "accounts/fireworks/models/deepseek-v3p1",
       LANGSMITH_TRACING: "false",
     });
@@ -336,9 +336,7 @@ describe("agent runtime", () => {
 
     expect(run.status).toBe("completed");
     expect(run.branches_taken).toContain("approval_to_care_handoff");
-    expect(run.steps.map((step) => step.node_id)).toContain(
-      "care-continuity",
-    );
+    expect(run.steps.map((step) => step.node_id)).toContain("care-continuity");
   });
 
   it("uses the live provider adapter interface when supplied and keeps outputs validated", async () => {

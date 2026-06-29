@@ -63,7 +63,8 @@ export function createLangSmithTraceLink(input: {
   runtimeConfig?: AgentRuntimeConfig;
   metadata?: LangSmithTraceMetadata;
 }): TraceLink {
-  const runtimeConfig = input.runtimeConfig ?? resolveAgentRuntimeConfig().config;
+  const runtimeConfig =
+    input.runtimeConfig ?? resolveAgentRuntimeConfig().config;
 
   return {
     trace_id: input.traceId,

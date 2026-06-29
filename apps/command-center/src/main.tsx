@@ -381,7 +381,10 @@ function CommandCenter({
           <SubmissionView data={runtime.data} runtime={runtime} />
         ) : null}
         {activeView === "appeals" ? (
-          <AppealView data={runtime.data} onOpenEvidence={() => onViewChange("evidence")} />
+          <AppealView
+            data={runtime.data}
+            onOpenEvidence={() => onViewChange("evidence")}
+          />
         ) : null}
         {activeView === "analytics" ? <AnalyticsView rows={rows} /> : null}
       </section>
@@ -481,8 +484,12 @@ function TopBar({
           <DatabaseZap size={14} />
           {runtime.source === "api" ? "Live event mirror" : "Fallback cache"}
         </span>
-        {runtime.error ? <span className="top-error">{runtime.error}</span> : null}
-        {mutationError ? <span className="top-error">{mutationError}</span> : null}
+        {runtime.error ? (
+          <span className="top-error">{runtime.error}</span>
+        ) : null}
+        {mutationError ? (
+          <span className="top-error">{mutationError}</span>
+        ) : null}
         <button
           aria-label="Open audit trace"
           className="round-button"
@@ -507,7 +514,11 @@ function TopBar({
         >
           <RotateCcw size={18} />
         </button>
-        <button aria-label="Notifications" className="round-button" type="button">
+        <button
+          aria-label="Notifications"
+          className="round-button"
+          type="button"
+        >
           <Bell size={18} />
           <span className="notification-dot" />
         </button>
@@ -638,7 +649,11 @@ function CaseDetailView({
     <div className="view-stack">
       <PageHeader
         action={
-          <button className="secondary-button" onClick={onOpenSubmission} type="button">
+          <button
+            className="secondary-button"
+            onClick={onOpenSubmission}
+            type="button"
+          >
             Actions
             <MoreVertical size={16} />
           </button>
@@ -699,7 +714,11 @@ function EvidenceView({
       <EvidenceSummaryBand data={data} patient={patient} />
       <div className="evidence-grid">
         <section className="glass-panel evidence-table-panel">
-          <div className="evidence-table" role="table" aria-label="Evidence matrix">
+          <div
+            className="evidence-table"
+            role="table"
+            aria-label="Evidence matrix"
+          >
             <div className="evidence-row evidence-head" role="row">
               <span role="columnheader">Payer Requirement</span>
               <span role="columnheader">Evidence Found</span>
@@ -720,7 +739,8 @@ function EvidenceView({
                   }
                   key={criterion.criterion_id}
                   onClick={() => {
-                    if (evidence) onSelectedEvidenceIdChange(evidence.mapping_id);
+                    if (evidence)
+                      onSelectedEvidenceIdChange(evidence.mapping_id);
                   }}
                   role="row"
                   type="button"
@@ -735,15 +755,23 @@ function EvidenceView({
                   <div role="cell">
                     <StatusIcon tone={tone} />
                     <div>
-                      <strong>{evidence ? evidenceLabel(evidence) : "Not found"}</strong>
-                      <span>{evidence?.evidence_summary ?? "No evidence mapped."}</span>
+                      <strong>
+                        {evidence ? evidenceLabel(evidence) : "Not found"}
+                      </strong>
+                      <span>
+                        {evidence?.evidence_summary ?? "No evidence mapped."}
+                      </span>
                     </div>
                   </div>
                   <div role="cell">
                     <FileText size={18} />
                     <div>
                       <strong>{sourceTitle(evidence, criterion)}</strong>
-                      <span>{formatSourceReference(evidence?.source_span ?? criterion.source_span)}</span>
+                      <span>
+                        {formatSourceReference(
+                          evidence?.source_span ?? criterion.source_span,
+                        )}
+                      </span>
                     </div>
                   </div>
                   <div role="cell">
@@ -793,7 +821,10 @@ function SubmissionView({
       />
       <div className="submission-layout">
         <section className="glass-panel submission-flow">
-          <PanelHeader icon={<Network size={20} />} title="Payer Channel Routing" />
+          <PanelHeader
+            icon={<Network size={20} />}
+            title="Payer Channel Routing"
+          />
           <div className="route-flow">
             <FlowNode
               icon={<ShieldCheck size={20} />}
@@ -805,8 +836,12 @@ function SubmissionView({
             <FlowNode
               icon={<Activity size={20} />}
               label="UiPath Robot"
-              state={portalAttempt || robotEvent ? "good" : apiDown ? "warn" : "idle"}
-              value={portalAttempt || robotEvent ? "Portal submitted" : "Waiting"}
+              state={
+                portalAttempt || robotEvent ? "good" : apiDown ? "warn" : "idle"
+              }
+              value={
+                portalAttempt || robotEvent ? "Portal submitted" : "Waiting"
+              }
             />
             <ArrowRight size={22} />
             <FlowNode
@@ -818,18 +853,41 @@ function SubmissionView({
           </div>
         </section>
         <section className="glass-panel">
-          <PanelHeader icon={<DatabaseZap size={20} />} title="Submission Detail" />
+          <PanelHeader
+            icon={<DatabaseZap size={20} />}
+            title="Submission Detail"
+          />
           <div className="detail-list">
             <KeyValue
               label="API attempt"
-              value={apiAttempt ? attemptStatus(apiAttempt) : apiDown ? "Armed by current state" : "Not attempted"}
+              value={
+                apiAttempt
+                  ? attemptStatus(apiAttempt)
+                  : apiDown
+                    ? "Armed by current state"
+                    : "Not attempted"
+              }
             />
-            <KeyValue label="Robot job" value={jobId ?? "Unavailable until Orchestrator writes"} />
-            <KeyValue label="Portal confirmation" value={confirmation ?? "No confirmation in mirror yet"} />
-            <KeyValue label="State source" value={runtime.source === "api" ? "Live event mirror" : "Local fallback cache"} />
+            <KeyValue
+              label="Robot job"
+              value={jobId ?? "Unavailable until Orchestrator writes"}
+            />
+            <KeyValue
+              label="Portal confirmation"
+              value={confirmation ?? "No confirmation in mirror yet"}
+            />
+            <KeyValue
+              label="State source"
+              value={
+                runtime.source === "api"
+                  ? "Live event mirror"
+                  : "Local fallback cache"
+              }
+            />
           </div>
           <p className="governance-note">
-            Robot fallback is shown only after UiPath job or event records are present. No live payer submission is implied by this UI.
+            Robot fallback is shown only after UiPath job or event records are
+            present. No live payer submission is implied by this UI.
           </p>
         </section>
       </div>
@@ -846,17 +904,23 @@ function AppealView({
 }) {
   const patient = casePatient(data);
   const denialAttempt =
-    data.submissions.find((submission) => submission.decision_status === "denied") ??
-    data.submissions.find((submission) => submission.denial_code);
+    data.submissions.find(
+      (submission) => submission.decision_status === "denied",
+    ) ?? data.submissions.find((submission) => submission.denial_code);
   const appeal = data.appeals.at(-1);
-  const denialReason = denialAttempt?.denial_reason ?? data.toggles.denial_reason;
+  const denialReason =
+    denialAttempt?.denial_reason ?? data.toggles.denial_reason;
   const needsSignoff = !appeal?.clinician_approved;
 
   return (
     <div className="view-stack">
       <PageHeader
         action={
-          <button className="secondary-button" onClick={onOpenEvidence} type="button">
+          <button
+            className="secondary-button"
+            onClick={onOpenEvidence}
+            type="button"
+          >
             <ArrowRight size={16} />
             Evidence
           </button>
@@ -899,7 +963,12 @@ function AppealView({
         <section className="glass-panel">
           <PanelHeader
             icon={<ClipboardCheck size={20} />}
-            right={<StatusPill tone={needsSignoff ? "warn" : "good"} value={needsSignoff ? "Awaiting Signoff" : "Ready"} />}
+            right={
+              <StatusPill
+                tone={needsSignoff ? "warn" : "good"}
+                value={needsSignoff ? "Awaiting Signoff" : "Ready"}
+              />
+            }
             title="Appeal Packet Builder"
           />
           <div className="packet-list">
@@ -936,7 +1005,10 @@ function AppealView({
         </section>
       </div>
       <section className="glass-panel recommended-actions">
-        <PanelHeader icon={<CheckCircle2 size={20} />} title="Recommended Next Actions" />
+        <PanelHeader
+          icon={<CheckCircle2 size={20} />}
+          title="Recommended Next Actions"
+        />
         <div className="action-card-grid">
           <ActionCard
             icon={<UserCheck size={20} />}
@@ -968,11 +1040,41 @@ function AnalyticsView({ rows }: { rows: CaseListRow[] }) {
       />
       <KpiGrid
         items={[
-          { icon: Clock3, label: "Median delay avoided", value: "4.2d", trend: "Across active cases", tone: "good" },
-          { icon: Gauge, label: "Automation coverage", value: "86%", trend: "UiPath-governed steps", tone: "info" },
-          { icon: ShieldCheck, label: "Evidence-linked claims", value: "100%", trend: "No unsupported assertions submitted", tone: "good" },
-          { icon: Bot, label: "Agent steps mirrored", value: "7", trend: "Specialist agents", tone: "info" },
-          { icon: UsersRound, label: "Case mix", value: String(rows.length), trend: "Visible synthetic queue", tone: "warn" },
+          {
+            icon: Clock3,
+            label: "Median delay avoided",
+            value: "4.2d",
+            trend: "Across active cases",
+            tone: "good",
+          },
+          {
+            icon: Gauge,
+            label: "Automation coverage",
+            value: "86%",
+            trend: "UiPath-governed steps",
+            tone: "info",
+          },
+          {
+            icon: ShieldCheck,
+            label: "Evidence-linked claims",
+            value: "100%",
+            trend: "No unsupported assertions submitted",
+            tone: "good",
+          },
+          {
+            icon: Bot,
+            label: "Agent steps mirrored",
+            value: "7",
+            trend: "Specialist agents",
+            tone: "info",
+          },
+          {
+            icon: UsersRound,
+            label: "Case mix",
+            value: String(rows.length),
+            trend: "Visible synthetic queue",
+            tone: "warn",
+          },
         ]}
       />
       <section className="glass-panel analytics-panel">
@@ -983,7 +1085,9 @@ function AnalyticsView({ rows }: { rows: CaseListRow[] }) {
           ))}
         </div>
         <p className="governance-note">
-          Analytics are synthetic and demo-oriented. Live production measures would be written by UiPath workflows and event records before this UI visualizes them.
+          Analytics are synthetic and demo-oriented. Live production measures
+          would be written by UiPath workflows and event records before this UI
+          visualizes them.
         </p>
       </section>
     </div>
@@ -1046,7 +1150,11 @@ function KpiGrid({
 
 function Sparkline({ tone }: { tone: Tone }) {
   return (
-    <svg aria-hidden="true" className={`sparkline ${tone}`} viewBox="0 0 120 24">
+    <svg
+      aria-hidden="true"
+      className={`sparkline ${tone}`}
+      viewBox="0 0 120 24"
+    >
       <path d="M2 16 C10 11 13 18 21 13 S31 17 38 12 S50 19 59 14 S71 9 79 13 S89 10 96 14 S107 7 118 9" />
     </svg>
   );
@@ -1074,7 +1182,9 @@ function FeaturedCase({
           <h2>{patient}</h2>
           <p>{row.treatment} - Specialty biologic authorization</p>
           <div className="case-tags">
-            <span>Case ID: {caseRecord.external_case_key ?? caseRecord.case_id}</span>
+            <span>
+              Case ID: {caseRecord.external_case_key ?? caseRecord.case_id}
+            </span>
             <span>{row.payer}</span>
           </div>
         </div>
@@ -1087,14 +1197,17 @@ function FeaturedCase({
       <div className="risk-copy">
         <strong>Why at risk?</strong>
         <p>
-          Prior authorization requires additional source-backed evidence and clinician signoff before payer submission.
+          Prior authorization requires additional source-backed evidence and
+          clinician signoff before payer submission.
         </p>
         <button className="primary-button" onClick={onOpenCase} type="button">
           Open Case
         </button>
       </div>
       <div className="source-footnote">
-        {runtime.source === "api" ? "Deterministic state from event mirror" : "Deterministic fallback cache"}
+        {runtime.source === "api"
+          ? "Deterministic state from event mirror"
+          : "Deterministic fallback cache"}
       </div>
     </section>
   );
@@ -1244,11 +1357,35 @@ function CaseSummaryBand({
           <p>MRN SYN-7845123 - Age {data.patient?.age ?? 34} - Synthetic</p>
         </div>
       </div>
-      <SummaryItem label="Diagnosis" value={data.order?.diagnosis ?? "Moderate-to-severe inflammatory bowel disease"} meta={data.patient?.diagnosis_codes.join(", ") ?? "K50.90"} />
-      <SummaryItem label="Requested Treatment" value={data.order?.medication_name ?? caseRecord.medication_name} meta={data.order?.dose ?? "Dose in order"} />
-      <SummaryItem label="Payer" value={caseRecord.payer_id} meta={data.patient?.coverage_plan ?? "Commercial"} />
-      <SummaryItem label="Case ID" value={caseRecord.external_case_key ?? caseRecord.case_id} meta={`Created ${formatShortDate(caseRecord.last_event_at)}`} />
-      <SummaryItem label="Urgency" value={labelize(caseRecord.urgency)} meta={`Decision due ${formatRelativeDue(caseRecord.sla_due_at)}`} tone="danger" />
+      <SummaryItem
+        label="Diagnosis"
+        value={
+          data.order?.diagnosis ??
+          "Moderate-to-severe inflammatory bowel disease"
+        }
+        meta={data.patient?.diagnosis_codes.join(", ") ?? "K50.90"}
+      />
+      <SummaryItem
+        label="Requested Treatment"
+        value={data.order?.medication_name ?? caseRecord.medication_name}
+        meta={data.order?.dose ?? "Dose in order"}
+      />
+      <SummaryItem
+        label="Payer"
+        value={caseRecord.payer_id}
+        meta={data.patient?.coverage_plan ?? "Commercial"}
+      />
+      <SummaryItem
+        label="Case ID"
+        value={caseRecord.external_case_key ?? caseRecord.case_id}
+        meta={`Created ${formatShortDate(caseRecord.last_event_at)}`}
+      />
+      <SummaryItem
+        label="Urgency"
+        value={labelize(caseRecord.urgency)}
+        meta={`Decision due ${formatRelativeDue(caseRecord.sla_due_at)}`}
+        tone="danger"
+      />
     </section>
   );
 }
@@ -1262,10 +1399,16 @@ function ProgressPanel({ caseRecord }: { caseRecord: TreatmentAccessCase }) {
       <div className="progress-track">
         {PROGRESS_STEPS.map((step, index) => {
           const state =
-            index < activeIndex ? "done" : index === activeIndex ? "active" : "queued";
+            index < activeIndex
+              ? "done"
+              : index === activeIndex
+                ? "active"
+                : "queued";
           return (
             <div className={`progress-step ${state}`} key={step.id}>
-              <span>{state === "done" ? <CheckCircle2 size={18} /> : index + 1}</span>
+              <span>
+                {state === "done" ? <CheckCircle2 size={18} /> : index + 1}
+              </span>
               <strong>{step.label}</strong>
               <em>{state === "active" ? "In Progress" : step.status}</em>
             </div>
@@ -1278,7 +1421,10 @@ function ProgressPanel({ caseRecord }: { caseRecord: TreatmentAccessCase }) {
         </div>
         <div>
           <h3>{PROGRESS_STEPS[activeIndex]?.label ?? "Case review"}</h3>
-          <p>Building the prior authorization package and aligning evidence to payer policy.</p>
+          <p>
+            Building the prior authorization package and aligning evidence to
+            payer policy.
+          </p>
         </div>
         <div>
           <span>Estimated completion</span>
@@ -1306,8 +1452,15 @@ function NextActionCards({
       <div className="action-card-grid">
         <ActionCard
           icon={<FileText size={20} />}
-          label={pendingRows[0] ? "Confirm clinical assertion" : "Confirm disease severity"}
-          meta={pendingRows[0]?.human_review_reason ?? "Review mapped evidence and sign the authorization package."}
+          label={
+            pendingRows[0]
+              ? "Confirm clinical assertion"
+              : "Confirm disease severity"
+          }
+          meta={
+            pendingRows[0]?.human_review_reason ??
+            "Review mapped evidence and sign the authorization package."
+          }
           onClick={onOpenEvidence}
           priority="High"
         />
@@ -1337,8 +1490,18 @@ function ActorsPanel({ data }: { data: DemoState }) {
   const actors = [
     { icon: Bot, label: "Agent", name: "CareGuide AI", state: "Active" },
     { icon: Bot, label: "Robot", name: "EvidenceBot", state: "Active" },
-    { icon: UserRound, label: "Human", name: "Clinician reviewer", state: "In Progress" },
-    { icon: Workflow, label: "API", name: "Payer Gateway", state: apiFailureActive(data) ? "Fallback" : "Active" },
+    {
+      icon: UserRound,
+      label: "Human",
+      name: "Clinician reviewer",
+      state: "In Progress",
+    },
+    {
+      icon: Workflow,
+      label: "API",
+      name: "Payer Gateway",
+      state: apiFailureActive(data) ? "Fallback" : "Active",
+    },
   ];
 
   return (
@@ -1349,12 +1512,22 @@ function ActorsPanel({ data }: { data: DemoState }) {
           const Icon = actor.icon;
           return (
             <div className="actor-row" key={`${actor.label}-${actor.name}`}>
-              <span className="actor-icon"><Icon size={18} /></span>
+              <span className="actor-icon">
+                <Icon size={18} />
+              </span>
               <div>
                 <strong>{actor.label}</strong>
                 <em>{actor.name}</em>
               </div>
-              <StatusDot tone={actor.state === "Fallback" ? "warn" : actor.state === "In Progress" ? "warn" : "good"} />
+              <StatusDot
+                tone={
+                  actor.state === "Fallback"
+                    ? "warn"
+                    : actor.state === "In Progress"
+                      ? "warn"
+                      : "good"
+                }
+              />
               <small>{actor.state}</small>
             </div>
           );
@@ -1386,7 +1559,9 @@ function RecentActivity({ events }: { events: AuditEvent[] }) {
                 <strong>{event.task_or_agent_name}</strong>
                 <span>{event.actor_name}</span>
               </div>
-              <time dateTime={event.timestamp}>{formatTime(event.timestamp)}</time>
+              <time dateTime={event.timestamp}>
+                {formatTime(event.timestamp)}
+              </time>
             </article>
           ))
         ) : (
@@ -1417,17 +1592,41 @@ function EvidenceSummaryBand({
           <p>MRN SYN-7845123 - Age {data.patient?.age ?? 34} - Synthetic</p>
         </div>
       </div>
-      <SummaryItem label="Treatment" value={data.order?.medication_name ?? data.case?.medication_name ?? "Treatment"} meta={data.order?.diagnosis ?? "Clinical indication"} />
-      <SummaryItem label="Case ID" value={data.case?.external_case_key ?? data.case?.case_id ?? "Case"} meta="Governed event record" />
-      <SummaryItem label="Risk Level" value={labelize(data.case?.sla_state ?? "at risk")} meta={`Decision due ${formatRelativeDue(data.case?.sla_due_at ?? new Date().toISOString())}`} tone="danger" />
-      <SummaryItem label="Stage" value={currentStageLabel(data.case?.current_stage)} meta="Next: payer review" />
+      <SummaryItem
+        label="Treatment"
+        value={
+          data.order?.medication_name ??
+          data.case?.medication_name ??
+          "Treatment"
+        }
+        meta={data.order?.diagnosis ?? "Clinical indication"}
+      />
+      <SummaryItem
+        label="Case ID"
+        value={data.case?.external_case_key ?? data.case?.case_id ?? "Case"}
+        meta="Governed event record"
+      />
+      <SummaryItem
+        label="Risk Level"
+        value={labelize(data.case?.sla_state ?? "at risk")}
+        meta={`Decision due ${formatRelativeDue(data.case?.sla_due_at ?? new Date().toISOString())}`}
+        tone="danger"
+      />
+      <SummaryItem
+        label="Stage"
+        value={currentStageLabel(data.case?.current_stage)}
+        meta="Next: payer review"
+      />
     </section>
   );
 }
 
 function EvidenceDrawer({ evidence }: { evidence?: EvidenceMapping }) {
   return (
-    <aside className="glass-panel selected-evidence" aria-label="Selected evidence">
+    <aside
+      className="glass-panel selected-evidence"
+      aria-label="Selected evidence"
+    >
       <div className="drawer-title">
         <h2>Selected Evidence</h2>
         <button aria-label="Close selected evidence" type="button">
@@ -1445,9 +1644,22 @@ function EvidenceDrawer({ evidence }: { evidence?: EvidenceMapping }) {
           </div>
           <div className="source-details">
             <h3>Source Details</h3>
-            <KeyValue label="Evidence status" value={labelize(evidence.status)} />
-            <KeyValue label="Confidence" value={`${Math.round(evidence.confidence * 100)}%`} />
-            <KeyValue label="Review" value={evidence.needs_human_review ? "Clinician review required" : "Evidence linked"} />
+            <KeyValue
+              label="Evidence status"
+              value={labelize(evidence.status)}
+            />
+            <KeyValue
+              label="Confidence"
+              value={`${Math.round(evidence.confidence * 100)}%`}
+            />
+            <KeyValue
+              label="Review"
+              value={
+                evidence.needs_human_review
+                  ? "Clinician review required"
+                  : "Evidence linked"
+              }
+            />
           </div>
           <div className="evidence-snapshot">
             <h3>Evidence Snapshot</h3>
@@ -1459,7 +1671,10 @@ function EvidenceDrawer({ evidence }: { evidence?: EvidenceMapping }) {
           </button>
         </>
       ) : (
-        <EmptyState detail="Select a mapped requirement to inspect its source." title="No evidence selected" />
+        <EmptyState
+          detail="Select a mapped requirement to inspect its source."
+          title="No evidence selected"
+        />
       )}
     </aside>
   );
@@ -1472,7 +1687,8 @@ function UnsupportedWarning() {
       <div>
         <strong>Do not submit unsupported claims.</strong>
         <p>
-          Payer guidelines require source-backed criteria, policy citations, or clinician approval before submission.
+          Payer guidelines require source-backed criteria, policy citations, or
+          clinician approval before submission.
         </p>
       </div>
       <button className="secondary-button" type="button">
@@ -1496,14 +1712,44 @@ function AppealSummaryBand({
         <Avatar initials={initialsFor(patient)} tone="red" large />
         <div>
           <h2>{patient}</h2>
-          <p>MRN SYN-7845123 - Case ID: {data.case?.external_case_key ?? data.case?.case_id}</p>
+          <p>
+            MRN SYN-7845123 - Case ID:{" "}
+            {data.case?.external_case_key ?? data.case?.case_id}
+          </p>
         </div>
       </div>
-      <SummaryItem label="Treatment" value={data.order?.medication_name ?? data.case?.medication_name ?? "Treatment"} meta="Specialty medication" />
-      <SummaryItem label="Payer" value={data.case?.payer_id ?? "Payer"} meta={data.patient?.coverage_plan ?? "Commercial"} />
-      <SummaryItem label="Denied On" value="Jul 02, 2026" meta="Denied" tone="danger" />
-      <SummaryItem label="Appeal Deadline" value="Jul 12, 2026" meta="Time sensitive" tone="danger" />
-      <SummaryItem label="Current Risk Level" value="High" meta="Decision due soon" tone="danger" />
+      <SummaryItem
+        label="Treatment"
+        value={
+          data.order?.medication_name ??
+          data.case?.medication_name ??
+          "Treatment"
+        }
+        meta="Specialty medication"
+      />
+      <SummaryItem
+        label="Payer"
+        value={data.case?.payer_id ?? "Payer"}
+        meta={data.patient?.coverage_plan ?? "Commercial"}
+      />
+      <SummaryItem
+        label="Denied On"
+        value="Jul 02, 2026"
+        meta="Denied"
+        tone="danger"
+      />
+      <SummaryItem
+        label="Appeal Deadline"
+        value="Jul 12, 2026"
+        meta="Time sensitive"
+        tone="danger"
+      />
+      <SummaryItem
+        label="Current Risk Level"
+        value="High"
+        meta="Decision due soon"
+        tone="danger"
+      />
     </section>
   );
 }
@@ -1536,7 +1782,11 @@ function AuditDrawer({
             <span>Audit / Trace</span>
             <h2>Runtime Proof</h2>
           </div>
-          <button aria-label="Close audit drawer" onClick={onClose} type="button">
+          <button
+            aria-label="Close audit drawer"
+            onClick={onClose}
+            type="button"
+          >
             <X size={20} />
           </button>
         </div>
@@ -1547,7 +1797,9 @@ function AuditDrawer({
               ? "Reading deterministic state from the event mirror API."
               : "Mirror unavailable; showing local deterministic fallback cache."}
           </p>
-          <small>{runtime.apiBaseUrl} - fetched {formatTime(runtime.lastFetchedAt)}</small>
+          <small>
+            {runtime.apiBaseUrl} - fetched {formatTime(runtime.lastFetchedAt)}
+          </small>
         </section>
         <section className="audit-section">
           <PanelHeader icon={<Bot size={18} />} title="Specialist Agents" />
@@ -1556,7 +1808,17 @@ function AuditDrawer({
               const view = agentView(agent.name, agent.traceNeedle, data);
               return (
                 <div className="compact-agent" key={agent.name}>
-                  <StatusDot tone={view.tone === "danger" ? "danger" : view.tone === "warn" ? "warn" : view.tone === "good" ? "good" : "idle"} />
+                  <StatusDot
+                    tone={
+                      view.tone === "danger"
+                        ? "danger"
+                        : view.tone === "warn"
+                          ? "warn"
+                          : view.tone === "good"
+                            ? "good"
+                            : "idle"
+                    }
+                  />
                   <strong>{agent.name}</strong>
                   <span>{view.status}</span>
                 </div>
@@ -1574,7 +1836,11 @@ function AuditDrawer({
         </section>
         <section className="audit-section">
           <PanelHeader icon={<Activity size={18} />} title="Runtime Events" />
-          <div className="actor-filter" role="tablist" aria-label="Timeline actor filter">
+          <div
+            className="actor-filter"
+            role="tablist"
+            aria-label="Timeline actor filter"
+          >
             {ACTOR_FILTERS.map((filter) => (
               <button
                 aria-selected={actorFilter === filter.id}
@@ -1595,7 +1861,9 @@ function AuditDrawer({
               filteredEvents
                 .slice()
                 .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
-                .map((event) => <TimelineEvent event={event} key={event.event_id} />)
+                .map((event) => (
+                  <TimelineEvent event={event} key={event.event_id} />
+                ))
             )}
           </div>
         </section>
@@ -1631,7 +1899,9 @@ function DemoTogglesPanel({
         checked={toggles.clinician_rejects_assertion}
         disabled={disabled}
         label="Clinician rejects assertion"
-        onChange={(checked) => onToggle({ clinician_rejects_assertion: checked })}
+        onChange={(checked) =>
+          onToggle({ clinician_rejects_assertion: checked })
+        }
       />
       <label className="select-row">
         <span>Denial reason</span>
@@ -1721,7 +1991,9 @@ function Avatar({
   large?: boolean;
   tone: CaseListRow["accent"];
 }) {
-  return <span className={`avatar ${tone} ${large ? "large" : ""}`}>{initials}</span>;
+  return (
+    <span className={`avatar ${tone} ${large ? "large" : ""}`}>{initials}</span>
+  );
 }
 
 function StatusPill({ tone, value }: { tone?: string; value: string }) {
@@ -1733,8 +2005,10 @@ function StatusDot({ tone }: { tone: "good" | "danger" | "warn" | "idle" }) {
 }
 
 function StatusIcon({ tone }: { tone: Tone }) {
-  if (tone === "good") return <CheckCircle2 className="status-icon good" size={24} />;
-  if (tone === "warn") return <AlertTriangle className="status-icon warn" size={24} />;
+  if (tone === "good")
+    return <CheckCircle2 className="status-icon good" size={24} />;
+  if (tone === "warn")
+    return <AlertTriangle className="status-icon warn" size={24} />;
   if (tone === "danger") return <X className="status-icon danger" size={24} />;
   return <CircleDashed className="status-icon idle" size={24} />;
 }
@@ -1742,7 +2016,10 @@ function StatusIcon({ tone }: { tone: Tone }) {
 function ConfidenceArc({ value }: { value: number }) {
   const percentage = Math.max(0, Math.min(100, Math.round(value * 100)));
   return (
-    <span className="confidence-arc" style={{ "--confidence": `${percentage}%` } as React.CSSProperties}>
+    <span
+      className="confidence-arc"
+      style={{ "--confidence": `${percentage}%` } as React.CSSProperties}
+    >
       <span />
     </span>
   );
@@ -1908,10 +2185,18 @@ function buildCaseRows(data: DemoState, patient: string): CaseListRow[] {
     initials: initialsFor(patient),
     patient,
     age: data.patient?.age ?? 34,
-    treatment: data.order?.medication_name ?? data.case?.medication_name ?? "Fictionalimab",
+    treatment:
+      data.order?.medication_name ??
+      data.case?.medication_name ??
+      "Fictionalimab",
     payer: payerName(data.case?.payer_id ?? "Northstar Health"),
     stage: stageForCase(data.case),
-    risk: data.case?.sla_state === "breached" ? "High" : data.case?.sla_state === "at_risk" ? "High" : "Medium",
+    risk:
+      data.case?.sla_state === "breached"
+        ? "High"
+        : data.case?.sla_state === "at_risk"
+          ? "High"
+          : "Medium",
     nextAction: nextActionForCase(data),
     owner: "CareGuide AI",
     accent: "red",
@@ -1978,33 +2263,65 @@ function agentView(name: string, traceNeedle: string, data: DemoState) {
   const event = [...data.events]
     .reverse()
     .find((candidate) =>
-      `${candidate.actor_name} ${candidate.task_or_agent_name}`.includes(traceNeedle),
+      `${candidate.actor_name} ${candidate.task_or_agent_name}`.includes(
+        traceNeedle,
+      ),
     );
   const missing = data.evidenceMappings.some((row) => row.status === "missing");
-  const needsHuman = data.evidenceMappings.some((row) => row.needs_human_review);
+  const needsHuman = data.evidenceMappings.some(
+    (row) => row.needs_human_review,
+  );
   const denial = hasDenialSignal(data);
   const appeal = data.appeals.at(-1);
   const handoff = data.handoffs.at(-1);
 
   if (event) {
-    return { tone: "good" as Tone, status: "completed", output: event.output_summary };
+    return {
+      tone: "good" as Tone,
+      status: "completed",
+      output: event.output_summary,
+    };
   }
   if (name === "Missing Evidence") {
-    return { tone: missing ? "danger" as Tone : "good" as Tone, status: missing ? "blocking" : "clear", output: "Evidence gap routing." };
+    return {
+      tone: missing ? ("danger" as Tone) : ("good" as Tone),
+      status: missing ? "blocking" : "clear",
+      output: "Evidence gap routing.",
+    };
   }
   if (name === "Submission Packet") {
-    return { tone: needsHuman ? "warn" as Tone : "idle" as Tone, status: needsHuman ? "needs human" : "queued", output: "Packet readiness." };
+    return {
+      tone: needsHuman ? ("warn" as Tone) : ("idle" as Tone),
+      status: needsHuman ? "needs human" : "queued",
+      output: "Packet readiness.",
+    };
   }
   if (name === "Denial Rescue") {
-    return { tone: denial ? "warn" as Tone : "idle" as Tone, status: denial ? "active" : "queued", output: "Denial strategy." };
+    return {
+      tone: denial ? ("warn" as Tone) : ("idle" as Tone),
+      status: denial ? "active" : "queued",
+      output: "Denial strategy.",
+    };
   }
   if (name === "Appeal Packet") {
-    return { tone: appeal ? "warn" as Tone : "idle" as Tone, status: appeal ? "review" : "queued", output: "Clinician review." };
+    return {
+      tone: appeal ? ("warn" as Tone) : ("idle" as Tone),
+      status: appeal ? "review" : "queued",
+      output: "Clinician review.",
+    };
   }
   if (name === "Care Continuity") {
-    return { tone: handoff ? "good" as Tone : "idle" as Tone, status: handoff ? "handoff" : "queued", output: "Care handoff." };
+    return {
+      tone: handoff ? ("good" as Tone) : ("idle" as Tone),
+      status: handoff ? "handoff" : "queued",
+      output: "Care handoff.",
+    };
   }
-  return { tone: "idle" as Tone, status: "queued", output: "Waiting for trace." };
+  return {
+    tone: "idle" as Tone,
+    status: "queued",
+    output: "Waiting for trace.",
+  };
 }
 
 function evidenceTone(status?: EvidenceMapping["status"]): Tone {
@@ -2044,7 +2361,9 @@ function apiFailureActive(data: DemoState) {
   return (
     data.toggles.payer_api_unavailable ||
     Boolean(
-      data.case?.active_secondary_stages.includes("api_failure_portal_fallback"),
+      data.case?.active_secondary_stages.includes(
+        "api_failure_portal_fallback",
+      ),
     ) ||
     data.submissions.some(
       (submission) =>
@@ -2065,7 +2384,9 @@ function latestRobotEvent(data: DemoState) {
 
 function hasDenialSignal(data: DemoState) {
   return data.submissions.some(
-    (submission) => submission.decision_status === "denied" || Boolean(submission.denial_code),
+    (submission) =>
+      submission.decision_status === "denied" ||
+      Boolean(submission.denial_code),
   );
 }
 
@@ -2086,9 +2407,15 @@ function extractConfirmation(value?: string) {
 
 function displayEventSummary(event: AuditEvent) {
   if (event.action === "demo_toggles_updated") {
-    const apiDown = event.output_summary.includes('"payer_api_unavailable":true');
-    const missingLab = event.output_summary.includes('"missing_safety_lab":true');
-    const rejected = event.output_summary.includes('"clinician_rejects_assertion":true');
+    const apiDown = event.output_summary.includes(
+      '"payer_api_unavailable":true',
+    );
+    const missingLab = event.output_summary.includes(
+      '"missing_safety_lab":true',
+    );
+    const rejected = event.output_summary.includes(
+      '"clinician_rejects_assertion":true',
+    );
     const active = [
       apiDown ? "payer API failure" : undefined,
       missingLab ? "missing safety screen" : undefined,
@@ -2126,10 +2453,12 @@ function payerName(value: string) {
 
 function stageForCase(caseRecord: TreatmentAccessCase | null) {
   if (!caseRecord) return "Intake";
-  if (caseRecord.current_stage === "clinical_validation") return "Clinician Signoff";
+  if (caseRecord.current_stage === "clinical_validation")
+    return "Clinician Signoff";
   if (caseRecord.current_stage === "denial_rescue") return "Appeal";
   if (caseRecord.current_stage === "submission") return "Payer Review";
-  if (caseRecord.current_stage === "policy_evidence") return "Evidence Gathering";
+  if (caseRecord.current_stage === "policy_evidence")
+    return "Evidence Gathering";
   return currentStageLabel(caseRecord.current_stage);
 }
 
@@ -2225,7 +2554,8 @@ function denialReasonText(reason: DemoToggles["denial_reason"]) {
 }
 
 function formatSourceReference(
-  source: EvidenceMapping["source_span"] | PolicyCriterion["source_span"] | undefined,
+  source:
+    EvidenceMapping["source_span"] | PolicyCriterion["source_span"] | undefined,
 ) {
   if (!source) return "No source reference";
   if (typeof source === "string") return source;

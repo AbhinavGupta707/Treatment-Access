@@ -60,7 +60,8 @@ console.log(
         metadata: langSmith.metadata,
       },
       modelCallAttempted: callModel,
-      sideEffects: "none; no UiPath, payer, Action Center, or Data Service calls",
+      sideEffects:
+        "none; no UiPath, payer, Action Center, or Data Service calls",
     },
     null,
     2,
