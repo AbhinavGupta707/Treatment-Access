@@ -452,12 +452,7 @@ components:
         denial_reason:
           type: string
           enum:
-            [
-              step_therapy,
-              safety_screen,
-              medical_necessity,
-              documentation_gap,
-            ]
+            [step_therapy, safety_screen, medical_necessity, documentation_gap]
         clinician_rejects_assertion:
           type: boolean
     LiveProofRunRequest:

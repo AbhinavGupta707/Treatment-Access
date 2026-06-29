@@ -477,3 +477,62 @@ Live side effects remain approval-gated:
 - No solution upload, publish, deploy, or activate.
 - No IXP mutation.
 - No payer submission.
+
+## Checkpoint 7 Closeout
+
+Checkpoint 7 has been merged and reconciled on `main`.
+
+Worker commits merged:
+
+- `45abde0` - live proof schemas/API/agent runtime.
+- `1bc77ba` - UiPath coded-agent governed hooks and samples.
+- `883a0d3` - RPA portal fallback live-smoke hardening.
+- `2ff0970` - Command Center live proof UX.
+- `deaab04` - QA/demo/submission readiness.
+
+Integration fixes:
+
+- `1503ddd` fixed the live proof embedded `AgentRun` contract.
+- `2e2a28c` aligned the Command Center to `/live-proof-runs`.
+- `c922244` merged QA and combined the executable/runtime smoke with static
+  demo-readiness checks.
+- The final integration edit added a timeout guard for optional UiPath readiness
+  checks and kept formatting clean.
+
+Current end-to-end proof:
+
+- Product UI can trigger a local live proof run and render product-facing
+  progress, evidence, approval, and trace/source details.
+- Runtime creates seven stage records and seven specialized agent step records.
+- Mock healthcare API mirrors seven synthetic UiPath-style events.
+- Approval gate remains visible and blocks autonomous clinical/payer action.
+- Fireworks live model smoke and LangSmith readiness have passed using ignored
+  local `.env.local`; no secrets were printed or committed.
+- UiPath local readiness passed: command surface discovery, RPA analyzer rules,
+  `uip rpa validate`, `uip rpa build`, and `uip solution pack --dry-run`.
+
+Verified in the integration tree:
+
+- `CI=true pnpm verify`
+- `CI=true pnpm format:check`
+- `CI=true pnpm verify:setup`
+- `CI=true pnpm smoke:checkpoint7-live-proof`
+- `CI=true pnpm smoke:agents`
+- `CI=true pnpm verify:checkpoint6`
+- `CI=true pnpm smoke:checkpoint6-live-providers`
+- `CI=true pnpm smoke:live-agents -- --require-live --call-model`
+- `UIPATH_OPTIONAL_TIMEOUT_SECONDS=10 CI=true pnpm uipath:readiness local`
+- `TACC_COMMAND_CENTER_URL=http://127.0.0.1:5175 CI=true pnpm smoke:checkpoint6-ui`
+- `git diff --check`
+
+Honest remaining limits:
+
+- No live UiPath side-effecting proof has been executed yet. That still needs
+  explicit user approval before running Agent/Coded Agent jobs, Maestro,
+  Action Center tasks, Data Service writes, Orchestrator jobs, RPA robot
+  run/debug, solution deploy/activate, IXP mutation, or payer submission.
+- The current live proof is a safe local synthetic event-mirror proof with live
+  LLM/provider readiness, not a fully deployed production UiPath tenant flow.
+- The coded-agent artifacts are an authoring packet and governed hook contract,
+  not a published live Coded Agent in Studio Web.
+- The payer portal is a synthetic local portal, not a real payer integration.

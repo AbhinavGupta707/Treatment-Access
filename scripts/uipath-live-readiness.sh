@@ -34,10 +34,41 @@ run() {
 }
 
 run_optional() {
+  local timeout_seconds="${UIPATH_OPTIONAL_TIMEOUT_SECONDS:-75}"
+  local status=0
+
   printf '\n+'
   printf ' %q' "$@"
   printf '  # optional\n'
-  if ! "$@"; then
+
+  if [[ "$timeout_seconds" == "0" ]]; then
+    set +e
+    "$@"
+    status=$?
+    set -e
+  else
+    "$@" &
+    local command_pid=$!
+    (
+      sleep "$timeout_seconds"
+      kill -TERM "$command_pid" 2>/dev/null || true
+    ) &
+    local timeout_pid=$!
+
+    set +e
+    wait "$command_pid"
+    status=$?
+    set -e
+
+    kill "$timeout_pid" 2>/dev/null || true
+    wait "$timeout_pid" 2>/dev/null || true
+  fi
+
+  if [[ "$status" -ne 0 ]]; then
+    if [[ "$status" -eq 143 ]]; then
+      echo "WARNING: optional readiness check timed out after ${timeout_seconds}s; continuing to narrower no-side-effect checks." >&2
+      return 0
+    fi
     echo "WARNING: optional readiness check failed; continuing to narrower no-side-effect checks." >&2
   fi
 }

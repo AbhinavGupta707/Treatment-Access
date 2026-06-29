@@ -176,4 +176,8 @@ Stop and ask the user before proceeding if:
 - [x] Commit Checkpoint 7 planning and control docs.
 - [x] Spawn the five lane worktree sessions from the prep commit.
 - [x] Record thread IDs and worktree paths in this runbook and project memory.
-- [ ] Begin heartbeat monitoring and merge only after lane review.
+- [x] Begin heartbeat monitoring and merge only after lane review.
+- [x] Merge all five lanes to `main` in planned order.
+- [x] Patch cross-lane integration gaps in the integration worktree.
+- [x] Run final no-side-effect verification and record remaining live approval
+      gates.

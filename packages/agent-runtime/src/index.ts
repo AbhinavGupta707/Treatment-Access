@@ -861,10 +861,7 @@ export async function runTreatmentAccessLiveProof(
     payer_api_unavailable: true,
     ...options.toggles,
   });
-  const context = createGraphRuntimeContext(
-    { fixture, toggles },
-    "approved",
-  );
+  const context = createGraphRuntimeContext({ fixture, toggles }, "approved");
   const startedAt = new Date().toISOString();
   const runId =
     options.runId ??
@@ -973,11 +970,7 @@ export async function runTreatmentAccessLiveProof(
     traces,
     uipath_evidence_refs: uipathEvidenceRefs,
     agent_run: agentRun,
-    step_runs: createLiveProofStepRuns(
-      runId,
-      fixture.case.case_id,
-      agentSteps,
-    ),
+    step_runs: createLiveProofStepRuns(runId, fixture.case.case_id, agentSteps),
     tool_calls: createLiveProofToolCalls(
       runId,
       fixture.case.case_id,
@@ -2418,10 +2411,10 @@ function compactTraceMetadata(
   metadata: Record<string, string | number | boolean | undefined>,
 ): Record<string, string | number | boolean> {
   return Object.fromEntries(
-    Object.entries(metadata).filter((entry): entry is [
-      string,
-      string | number | boolean,
-    ] => entry[1] !== undefined),
+    Object.entries(metadata).filter(
+      (entry): entry is [string, string | number | boolean] =>
+        entry[1] !== undefined,
+    ),
   );
 }
 

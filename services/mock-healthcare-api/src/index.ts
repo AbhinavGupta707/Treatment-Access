@@ -896,25 +896,25 @@ function caseSnapshot(state: MockState): TreatmentAccessCase {
     status: latestLiveProof
       ? "Live proof waiting for approval"
       : hasHandoff
-      ? "Pharmacy handoff created"
-      : hasAppeal
-        ? "Appeal approved"
-        : hasSubmission
-          ? "Prior authorization denied for demo"
-          : state.toggles.missing_safety_lab
-            ? "Missing evidence"
-            : seedCase.status,
+        ? "Pharmacy handoff created"
+        : hasAppeal
+          ? "Appeal approved"
+          : hasSubmission
+            ? "Prior authorization denied for demo"
+            : state.toggles.missing_safety_lab
+              ? "Missing evidence"
+              : seedCase.status,
     current_stage: latestLiveProof
       ? "submission"
       : hasHandoff
-      ? "care_continuity"
-      : hasAppeal
         ? "care_continuity"
-        : hasSubmission
-          ? "payer_decision"
-          : state.toggles.missing_safety_lab
-            ? "policy_evidence"
-            : seedCase.current_stage,
+        : hasAppeal
+          ? "care_continuity"
+          : hasSubmission
+            ? "payer_decision"
+            : state.toggles.missing_safety_lab
+              ? "policy_evidence"
+              : seedCase.current_stage,
     active_secondary_stages: [
       ...new Set([
         ...(state.toggles.missing_safety_lab
@@ -924,10 +924,7 @@ function caseSnapshot(state: MockState): TreatmentAccessCase {
           ? (["api_failure_portal_fallback"] as const)
           : []),
         ...(latestLiveProof
-          ? ([
-              "api_failure_portal_fallback",
-              "human_exception_review",
-            ] as const)
+          ? (["api_failure_portal_fallback", "human_exception_review"] as const)
           : []),
         ...(hasSubmission && !hasAppeal
           ? (["denial_rescue_appeal"] as const)

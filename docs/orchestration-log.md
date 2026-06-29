@@ -774,3 +774,70 @@ worktree lanes from `main`.
 Initial orchestration stance: leave active workers alone unless blocked. Merge
 only after handoff review, lane-specific checks, `CI=true pnpm verify:setup`,
 and `git diff --check`.
+
+## 2026-06-29 - Checkpoint 7 Integrated and Reconciled
+
+Reviewed all five Checkpoint 7 worker handoffs, inspected each worktree diff,
+and merged them to `main` in the planned order:
+
+| Merge order | Lane                                       | Worker commit |
+| ----------- | ------------------------------------------ | ------------- |
+| 1           | Live Proof Schemas, API, and Agent Runtime | `45abde0`     |
+| 2           | UiPath Coded Agent and Governed Hooks      | `1bc77ba`     |
+| 3           | RPA Portal Fallback Live-Smoke Hardening   | `883a0d3`     |
+| 4           | Command Center Live Proof UX               | `2ff0970`     |
+| 5           | Checkpoint 7 QA, Demo, and Submission      | `deaab04`     |
+
+Integration fixes applied on `main`:
+
+- Added the missing embedded `synthetic: true` field to the live proof
+  `AgentRun` contract so runtime smoke and TypeScript agree.
+- Aligned the Command Center client to the backend's canonical
+  `/live-proof-runs` route.
+- Reconciled the QA smoke with the executable runtime smoke so
+  `smoke:checkpoint7-live-proof` verifies both the runnable proof and the
+  demo/submission documentation.
+- Ran Prettier on new runtime/schema/API files after the merged workers.
+- Added an optional-check timeout guard to `scripts/uipath-live-readiness.sh`
+  so future local readiness runs cannot stall indefinitely behind UiPath Helm
+  analyzer/validate probes.
+
+Verification during integration:
+
+- `CI=true pnpm verify`
+- `CI=true pnpm format:check`
+- `CI=true pnpm verify:setup`
+- `CI=true pnpm smoke:checkpoint7-live-proof`
+- `CI=true pnpm smoke:agents`
+- `CI=true pnpm verify:checkpoint6`
+- `CI=true pnpm smoke:checkpoint6-live-providers`
+- `CI=true pnpm smoke:live-agents -- --require-live --call-model` after
+  loading ignored local `.env.local`
+- `UIPATH_OPTIONAL_TIMEOUT_SECONDS=10 CI=true pnpm uipath:readiness local`
+- `TACC_COMMAND_CENTER_URL=http://127.0.0.1:5175 CI=true pnpm smoke:checkpoint6-ui`
+- `git diff --check`
+
+Checkpoint 7 proof now works as a no-side-effect live-product slice:
+
+- The Command Center can start a live proof run through the local API.
+- The runtime produces seven stage records and seven specialized agent records.
+- The mock healthcare API writes seven synthetic UiPath-style event mirror
+  records for the visible product timeline.
+- The live proof run ends at the correct approval gate instead of implying an
+  autonomous clinical or payer submission.
+- Fireworks and LangSmith credentials were validated through the Checkpoint 6
+  provider smokes, and a small live Fireworks model call succeeded.
+- UiPath command discovery, RPA analyzer rules, RPA validate, RPA build, and
+  solution pack dry-run passed without running live side effects.
+
+Remaining explicit approval gates:
+
+- No live Agent Builder/Coded Agent run/debug, Maestro run/debug, Action Center
+  task creation, Data Service/Data Fabric write, Orchestrator job start, RPA
+  run/debug, solution upload/publish/deploy/activate, IXP mutation, or payer
+  submission has been run.
+- The UiPath coded-agent folder is still an authoring/governed-hook packet, not
+  a deployed Studio Web/Coded Agent project.
+- The payer portal remains a synthetic local fallback target; no real payer
+  system is connected.
+- Clinical evidence remains synthetic and source-bounded by design.

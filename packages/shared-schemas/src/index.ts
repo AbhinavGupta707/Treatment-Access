@@ -781,12 +781,7 @@ export const LiveProofApprovalGateSchema = z.object({
     "appeal_signoff",
     "exception_review",
   ]),
-  status: z.enum([
-    "not_created",
-    "pending",
-    "approved_for_demo",
-    "blocked",
-  ]),
+  status: z.enum(["not_created", "pending", "approved_for_demo", "blocked"]),
   assigned_role: z.string(),
   reason: z.string(),
   source_stage: LiveProofStageSchema,
@@ -984,9 +979,7 @@ export type LiveProofStepStatus = z.infer<typeof LiveProofStepStatusSchema>;
 export type LiveProofRunStatus = z.infer<typeof LiveProofRunStatusSchema>;
 export type UiPathEvidenceRef = z.infer<typeof UiPathEvidenceRefSchema>;
 export type LiveProofTrace = z.infer<typeof LiveProofTraceSchema>;
-export type LiveProofApprovalGate = z.infer<
-  typeof LiveProofApprovalGateSchema
->;
+export type LiveProofApprovalGate = z.infer<typeof LiveProofApprovalGateSchema>;
 export type LiveProofStep = z.infer<typeof LiveProofStepSchema>;
 export type LiveProofRun = z.infer<typeof LiveProofRunSchema>;
 export type CaseRunSnapshot = z.infer<typeof CaseRunSnapshotSchema>;
