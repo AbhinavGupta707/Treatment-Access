@@ -51,6 +51,46 @@ clinician-review appeal constraints, and unsupported-claim warnings:
 CI=true pnpm smoke:agents
 ```
 
+## Checkpoint 6 LangGraph Workflow Runtime
+
+`@tacc/agent-runtime` now exposes a graph-shaped workflow runner:
+
+- `getTreatmentAccessGraphDefinition()` returns the LangGraph node/edge
+  definition and branch labels.
+- `createTreatmentAccessLangGraph()` compiles the LangGraph skeleton.
+- `runTreatmentAccessGraph()` runs the no-side-effect workflow and returns
+  validated graph steps, structured tool results, human gates, submission
+  attempts, robot fallback requests, audit metadata, and LangSmith-ready trace
+  metadata.
+
+The package adds the minimal LangGraph dependency:
+
+```bash
+pnpm --filter @tacc/agent-runtime add @langchain/langgraph@1.4.7
+```
+
+Deterministic mode remains the default and requires no API keys:
+
+```bash
+CI=true pnpm --filter @tacc/agent-runtime test
+CI=true pnpm smoke:agents
+```
+
+Live mode is intentionally adapter-shaped. Pass a provider implementing
+`TreatmentAccessStructuredProvider` so the runtime can call Fireworks through
+the provider/schema lane once available. Without a provider, the runner remains
+safe and deterministic-shaped. LangSmith fields are included as trace metadata;
+the deterministic tests do not call LangSmith.
+
+The graph models these governed branches without live UiPath side effects or
+real payer submission:
+
+- missing evidence -> human gate;
+- clinician rejection -> rework/block;
+- payer API unavailable -> robot fallback request, no Orchestrator job start;
+- denial -> denial rescue and appeal packet with clinician signoff gate;
+- approval -> care continuity handoff.
+
 ## Checkpoint 4 Mock Payer Portal
 
 Run the local mock payer portal for RPA fallback development:
