@@ -9,6 +9,7 @@ import {
   type DemoToggles,
 } from "@tacc/shared-schemas";
 import type { DemoState, RuntimeState } from "./types";
+import type { LiveProofRun, LiveProofStep } from "./types";
 
 const fallbackNow = "2026-06-28T22:00:00.000Z";
 
@@ -232,6 +233,7 @@ export async function loadRuntimeState(
     const json = (await response.json()) as unknown;
     return {
       data: parseDemoState(json),
+      liveProofRun: parseLiveProofRun(json),
       source: "api",
       apiBaseUrl,
       lastFetchedAt: fetchedAt,
@@ -244,12 +246,45 @@ export async function loadRuntimeState(
 
     return {
       data: fallbackState,
+      liveProofRun: buildSyntheticLiveProofRun(fallbackState, fetchedAt, {
+        status: "blocked",
+        sourceLabel: "Contract preview from local synthetic fallback",
+      }),
       source: "fallback",
       apiBaseUrl,
       lastFetchedAt: fetchedAt,
       error: error instanceof Error ? error.message : "Mock API request failed",
     };
   }
+}
+
+export async function startLiveProofRun(
+  caseId: string,
+  signal?: AbortSignal,
+): Promise<LiveProofRun> {
+  const apiBaseUrl = getApiBaseUrl();
+  const response = await fetch(`${apiBaseUrl}/live-proof/runs`, {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({ case_id: caseId }),
+    signal,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Live proof run failed with ${response.status}`);
+  }
+
+  const json = (await response.json()) as unknown;
+  const run = parseLiveProofRun(json);
+
+  if (!run) {
+    throw new Error("Live proof response did not include a run contract");
+  }
+
+  return run;
 }
 
 export async function updateDemoToggles(
@@ -289,6 +324,216 @@ export async function resetDemoState(signal?: AbortSignal) {
   return response.json() as Promise<{ ok: boolean; eventCount: number }>;
 }
 
+export function buildSyntheticLiveProofRun(
+  state: DemoState,
+  timestamp = new Date().toISOString(),
+  options?: {
+    status?: LiveProofRun["status"];
+    sourceLabel?: string;
+  },
+): LiveProofRun {
+  const caseId = state.case?.case_id ?? "case-syn-001";
+  const needsHuman = state.evidenceMappings.some(
+    (mapping) => mapping.needs_human_review,
+  );
+  const missingEvidence = state.evidenceMappings.some(
+    (mapping) => mapping.status === "missing",
+  );
+  const apiDown =
+    state.toggles.payer_api_unavailable ||
+    state.case?.active_secondary_stages.includes(
+      "api_failure_portal_fallback",
+    ) === true;
+
+  const steps: LiveProofStep[] = [
+    {
+      step_id: "case_live_proof_started",
+      label: "Case run started",
+      agent: "UiPath Maestro",
+      status: "completed",
+      summary:
+        "Created a synthetic live-proof run record for the treatment-access case.",
+      source: "uipath",
+      evidence_refs: [
+        {
+          label: "UiPath event mirror",
+          source: "event_mirror",
+          detail: `${state.events.length} synthetic event records visible`,
+        },
+      ],
+    },
+    {
+      step_id: "policy_checked",
+      label: "Policy checked",
+      agent: "Coverage Requirement Agent",
+      status: "completed",
+      summary:
+        "Matched payer criteria to policy citations before any packet language is prepared.",
+      source: "fireworks",
+      evidence_refs: state.criteria.slice(0, 2).map((criterion) => ({
+        label: criterion.policy_citation,
+        source: "event_mirror",
+        detail: formatSourceRef(criterion.source_span),
+      })),
+    },
+    {
+      step_id: "evidence_mapped",
+      label: "Evidence mapped",
+      agent: "Evidence Retrieval Agent",
+      status: missingEvidence ? "blocked" : "completed",
+      summary: missingEvidence
+        ? "A required synthetic source is missing, so submission remains blocked."
+        : "Mapped chart evidence to payer criteria and flagged clinical assertions that need review.",
+      source: "fireworks",
+      evidence_refs: state.evidenceMappings.slice(0, 3).map((mapping) => ({
+        label: mapping.evidence_summary,
+        source: "event_mirror",
+        detail: formatSourceRef(mapping.source_span),
+      })),
+    },
+    {
+      step_id: "human_gate_required",
+      label: "Clinician gate",
+      agent: "Missing Evidence Agent",
+      status: needsHuman ? "needs_human" : "completed",
+      summary: needsHuman
+        ? "A clinician must approve the high-impact clinical assertion before submission."
+        : "No current evidence row requires clinician approval.",
+      source: "human",
+      evidence_refs: state.evidenceMappings
+        .filter((mapping) => mapping.needs_human_review)
+        .map((mapping) => ({
+          label: "Human review reason",
+          source: "human",
+          detail: mapping.human_review_reason ?? mapping.evidence_summary,
+        })),
+    },
+    {
+      step_id: "submission_packet_ready_or_blocked",
+      label: "Packet readiness",
+      agent: "Submission Packet Agent",
+      status: needsHuman || missingEvidence ? "blocked" : "running",
+      summary:
+        needsHuman || missingEvidence
+          ? "Submission packet is held until evidence and approval gates clear."
+          : "Packet is ready to route through the governed payer channel.",
+      source: "uipath",
+      evidence_refs: [
+        {
+          label: "Safety rule",
+          source: "event_mirror",
+          detail:
+            "The UI visualizes readiness only; UiPath-owned workflows produce live case state.",
+        },
+      ],
+    },
+    {
+      step_id: "payer_api_unavailable_or_not_attempted",
+      label: "Payer channel",
+      agent: "API Workflow",
+      status: apiDown ? "blocked" : "queued",
+      summary: apiDown
+        ? "Payer API is unavailable; robot fallback waits for governed UiPath records."
+        : "Payer API is available but no real payer submission is implied.",
+      source: "uipath",
+      evidence_refs: [
+        {
+          label: "Payer channel state",
+          source: "event_mirror",
+          detail: apiDown ? "API unavailable" : "API ready",
+        },
+      ],
+    },
+    {
+      step_id: "live_proof_completed_or_waiting_for_approval",
+      label: "Proof outcome",
+      agent: "Audit Packet",
+      status: needsHuman ? "needs_human" : "running",
+      summary: needsHuman
+        ? "Live proof is waiting for clinician approval before any downstream action."
+        : "Run is ready for the next governed UiPath-owned action.",
+      source: "uipath",
+      evidence_refs: [
+        {
+          label: "Synthetic-only safety",
+          source: "deterministic",
+          detail:
+            state.case?.synthetic_data_disclaimer ??
+            "Synthetic fictional demo data; not a real person or encounter.",
+        },
+      ],
+    },
+  ];
+
+  return {
+    run_id: `live-proof-preview-${caseId}`,
+    case_id: caseId,
+    status:
+      options?.status ??
+      (needsHuman
+        ? "waiting_for_approval"
+        : missingEvidence
+          ? "blocked"
+          : "running"),
+    headline: needsHuman
+      ? "Clinician approval is the next safe step"
+      : "Live proof is ready for governed routing",
+    started_at: timestamp,
+    updated_at: timestamp,
+    current_agent: needsHuman
+      ? "Missing Evidence Agent"
+      : apiDown
+        ? "Submission Packet Agent"
+        : "Coverage Requirement Agent",
+    value_summary: [
+      "Prevents avoidable denial by checking policy criteria first",
+      "Reduces manual chart review by mapping evidence to requirements",
+      "Keeps appeal language as a clinician-reviewed administrative draft",
+      "Leaves auditable human gates under UiPath governance",
+    ],
+    steps,
+    approval_gate: {
+      gate_id: "clinician-approval-syn",
+      label: "Clinician approval",
+      status: needsHuman ? "waiting" : "not_required",
+      owner: "Clinician reviewer",
+      reason: needsHuman
+        ? "High-impact clinical assertion requires human approval."
+        : "Current synthetic evidence does not require a human exception gate.",
+      source: "human",
+    },
+    traces: [
+      {
+        provider: "Fireworks",
+        label: "Agent model calls",
+        status: "pending",
+        detail:
+          "Will show provider evidence after the live agent runtime writes run metadata.",
+      },
+      {
+        provider: "LangSmith",
+        label: "Trace metadata",
+        status: "metadata_only",
+        trace_id: "pending-live-proof-trace",
+        detail:
+          "Trace URL is displayed only when the runtime returns one. Metadata-only states are labeled honestly.",
+      },
+      {
+        provider: "UiPath",
+        label: "Governed records",
+        status: "available",
+        detail:
+          "Command Center visualizes UiPath-owned event records; it is not the source of truth.",
+      },
+    ],
+    source_label:
+      options?.sourceLabel ?? "Contract preview until live proof API responds",
+    synthetic_data_disclaimer:
+      state.case?.synthetic_data_disclaimer ??
+      "Synthetic fictional demo data; not a real person or encounter.",
+  };
+}
+
 function parseDemoState(value: unknown): DemoState {
   const state = value as DemoState;
 
@@ -311,4 +556,34 @@ function parseDemoState(value: unknown): DemoState {
       : [],
     events: state.events.map((event) => AuditEventSchema.parse(event)),
   };
+}
+
+function parseLiveProofRun(value: unknown): LiveProofRun | null {
+  const envelope = value as {
+    liveProofRun?: unknown;
+    live_proof_run?: unknown;
+    run?: unknown;
+  };
+  const candidate =
+    envelope.liveProofRun ?? envelope.live_proof_run ?? envelope.run ?? value;
+
+  if (!candidate || typeof candidate !== "object") return null;
+
+  const run = candidate as Partial<LiveProofRun>;
+  if (!run.run_id || !run.case_id || !run.status || !Array.isArray(run.steps)) {
+    return null;
+  }
+
+  return run as LiveProofRun;
+}
+
+function formatSourceRef(
+  source:
+    | string
+    | { source_uri: string; section_label?: string | undefined }
+    | undefined,
+) {
+  if (!source) return "No source reference";
+  if (typeof source === "string") return source;
+  return [source.source_uri, source.section_label].filter(Boolean).join(" - ");
 }

@@ -52,10 +52,18 @@ import type {
   PolicyCriterion,
   TreatmentAccessCase,
 } from "@tacc/shared-schemas";
-import { loadRuntimeState, resetDemoState, updateDemoToggles } from "./lib/api";
+import {
+  buildSyntheticLiveProofRun,
+  loadRuntimeState,
+  resetDemoState,
+  startLiveProofRun,
+  updateDemoToggles,
+} from "./lib/api";
 import type {
   ActorFilter,
   DemoState,
+  LiveProofRun,
+  LiveProofStep,
   MirrorSubmission,
   RuntimeState,
 } from "./lib/types";
@@ -208,6 +216,9 @@ function App() {
   const [activeView, setActiveView] = useState<AppView>("dashboard");
   const [actorFilter, setActorFilter] = useState<ActorFilter>("all");
   const [isAuditOpen, setIsAuditOpen] = useState(false);
+  const [isLiveProofOpen, setIsLiveProofOpen] = useState(false);
+  const [isLiveProofStarting, setIsLiveProofStarting] = useState(false);
+  const [liveProofRun, setLiveProofRun] = useState<LiveProofRun | null>(null);
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<string | null>(
     null,
   );
@@ -224,6 +235,9 @@ function App() {
     try {
       const nextRuntime = await loadRuntimeState(controller.signal);
       setRuntime(nextRuntime);
+      if (nextRuntime.liveProofRun) {
+        setLiveProofRun(nextRuntime.liveProofRun);
+      }
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -254,11 +268,46 @@ function App() {
     setMutationError(null);
     try {
       await resetDemoState();
+      setLiveProofRun(null);
       await refresh(true);
     } catch (error) {
       setMutationError(
         error instanceof Error ? error.message : "Unable to reset demo",
       );
+    }
+  };
+
+  const runLiveProof = async () => {
+    const currentRuntime = runtime;
+    if (!currentRuntime?.data.case) return;
+
+    setMutationError(null);
+    setIsLiveProofStarting(true);
+
+    try {
+      const run = await startLiveProofRun(currentRuntime.data.case.case_id);
+      setLiveProofRun(run);
+      setIsLiveProofOpen(true);
+      await refresh(true);
+    } catch (error) {
+      const preview = buildSyntheticLiveProofRun(
+        currentRuntime.data,
+        new Date().toISOString(),
+        {
+          status: "blocked",
+          sourceLabel:
+            "Live proof API not available yet; showing contract-ready synthetic preview",
+        },
+      );
+      setLiveProofRun(preview);
+      setIsLiveProofOpen(true);
+      setMutationError(
+        error instanceof Error
+          ? error.message
+          : "Live proof endpoint unavailable",
+      );
+    } finally {
+      setIsLiveProofStarting(false);
     }
   };
 
@@ -282,12 +331,17 @@ function App() {
       activeView={activeView}
       actorFilter={actorFilter}
       isAuditOpen={isAuditOpen}
+      isLiveProofOpen={isLiveProofOpen}
+      isLiveProofStarting={isLiveProofStarting}
       isRefreshing={isRefreshing}
+      liveProofRun={liveProofRun ?? runtime.liveProofRun}
       mutationError={mutationError}
       onActorFilterChange={setActorFilter}
       onAuditOpenChange={setIsAuditOpen}
+      onLiveProofOpenChange={setIsLiveProofOpen}
       onRefresh={() => void refresh(true)}
       onReset={() => void resetDemo()}
+      onRunLiveProof={() => void runLiveProof()}
       onSelectedEvidenceIdChange={setSelectedEvidenceId}
       onToggle={(patch) => void updateToggle(patch)}
       onViewChange={setActiveView}
@@ -301,12 +355,17 @@ function CommandCenter({
   activeView,
   actorFilter,
   isAuditOpen,
+  isLiveProofOpen,
+  isLiveProofStarting,
   isRefreshing,
+  liveProofRun,
   mutationError,
   onActorFilterChange,
   onAuditOpenChange,
+  onLiveProofOpenChange,
   onRefresh,
   onReset,
+  onRunLiveProof,
   onSelectedEvidenceIdChange,
   onToggle,
   onViewChange,
@@ -316,12 +375,17 @@ function CommandCenter({
   activeView: AppView;
   actorFilter: ActorFilter;
   isAuditOpen: boolean;
+  isLiveProofOpen: boolean;
+  isLiveProofStarting: boolean;
   isRefreshing: boolean;
+  liveProofRun: LiveProofRun | null;
   mutationError: string | null;
   onActorFilterChange: (filter: ActorFilter) => void;
   onAuditOpenChange: (isOpen: boolean) => void;
+  onLiveProofOpenChange: (isOpen: boolean) => void;
   onRefresh: () => void;
   onReset: () => void;
+  onRunLiveProof: () => void;
   onSelectedEvidenceIdChange: (id: string | null) => void;
   onToggle: (patch: Partial<DemoToggles>) => void;
   onViewChange: (view: AppView) => void;
@@ -357,6 +421,10 @@ function CommandCenter({
             onOpenAppeal={() => onViewChange("appeals")}
             onOpenCase={() => onViewChange("case-detail")}
             onOpenEvidence={() => onViewChange("evidence")}
+            onOpenLiveProof={() => onLiveProofOpenChange(true)}
+            onRunLiveProof={onRunLiveProof}
+            isLiveProofStarting={isLiveProofStarting}
+            liveProofRun={liveProofRun}
             rows={rows}
             runtime={runtime}
           />
@@ -396,6 +464,12 @@ function CommandCenter({
           onClose={() => onAuditOpenChange(false)}
           onToggle={onToggle}
           runtime={runtime}
+        />
+      ) : null}
+      {isLiveProofOpen && liveProofRun ? (
+        <LiveProofDrawer
+          onClose={() => onLiveProofOpenChange(false)}
+          run={liveProofRun}
         />
       ) : null}
     </main>
@@ -533,16 +607,24 @@ function TopBar({
 
 function DashboardView({
   data,
+  isLiveProofStarting,
+  liveProofRun,
   onOpenAppeal,
   onOpenCase,
   onOpenEvidence,
+  onOpenLiveProof,
+  onRunLiveProof,
   rows,
   runtime,
 }: {
   data: DemoState;
+  isLiveProofStarting: boolean;
+  liveProofRun: LiveProofRun | null;
   onOpenAppeal: () => void;
   onOpenCase: () => void;
   onOpenEvidence: () => void;
+  onOpenLiveProof: () => void;
+  onRunLiveProof: () => void;
   rows: CaseListRow[];
   runtime: RuntimeState;
 }) {
@@ -601,6 +683,14 @@ function DashboardView({
             tone: "good",
           },
         ]}
+      />
+      <LiveProofPanel
+        data={data}
+        isStarting={isLiveProofStarting}
+        onOpenDetail={onOpenLiveProof}
+        onRun={onRunLiveProof}
+        run={liveProofRun}
+        runtime={runtime}
       />
       <div className="dashboard-grid">
         <section className="main-column">
@@ -1157,6 +1247,105 @@ function Sparkline({ tone }: { tone: Tone }) {
     >
       <path d="M2 16 C10 11 13 18 21 13 S31 17 38 12 S50 19 59 14 S71 9 79 13 S89 10 96 14 S107 7 118 9" />
     </svg>
+  );
+}
+
+function LiveProofPanel({
+  data,
+  isStarting,
+  onOpenDetail,
+  onRun,
+  run,
+  runtime,
+}: {
+  data: DemoState;
+  isStarting: boolean;
+  onOpenDetail: () => void;
+  onRun: () => void;
+  run: LiveProofRun | null;
+  runtime: RuntimeState;
+}) {
+  const previewRun =
+    run ??
+    buildSyntheticLiveProofRun(data, runtime.lastFetchedAt, {
+      status: "not_started",
+      sourceLabel: "Ready to start a synthetic governed proof",
+    });
+  const progress = liveProofProgress(previewRun.steps);
+  const activeSteps = previewRun.steps.slice(0, 4);
+
+  return (
+    <section className="live-proof-panel">
+      <div className="live-proof-copy">
+        <span className="eyebrow">Checkpoint 7 live proof</span>
+        <h2>{previewRun.headline}</h2>
+        <p>
+          Start one synthetic treatment-access run to show fewer preventable
+          denials, less manual chart review, faster prior authorization prep,
+          safer appeal review, and auditable human gates.
+        </p>
+        <div className="live-proof-actions">
+          <button
+            className="primary-button run-live-proof-button"
+            disabled={isStarting}
+            onClick={onRun}
+            type="button"
+          >
+            {isStarting ? (
+              <RefreshCw className="spin" size={16} />
+            ) : (
+              <Workflow size={16} />
+            )}
+            {run ? "Run live proof again" : "Run live proof"}
+          </button>
+          <button
+            className="secondary-button"
+            disabled={!run}
+            onClick={onOpenDetail}
+            type="button"
+          >
+            View proof detail
+            <PanelRightOpen size={16} />
+          </button>
+        </div>
+      </div>
+      <div className="live-proof-status-card">
+        <div className="live-proof-status-head">
+          <StatusPill
+            tone={liveRunTone(previewRun.status)}
+            value={liveProofStatusCopy(previewRun.status)}
+          />
+          <span>{previewRun.source_label}</span>
+        </div>
+        <div className="proof-meter" aria-label={`${progress}% complete`}>
+          <span style={{ width: `${progress}%` }} />
+        </div>
+        <div className="live-proof-current">
+          <Bot size={22} />
+          <div>
+            <span>Current work</span>
+            <strong>{previewRun.current_agent}</strong>
+          </div>
+        </div>
+        <div className="live-proof-mini-steps">
+          {activeSteps.map((step) => (
+            <div className="mini-step" key={step.step_id}>
+              <StatusDot tone={liveStepDot(step.status)} />
+              <span>{step.label}</span>
+              <em>{step.agent}</em>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="live-proof-value-list">
+        {previewRun.value_summary.map((value) => (
+          <div className="value-proof" key={value}>
+            <ShieldCheck size={18} />
+            <span>{value}</span>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -1751,6 +1940,140 @@ function AppealSummaryBand({
         tone="danger"
       />
     </section>
+  );
+}
+
+function LiveProofDrawer({
+  onClose,
+  run,
+}: {
+  onClose: () => void;
+  run: LiveProofRun;
+}) {
+  const progress = liveProofProgress(run.steps);
+
+  return (
+    <div className="audit-backdrop" role="presentation">
+      <aside className="live-proof-drawer" aria-label="Live proof detail">
+        <div className="audit-header">
+          <div>
+            <span>Live proof detail</span>
+            <h2>{run.headline}</h2>
+          </div>
+          <button
+            aria-label="Close live proof detail"
+            onClick={onClose}
+            type="button"
+          >
+            <X size={20} />
+          </button>
+        </div>
+        <section className="audit-section proof-detail-summary">
+          <div className="proof-detail-topline">
+            <StatusPill
+              tone={liveRunTone(run.status)}
+              value={liveProofStatusCopy(run.status)}
+            />
+            <span>{run.source_label}</span>
+          </div>
+          <div className="proof-meter" aria-label={`${progress}% complete`}>
+            <span style={{ width: `${progress}%` }} />
+          </div>
+          <p>
+            The Command Center visualizes governed records and run metadata. It
+            does not replace UiPath as the orchestration or source-of-truth
+            layer, and it does not submit to a real payer.
+          </p>
+          <small>{run.synthetic_data_disclaimer}</small>
+        </section>
+        <section className="audit-section">
+          <PanelHeader icon={<UserCheck size={18} />} title="Human Gate" />
+          <div className="approval-gate-card">
+            <div>
+              <strong>{run.approval_gate.label}</strong>
+              <span>{run.approval_gate.reason}</span>
+            </div>
+            <StatusPill
+              tone={approvalGateTone(run.approval_gate.status)}
+              value={labelize(run.approval_gate.status)}
+            />
+            <small>{run.approval_gate.owner}</small>
+          </div>
+        </section>
+        <section className="audit-section">
+          <PanelHeader icon={<Bot size={18} />} title="Agent Work" />
+          <div className="proof-step-list">
+            {run.steps.map((step) => (
+              <LiveProofStepCard key={step.step_id} step={step} />
+            ))}
+          </div>
+        </section>
+        <section className="audit-section">
+          <PanelHeader
+            icon={<DatabaseZap size={18} />}
+            title="Trace And Source Labels"
+          />
+          <div className="trace-list">
+            {run.traces.map((trace) => (
+              <article
+                className="trace-card"
+                key={`${trace.provider}-${trace.label}`}
+              >
+                <div>
+                  <strong>{trace.provider}</strong>
+                  <span>{trace.label}</span>
+                </div>
+                <StatusPill
+                  tone={traceTone(trace.status)}
+                  value={labelize(trace.status)}
+                />
+                <p>{trace.detail}</p>
+                {trace.trace_url ? (
+                  <a href={trace.trace_url} rel="noreferrer" target="_blank">
+                    Open trace
+                    <ExternalLink size={14} />
+                  </a>
+                ) : trace.trace_id ? (
+                  <small>{trace.trace_id}</small>
+                ) : null}
+              </article>
+            ))}
+          </div>
+        </section>
+      </aside>
+    </div>
+  );
+}
+
+function LiveProofStepCard({ step }: { step: LiveProofStep }) {
+  return (
+    <article className={`proof-step-card ${liveStepTone(step.status)}`}>
+      <div className="proof-step-head">
+        <StatusDot tone={liveStepDot(step.status)} />
+        <div>
+          <strong>{step.label}</strong>
+          <span>{step.agent}</span>
+        </div>
+        <StatusPill
+          tone={liveStepTone(step.status)}
+          value={labelize(step.status)}
+        />
+      </div>
+      <p>{step.summary}</p>
+      <div className="source-label-row">
+        <span className={`source-label ${sourceTone(step.source)}`}>
+          {sourceKindLabel(step.source)}
+        </span>
+        {step.evidence_refs.slice(0, 3).map((ref) => (
+          <span
+            className={`source-label ${sourceTone(ref.source)}`}
+            key={`${step.step_id}-${ref.label}`}
+          >
+            {ref.label}
+          </span>
+        ))}
+      </div>
+    </article>
   );
 }
 
@@ -2494,6 +2817,64 @@ function stageTone(stage: string) {
   if (stage.includes("Signoff") || stage.includes("Evidence")) return "warn";
   if (stage.includes("Appeal")) return "info";
   return "neutral";
+}
+
+function liveProofProgress(steps: LiveProofStep[]) {
+  if (steps.length === 0) return 0;
+  const completed = steps.filter((step) =>
+    ["completed", "needs_human", "blocked"].includes(step.status),
+  ).length;
+  return Math.round((completed / steps.length) * 100);
+}
+
+function liveRunTone(status: LiveProofRun["status"]) {
+  if (status === "completed") return "good";
+  if (status === "waiting_for_approval" || status === "running") return "warn";
+  if (status === "blocked" || status === "failed") return "danger";
+  return "info";
+}
+
+function liveProofStatusCopy(status: LiveProofRun["status"]) {
+  if (status === "waiting_for_approval") return "Waiting for approval";
+  if (status === "not_started") return "Ready";
+  return labelize(status);
+}
+
+function liveStepTone(status: LiveProofStep["status"]) {
+  if (status === "completed") return "good";
+  if (status === "needs_human" || status === "running") return "warn";
+  if (status === "blocked" || status === "failed") return "danger";
+  return "idle";
+}
+
+function liveStepDot(status: LiveProofStep["status"]) {
+  return liveStepTone(status);
+}
+
+function approvalGateTone(status: LiveProofRun["approval_gate"]["status"]) {
+  if (status === "approved" || status === "not_required") return "good";
+  if (status === "waiting" || status === "required") return "warn";
+  if (status === "rejected") return "danger";
+  return "idle";
+}
+
+function traceTone(status: LiveProofRun["traces"][number]["status"]) {
+  if (status === "available") return "good";
+  if (status === "metadata_only" || status === "pending") return "warn";
+  return "idle";
+}
+
+function sourceKindLabel(source: LiveProofStep["source"]) {
+  if (source === "event_mirror") return "Event mirror";
+  if (source === "deterministic") return "Deterministic fallback";
+  return source.charAt(0).toUpperCase() + source.slice(1);
+}
+
+function sourceTone(source: LiveProofStep["source"]) {
+  if (source === "fireworks" || source === "langsmith") return "info";
+  if (source === "uipath" || source === "event_mirror") return "good";
+  if (source === "human") return "warn";
+  return "idle";
 }
 
 function riskTone(risk: string) {

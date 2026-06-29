@@ -82,8 +82,79 @@ export type DemoState = {
 
 export type RuntimeSource = "api" | "fallback";
 
+export type LiveProofSourceKind =
+  | "fireworks"
+  | "langsmith"
+  | "uipath"
+  | "human"
+  | "event_mirror"
+  | "deterministic";
+
+export type LiveProofStepStatus =
+  "queued" | "running" | "completed" | "needs_human" | "blocked" | "failed";
+
+export type UiPathEvidenceRef = {
+  label: string;
+  source: LiveProofSourceKind;
+  detail: string;
+  href?: string;
+  record_id?: string;
+};
+
+export type LiveProofTrace = {
+  provider: "LangSmith" | "Fireworks" | "UiPath" | "Deterministic";
+  label: string;
+  status: "available" | "metadata_only" | "pending" | "unavailable";
+  trace_id?: string;
+  trace_url?: string;
+  detail: string;
+};
+
+export type LiveProofApprovalGate = {
+  gate_id: string;
+  label: string;
+  status: "not_required" | "required" | "waiting" | "approved" | "rejected";
+  owner: string;
+  reason: string;
+  source: LiveProofSourceKind;
+};
+
+export type LiveProofStep = {
+  step_id: string;
+  label: string;
+  agent: string;
+  status: LiveProofStepStatus;
+  summary: string;
+  source: LiveProofSourceKind;
+  evidence_refs: UiPathEvidenceRef[];
+};
+
+export type LiveProofRun = {
+  run_id: string;
+  case_id: string;
+  status:
+    | "not_started"
+    | "starting"
+    | "running"
+    | "waiting_for_approval"
+    | "completed"
+    | "blocked"
+    | "failed";
+  headline: string;
+  started_at?: string;
+  updated_at: string;
+  current_agent: string;
+  value_summary: string[];
+  steps: LiveProofStep[];
+  approval_gate: LiveProofApprovalGate;
+  traces: LiveProofTrace[];
+  source_label: string;
+  synthetic_data_disclaimer: string;
+};
+
 export type RuntimeState = {
   data: DemoState;
+  liveProofRun: LiveProofRun | null;
   source: RuntimeSource;
   apiBaseUrl: string;
   lastFetchedAt: string;
