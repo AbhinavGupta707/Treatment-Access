@@ -1,0 +1,47 @@
+{
+  "event_id": "evt-uipath-h1-syn-001",
+  "case_id": "case-syn-001",
+  "event_type": "case.h1_proof.created",
+  "event_action": "uipath_h1_event_written",
+  "timestamp": "2026-06-29T18:00:00.000Z",
+  "actor_type": "api_workflow",
+  "actor_name": "UiPath API Workflow",
+  "task_or_agent_name": "WriteTreatmentAccessEvent",
+  "input_summary": "Synthetic H1 proof event accepted by a UiPath-owned write path.",
+  "output_summary": "TreatmentAccessHackathon Data Service audit record created for the synthetic case.",
+  "evidence_refs": ["policy-northstar-biologic-2026-section-2-4"],
+  "provenance": {
+    "source_system": "uipath_data_service",
+    "source_actor": "UiPath API Workflow",
+    "source_verification": "live_uipath_written",
+    "uipath_org_name": "galacticus",
+    "uipath_tenant_name": "DefaultTenant",
+    "uipath_folder_name": "TreatmentAccessHackathon",
+    "uipath_folder_id": "7986316",
+    "uipath_folder_key": "4fba2fa1-012b-469a-b6aa-e5be3811c173",
+    "uipath_record_id": "df-record-syn-001",
+    "uipath_record_type": "TaccAuditEvent",
+    "source_record_id": "df-record-syn-001",
+    "source_record_type": "TaccAuditEvent",
+    "confirmation_id": "df-confirmation-syn-001",
+    "confirmation_status": "created",
+    "source_labels": [
+      "uipath_data_service",
+      "checkpoint8_h1",
+      "event_state_bridge"
+    ],
+    "safety_labels": [
+      "synthetic_data_only",
+      "clinician_review_required",
+      "no_real_payer_submission"
+    ],
+    "captured_at": "2026-06-29T18:00:00.000Z",
+    "synthetic": true
+  },
+  "payload": {
+    "case_status": "UiPath event state proof created",
+    "policy_citation": "Northstar Biologic Policy 2026, Section 2.4",
+    "human_review_required": true
+  },
+  "synthetic_data_disclaimer": "Synthetic demo data only. Not PHI. Not medical or legal advice."
+}

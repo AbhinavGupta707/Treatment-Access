@@ -15,11 +15,13 @@ import {
   AuditEventSchema,
   DemoTogglesSchema,
   LiveProofRunSchema,
+  UiPathEventStateRecordSchema,
   type AuditEvent,
   type DemoToggles,
   type EvidenceMapping,
   type LiveProofRun,
   type TreatmentAccessCase,
+  type UiPathEventStateRecord,
 } from "@tacc/shared-schemas";
 
 const port = Number(process.env.PORT ?? 8787);
@@ -142,6 +144,7 @@ type MockState = {
   handoffs: PharmacyHandoff[];
   schedulingTasks: SchedulingTask[];
   liveProofRuns: LiveProofRun[];
+  uipathEventStateRecords: UiPathEventStateRecord[];
   safetyScreeningOverride: SafetyScreening | null;
   counters: {
     event: number;
@@ -301,6 +304,52 @@ export function createServer(): FastifyInstance {
     live_proof_runs: state.liveProofRuns,
     syntheticDataOnly: true,
   }));
+
+  server.post("/uipath/event-state-records/validate", async (request) => {
+    const eventStateRecord = UiPathEventStateRecordSchema.parse(request.body);
+    return {
+      ok: true,
+      event_state_record: eventStateRecord,
+      verification: eventStateRecord.provenance.source_verification,
+      mirrored_audit_event: auditEventFromUiPathStateRecord(eventStateRecord),
+      syntheticDataOnly: true,
+    };
+  });
+
+  server.post("/uipath/event-state-records", async (request) => {
+    const eventStateRecord = UiPathEventStateRecordSchema.parse(request.body);
+    const auditEvent = auditEventFromUiPathStateRecord(eventStateRecord);
+
+    state.uipathEventStateRecords = [
+      eventStateRecord,
+      ...state.uipathEventStateRecords,
+    ];
+    state.auditEvents = [...state.auditEvents, auditEvent];
+
+    return {
+      ok: true,
+      event_state_record: eventStateRecord,
+      audit_event: auditEvent,
+      eventStateRecordCount: state.uipathEventStateRecords.length,
+      eventCount: state.auditEvents.length,
+      syntheticDataOnly: true,
+    };
+  });
+
+  server.get<{ Querystring: { case_id?: string; verification?: string } }>(
+    "/uipath/event-state-records",
+    async (request) => ({
+      event_state_records: state.uipathEventStateRecords.filter(
+        (record) =>
+          (!request.query.case_id ||
+            record.case_id === request.query.case_id) &&
+          (!request.query.verification ||
+            record.provenance.source_verification ===
+              request.query.verification),
+      ),
+      syntheticDataOnly: true,
+    }),
+  );
 
   server.get<{ Params: { runId: string } }>(
     "/live-proof-runs/:runId",
@@ -848,6 +897,7 @@ function createInitialState(): MockState {
     handoffs: [],
     schedulingTasks: [],
     liveProofRuns: [],
+    uipathEventStateRecords: [],
     safetyScreeningOverride: null,
     counters: {
       event: 0,
@@ -872,6 +922,7 @@ function stateSnapshot(state: MockState) {
     handoffs: state.handoffs,
     schedulingTasks: state.schedulingTasks,
     liveProofRuns: state.liveProofRuns,
+    uipathEventStateRecords: state.uipathEventStateRecords,
     events: state.auditEvents,
     syntheticDataOnly: true,
   };
@@ -1081,6 +1132,27 @@ function recordRobotEvent(
       timestamp: new Date().toISOString(),
     },
   ];
+}
+
+function auditEventFromUiPathStateRecord(
+  record: UiPathEventStateRecord,
+): AuditEvent {
+  return AuditEventSchema.parse({
+    event_id: record.event_id,
+    case_id: record.case_id,
+    actor_type: record.actor_type,
+    actor_name: record.actor_name,
+    task_or_agent_name: record.task_or_agent_name,
+    action: record.event_action,
+    input_summary: record.input_summary,
+    output_summary: record.output_summary,
+    evidence_refs: record.evidence_refs,
+    trace_id: record.trace_id,
+    orchestrator_job_id: record.provenance.uipath_job_id,
+    payer_status: record.payer_status,
+    timestamp: record.timestamp,
+    source_provenance: record.provenance,
+  });
 }
 
 function denialCodeForReason(reason: DemoToggles["denial_reason"]) {

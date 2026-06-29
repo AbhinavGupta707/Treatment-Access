@@ -12,6 +12,11 @@ All rows must include:
 - `syntheticDataDisclaimer` with the fixed text:
   `Synthetic demo data only. Not PHI. Not medical or legal advice.`
 - Timestamps from UiPath workflow, agent, robot, or human task execution.
+- For Checkpoint 8 H1 proof rows, provenance fields that identify the writer:
+  `sourceSystem`, `sourceActor`, `sourceVerification`, `uipathFolderName`,
+  `uipathFolderId`, `uipathFolderKey`, optional `uipathTaskId`,
+  `uipathJobId`, `uipathRecordId`, `uipathRecordType`, `confirmationId`,
+  `confirmationStatus`, `sourceLabelsJson`, and `safetyLabelsJson`.
 
 ## Entities
 
@@ -79,3 +84,39 @@ When live creation is approved:
    `uip df entities create`.
 5. Keep the JSON-shaped fields as `STRING` until a live entity evolution plan
    explicitly introduces choice sets or relationships.
+
+## Checkpoint 8 H1 Entity Shape
+
+The preferred H1 record is a `TaccAuditEvent` row with the existing event fields
+plus provenance fields. If the current tenant entity is not created yet, use
+the field proposal in [entities.json](./entities.json); do not create it until
+the orchestrator gives explicit approval.
+
+Read-only discovery is allowed:
+
+```bash
+uip login status --output json
+uip df entities list --include-folders --output json
+uip df entities list --folder-key 4fba2fa1-012b-469a-b6aa-e5be3811c173 --output json
+uip df entities get <TaccAuditEvent-entity-id> --folder-key 4fba2fa1-012b-469a-b6aa-e5be3811c173 --output json
+```
+
+Approval-gated mutation commands, not run by this lane:
+
+```bash
+uip df records insert <TaccAuditEvent-entity-id> \
+  --folder-key 4fba2fa1-012b-469a-b6aa-e5be3811c173 \
+  --file /path/to/uipath-written-event-state-record.json \
+  --output json
+```
+
+For entity creation, first extract the single `TaccAuditEvent` proposal from
+`entities.json` into a Data Fabric body with the top-level keys
+`displayName`, `description`, and `fields`. Review that body with the
+orchestrator before running `uip df entities create`; do not pass the entire
+multi-entity `entities.json` contract to the CLI.
+
+Only a record returned by UiPath/Data Fabric, Action Center, Orchestrator, a
+UiPath robot, a UiPath agent, or a UiPath API Workflow may set
+`sourceVerification` to `live_uipath_written`. Local-only API or UI mirrors must
+use `local_synthetic_mirror` or `uipath_shaped_pending_approval`.

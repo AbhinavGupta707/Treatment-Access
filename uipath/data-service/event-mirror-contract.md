@@ -41,6 +41,71 @@ Every event write uses this envelope:
 }
 ```
 
+## Checkpoint 8 H1 Provenance Envelope
+
+Checkpoint 8 adds an H1 proof envelope that distinguishes live UiPath-written
+events from local-only synthetic mirror events. The existing event envelope
+remains backward compatible. New proof writes should include this nested
+`provenance` object, using snake_case in API payloads and camelCase fields in
+Data Fabric records:
+
+```json
+{
+  "event_id": "evt-uipath-h1-syn-001",
+  "case_id": "case-syn-001",
+  "event_type": "case.h1_proof.created",
+  "event_action": "uipath_h1_event_written",
+  "timestamp": "2026-06-29T18:00:00.000Z",
+  "actor_type": "api_workflow",
+  "actor_name": "UiPath API Workflow",
+  "task_or_agent_name": "WriteTreatmentAccessEvent",
+  "input_summary": "Synthetic H1 proof event accepted by a UiPath-owned write path.",
+  "output_summary": "TreatmentAccessHackathon Data Service audit record created for the synthetic case.",
+  "provenance": {
+    "source_system": "uipath_data_service",
+    "source_actor": "UiPath API Workflow",
+    "source_verification": "live_uipath_written",
+    "uipath_folder_name": "TreatmentAccessHackathon",
+    "uipath_folder_id": "7986316",
+    "uipath_folder_key": "4fba2fa1-012b-469a-b6aa-e5be3811c173",
+    "uipath_record_id": "df-record-syn-001",
+    "uipath_record_type": "TaccAuditEvent",
+    "uipath_task_id": "optional-action-center-task-id",
+    "uipath_job_id": "optional-orchestrator-job-id",
+    "confirmation_id": "df-confirmation-syn-001",
+    "confirmation_status": "created",
+    "source_labels": ["uipath_data_service", "checkpoint8_h1"],
+    "safety_labels": ["synthetic_data_only", "clinician_review_required"],
+    "captured_at": "2026-06-29T18:00:00.000Z",
+    "synthetic": true
+  }
+}
+```
+
+Validation rules:
+
+- `source_verification=live_uipath_written` requires a `source_system` beginning
+  with `uipath_`.
+- `source_verification=live_uipath_written` also requires at least one UiPath
+  runtime identifier: `uipath_record_id`, `uipath_task_id`, or
+  `uipath_job_id`.
+- `source_verification=local_synthetic_mirror` must not carry UiPath runtime
+  identifiers.
+- `safety_labels` must include `synthetic_data_only`.
+- The folder must be `TreatmentAccessHackathon` with key
+  `4fba2fa1-012b-469a-b6aa-e5be3811c173`.
+
+The mock healthcare API exposes the local validator/bridge:
+
+```bash
+node --import tsx/esm scripts/verify-checkpoint8-event-bridge.ts
+```
+
+The valid sample is
+`uipath/live-proof/samples/uipath-written-event-state.sample.json`. The
+intentional overclaim rejection sample is
+`uipath/live-proof/samples/local-overclaim-event-state.invalid.sample.json`.
+
 ## UiPath Task To Event Mapping
 
 | UiPath task                      | Event type                    | Data Service write                                                                 | Command Center impact                              |

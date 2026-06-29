@@ -306,6 +306,110 @@ describe("mock healthcare api", () => {
     });
   });
 
+  it("validates checkpoint 8 UiPath event state provenance", async () => {
+    const server = testServer();
+    const uipathWrittenPayload = {
+      event_id: "evt-uipath-syn-001",
+      case_id: "case-syn-001",
+      event_type: "case.h1_proof.created",
+      event_action: "uipath_h1_event_written",
+      timestamp: "2026-06-29T18:00:00.000Z",
+      actor_type: "api_workflow",
+      actor_name: "UiPath API Workflow",
+      task_or_agent_name: "WriteTreatmentAccessEvent",
+      input_summary: "Synthetic H1 event accepted by UiPath.",
+      output_summary:
+        "Data Service record was written in TreatmentAccessHackathon.",
+      provenance: {
+        source_system: "uipath_data_service",
+        source_actor: "UiPath API Workflow",
+        source_verification: "live_uipath_written",
+        uipath_folder_name: "TreatmentAccessHackathon",
+        uipath_folder_key: "4fba2fa1-012b-469a-b6aa-e5be3811c173",
+        uipath_record_id: "ds-record-syn-001",
+        uipath_record_type: "TaccAuditEvent",
+        confirmation_status: "created",
+        confirmation_id: "df-confirmation-syn-001",
+        source_labels: ["uipath_data_service", "checkpoint8_h1"],
+        safety_labels: ["synthetic_data_only", "clinician_review_required"],
+        captured_at: "2026-06-29T18:00:00.000Z",
+      },
+      payload: {
+        policy_citation: "Northstar Biologic Policy 2026, Section 2.4",
+      },
+    };
+
+    const validateResponse = await server.inject({
+      method: "POST",
+      url: "/uipath/event-state-records/validate",
+      payload: uipathWrittenPayload,
+    });
+    expect(validateResponse.statusCode).toBe(200);
+    expect(validateResponse.json()).toMatchObject({
+      verification: "live_uipath_written",
+      mirrored_audit_event: {
+        action: "uipath_h1_event_written",
+        source_provenance: {
+          source_system: "uipath_data_service",
+          uipath_record_id: "ds-record-syn-001",
+        },
+      },
+    });
+
+    const ingestResponse = await server.inject({
+      method: "POST",
+      url: "/uipath/event-state-records",
+      payload: uipathWrittenPayload,
+    });
+    expect(ingestResponse.statusCode).toBe(200);
+    expect(ingestResponse.json()).toMatchObject({
+      event_state_record: {
+        event_id: "evt-uipath-syn-001",
+        provenance: {
+          source_verification: "live_uipath_written",
+        },
+      },
+    });
+
+    const overclaimResponse = await server.inject({
+      method: "POST",
+      url: "/uipath/event-state-records/validate",
+      payload: {
+        ...uipathWrittenPayload,
+        event_id: "evt-local-overclaim-syn-001",
+        provenance: {
+          ...uipathWrittenPayload.provenance,
+          source_system: "command_center_ui",
+          source_actor: "Command Center UI",
+          uipath_record_id: undefined,
+        },
+      },
+    });
+    expect(overclaimResponse.statusCode).toBe(400);
+    expect(overclaimResponse.json()).toMatchObject({
+      error: "VALIDATION_ERROR",
+      syntheticDataOnly: true,
+    });
+
+    const eventsResponse = await server.inject({
+      method: "GET",
+      url: "/cases/case-syn-001/events",
+    });
+    expect(
+      eventsResponse
+        .json()
+        .events.some(
+          (event: {
+            action: string;
+            source_provenance?: { source_verification: string };
+          }) =>
+            event.action === "uipath_h1_event_written" &&
+            event.source_provenance?.source_verification ===
+              "live_uipath_written",
+        ),
+    ).toBe(true);
+  });
+
   it("submits prior auth, approves appeal after clinician approval, and creates pharmacy handoff", async () => {
     const server = testServer();
     await server.inject({

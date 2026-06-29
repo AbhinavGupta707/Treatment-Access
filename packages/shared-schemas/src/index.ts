@@ -454,6 +454,127 @@ export const AgentTraceSchema = z.object({
   completed_at: IsoDateTimeSchema.optional(),
 });
 
+export const UiPathEventSourceSystemSchema = z.enum([
+  "uipath_data_service",
+  "uipath_api_workflow",
+  "uipath_maestro",
+  "uipath_agent",
+  "uipath_robot",
+  "uipath_action_center",
+  "local_event_mirror",
+  "command_center_ui",
+  "deterministic_runtime",
+  "mock_healthcare_api",
+]);
+
+export const UiPathEventSourceVerificationSchema = z.enum([
+  "live_uipath_written",
+  "uipath_shaped_pending_approval",
+  "local_synthetic_mirror",
+]);
+
+export const UiPathEventConfirmationStatusSchema = z.enum([
+  "accepted",
+  "created",
+  "updated",
+  "completed",
+  "pending",
+  "blocked",
+  "failed",
+  "rejected",
+]);
+
+export const UiPathEventStateProvenanceSchema = z
+  .object({
+    source_system: UiPathEventSourceSystemSchema,
+    source_actor: z.string().min(1),
+    source_verification: UiPathEventSourceVerificationSchema,
+    uipath_org_name: z.string().default("galacticus"),
+    uipath_tenant_name: z.string().default("DefaultTenant"),
+    uipath_folder_name: z.literal("TreatmentAccessHackathon"),
+    uipath_folder_id: z.string().default("7986316"),
+    uipath_folder_key: z.literal("4fba2fa1-012b-469a-b6aa-e5be3811c173"),
+    uipath_task_id: z.string().optional(),
+    uipath_job_id: z.string().optional(),
+    uipath_record_id: z.string().optional(),
+    uipath_record_type: z.string().optional(),
+    source_record_id: z.string().optional(),
+    source_record_type: z.string().optional(),
+    confirmation_id: z.string().optional(),
+    confirmation_status: UiPathEventConfirmationStatusSchema,
+    source_labels: z.array(z.string().min(1)).min(1),
+    safety_labels: z.array(z.string().min(1)).min(1),
+    captured_at: IsoDateTimeSchema,
+    synthetic: z.literal(true).default(true),
+  })
+  .superRefine((value, context) => {
+    const hasUiPathWriter = value.source_system.startsWith("uipath_");
+    const hasUiPathRuntimeId = Boolean(
+      value.uipath_record_id || value.uipath_task_id || value.uipath_job_id,
+    );
+
+    if (value.source_verification === "live_uipath_written") {
+      if (!hasUiPathWriter) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["source_system"],
+          message:
+            "live_uipath_written events must use a UiPath source_system.",
+        });
+      }
+
+      if (!hasUiPathRuntimeId) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["uipath_record_id"],
+          message:
+            "live_uipath_written events require a UiPath record, task, or job identifier.",
+        });
+      }
+    }
+
+    if (
+      value.source_verification === "local_synthetic_mirror" &&
+      hasUiPathRuntimeId
+    ) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["source_verification"],
+        message:
+          "local_synthetic_mirror events must not carry UiPath runtime identifiers.",
+      });
+    }
+
+    if (!value.safety_labels.includes("synthetic_data_only")) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["safety_labels"],
+        message: "safety_labels must include synthetic_data_only.",
+      });
+    }
+  });
+
+export const UiPathEventStateRecordSchema = z.object({
+  event_id: z.string(),
+  case_id: z.string().min(1),
+  event_type: z.string().min(1),
+  event_action: z.string().min(1),
+  timestamp: IsoDateTimeSchema,
+  actor_type: ActorTypeSchema,
+  actor_name: z.string().min(1),
+  task_or_agent_name: z.string().min(1),
+  input_summary: z.string().min(1),
+  output_summary: z.string().min(1),
+  evidence_refs: z.array(z.string()).default([]),
+  trace_id: z.string().optional(),
+  payer_status: PayerStatusSchema.optional(),
+  provenance: UiPathEventStateProvenanceSchema,
+  payload: z.record(z.unknown()).default({}),
+  synthetic_data_disclaimer: z
+    .string()
+    .default("Synthetic demo data only. Not PHI. Not medical or legal advice."),
+});
+
 export const AuditEventSchema = z.object({
   event_id: z.string(),
   case_id: z.string(),
@@ -469,6 +590,7 @@ export const AuditEventSchema = z.object({
   orchestrator_job_id: z.string().optional(),
   payer_status: PayerStatusSchema.optional(),
   timestamp: IsoDateTimeSchema,
+  source_provenance: UiPathEventStateProvenanceSchema.optional(),
 });
 
 export const AgentIdSchema = z.enum([
@@ -917,6 +1039,21 @@ export type AppealPacket = z.infer<typeof AppealPacketSchema>;
 export type PharmacyHandoff = z.infer<typeof PharmacyHandoffSchema>;
 export type HumanTask = z.infer<typeof HumanTaskSchema>;
 export type AgentTrace = z.infer<typeof AgentTraceSchema>;
+export type UiPathEventSourceSystem = z.infer<
+  typeof UiPathEventSourceSystemSchema
+>;
+export type UiPathEventSourceVerification = z.infer<
+  typeof UiPathEventSourceVerificationSchema
+>;
+export type UiPathEventConfirmationStatus = z.infer<
+  typeof UiPathEventConfirmationStatusSchema
+>;
+export type UiPathEventStateProvenance = z.infer<
+  typeof UiPathEventStateProvenanceSchema
+>;
+export type UiPathEventStateRecord = z.infer<
+  typeof UiPathEventStateRecordSchema
+>;
 export type AuditEvent = z.infer<typeof AuditEventSchema>;
 export type AgentId = z.infer<typeof AgentIdSchema>;
 export type SafetyFlag = z.infer<typeof SafetyFlagSchema>;

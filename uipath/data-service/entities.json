@@ -1,5 +1,5 @@
 {
-  "contractVersion": "2026-06-29.checkpoint2",
+  "contractVersion": "2026-06-29.checkpoint8-event-bridge",
   "scope": {
     "uipathFolderName": "TreatmentAccessHackathon",
     "uipathFolderKey": "4fba2fa1-012b-469a-b6aa-e5be3811c173",
@@ -243,6 +243,70 @@
           "fieldName": "taskOrAgentName",
           "type": "STRING",
           "lengthLimit": 160
+        },
+        { "fieldName": "sourceSystem", "type": "STRING", "lengthLimit": 120 },
+        { "fieldName": "sourceActor", "type": "STRING", "lengthLimit": 160 },
+        {
+          "fieldName": "sourceVerification",
+          "type": "STRING",
+          "lengthLimit": 80
+        },
+        {
+          "fieldName": "uipathOrgName",
+          "type": "STRING",
+          "lengthLimit": 120
+        },
+        {
+          "fieldName": "uipathTenantName",
+          "type": "STRING",
+          "lengthLimit": 120
+        },
+        {
+          "fieldName": "uipathFolderName",
+          "type": "STRING",
+          "lengthLimit": 160
+        },
+        {
+          "fieldName": "uipathFolderId",
+          "type": "STRING",
+          "lengthLimit": 80
+        },
+        {
+          "fieldName": "uipathFolderKey",
+          "type": "STRING",
+          "lengthLimit": 120
+        },
+        { "fieldName": "uipathTaskId", "type": "STRING", "lengthLimit": 160 },
+        { "fieldName": "uipathJobId", "type": "STRING", "lengthLimit": 160 },
+        {
+          "fieldName": "uipathRecordId",
+          "type": "STRING",
+          "lengthLimit": 160
+        },
+        {
+          "fieldName": "uipathRecordType",
+          "type": "STRING",
+          "lengthLimit": 120
+        },
+        {
+          "fieldName": "confirmationId",
+          "type": "STRING",
+          "lengthLimit": 160
+        },
+        {
+          "fieldName": "confirmationStatus",
+          "type": "STRING",
+          "lengthLimit": 80
+        },
+        {
+          "fieldName": "sourceLabelsJson",
+          "type": "STRING",
+          "lengthLimit": 1000
+        },
+        {
+          "fieldName": "safetyLabelsJson",
+          "type": "STRING",
+          "lengthLimit": 1000
         },
         { "fieldName": "inputSummary", "type": "STRING", "lengthLimit": 1500 },
         { "fieldName": "outputSummary", "type": "STRING", "lengthLimit": 2000 },

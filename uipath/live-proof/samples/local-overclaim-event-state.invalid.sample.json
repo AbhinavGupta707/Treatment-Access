@@ -1,0 +1,32 @@
+{
+  "event_id": "evt-local-overclaim-syn-001",
+  "case_id": "case-syn-001",
+  "event_type": "case.h1_proof.created",
+  "event_action": "uipath_h1_event_written",
+  "timestamp": "2026-06-29T18:00:00.000Z",
+  "actor_type": "system",
+  "actor_name": "Command Center UI",
+  "task_or_agent_name": "Local State Toggle",
+  "input_summary": "Synthetic local UI state was toggled.",
+  "output_summary": "This sample intentionally overclaims live UiPath authorship and must be rejected.",
+  "evidence_refs": [],
+  "provenance": {
+    "source_system": "command_center_ui",
+    "source_actor": "Command Center UI",
+    "source_verification": "live_uipath_written",
+    "uipath_org_name": "galacticus",
+    "uipath_tenant_name": "DefaultTenant",
+    "uipath_folder_name": "TreatmentAccessHackathon",
+    "uipath_folder_id": "7986316",
+    "uipath_folder_key": "4fba2fa1-012b-469a-b6aa-e5be3811c173",
+    "confirmation_status": "created",
+    "source_labels": ["command_center_ui", "local_only"],
+    "safety_labels": ["synthetic_data_only", "no_real_payer_submission"],
+    "captured_at": "2026-06-29T18:00:00.000Z",
+    "synthetic": true
+  },
+  "payload": {
+    "case_status": "Local-only UI toggle"
+  },
+  "synthetic_data_disclaimer": "Synthetic demo data only. Not PHI. Not medical or legal advice."
+}
