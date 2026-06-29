@@ -181,6 +181,94 @@ the orchestrator or user before running:
 - Payer submission: any live workflow step that submits a prior authorization,
   appeal, or portal packet outside the local synthetic mock.
 
+## Checkpoint 6 Live Product Readiness
+
+Checkpoint 6 readiness is split into three layers so the demo can prove live
+capabilities without overclaiming UiPath side effects.
+
+### Deterministic Local Smoke
+
+Run this first on every merged build:
+
+```bash
+CI=true pnpm verify:checkpoint6
+CI=true pnpm smoke:agents
+CI=true pnpm smoke:checkpoint4 -- --port 8894
+git diff --check
+```
+
+`verify:checkpoint6` runs the static submission-readiness gate and
+`smoke:checkpoint6-readiness`. The Checkpoint 6 readiness script checks that
+the docs separate local proof, live provider proof, and approval-gated UiPath
+steps; confirms the product-first demo script; verifies package command
+registration; validates live env shape without printing values; scans tracked
+text files for likely committed secrets; and confirms no live UiPath side
+effect was attempted.
+
+### UI Page Smoke
+
+After the Command Center lane is merged and a local app server is running, use:
+
+```bash
+CI=true pnpm dev:command-center
+CI=true pnpm smoke:checkpoint6-ui
+```
+
+The UI smoke checks the app shell at `/`, `/dashboard`, `/cases`, and
+`/analytics` through `TACC_COMMAND_CENTER_URL` or
+`http://127.0.0.1:5173` by default. It is a navigation/page availability smoke,
+not a live UiPath or payer test.
+
+### Fireworks/LangSmith No-Side-Effect Smoke
+
+After `.env.local` contains live provider credentials, run:
+
+```bash
+CI=true pnpm smoke:checkpoint6-live-providers
+```
+
+The script reads `.env.local` only to check key presence and authenticate
+read-only provider calls. It never prints `.env.local` values. The Fireworks
+check calls the OpenAI-compatible `/models` endpoint and does not run
+inference. The LangSmith check reads sessions/projects and does not create a
+trace. A demo may claim live LLM/provider readiness only after this command
+passes or equivalent evidence is captured.
+
+Expected live provider variables:
+
+```bash
+AGENT_MODE=live
+FIREWORKS_API_KEY=
+FIREWORKS_BASE_URL=https://api.fireworks.ai/inference/v1
+FIREWORKS_AGENT_MODEL=
+LANGSMITH_API_KEY=
+LANGSMITH_PROJECT=
+```
+
+Optional:
+
+```bash
+LANGSMITH_ENDPOINT=
+LANGSMITH_WORKSPACE_ID=
+```
+
+### Approval-Gated UiPath Live Side Effects
+
+Do not run these from the readiness lane without explicit approval and a plan
+for recording evidence:
+
+- live `uip agent debug`, Agent Builder run/debug, or Coded Agent run/debug;
+- Maestro debug/run or case start;
+- Action Center task creation;
+- Data Service/Data Fabric writes;
+- Orchestrator robot job start, Assistant robot execution, or RPA debug/run;
+- solution upload, publish, deploy, or activation;
+- any payer submission outside the local synthetic mock.
+
+If a live UiPath feature is missing or unavailable, diagnose in layer order:
+confirm registration, discovery/install state, and official activation flow
+first; only debug permissions or runtime after the feature is present.
+
 ## Checkpoint 5 Final QA
 
 Run the final non-live setup and repository checks from a clean worktree:

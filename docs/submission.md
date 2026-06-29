@@ -133,26 +133,30 @@ event records are responsible for writing in the live architecture.
 
 Use this path for the five-minute video and live judge walkthrough:
 
-1. Start from UiPath context: `TreatmentAccessHackathon`, case lifecycle, or
-   intake/runbook evidence.
-2. Launch or describe the synthetic case `TACC-2026-001`.
-3. Open Command Center at `http://127.0.0.1:5173`.
-4. Show `Live event mirror`, the case queue, seven agent cards, and the
-   policy-to-evidence matrix.
-5. Toggle or explain missing evidence to show that submission blocks rather
+1. Open Command Center at `http://127.0.0.1:5173` and start on the polished
+   product dashboard.
+2. Show the priority KPIs, urgent case, case queue, SLA risk, and synthetic-data
+   disclosure.
+3. Open the synthetic case `TACC-2026-001`.
+4. Show the current stage, next best action, evidence matrix, and seven agent
+   activity/trace drawer.
+5. Drill into `TreatmentAccessHackathon`, the UiPath audit drawer, or
+   architecture proof to explain that UiPath governs the case lifecycle.
+6. Toggle or explain missing evidence to show that submission blocks rather
    than hiding unsupported clinical claims.
-6. Show clinician validation/Action Center gates as accountable human review
+7. Show clinician validation/Action Center gates as accountable human review
    surfaces.
-7. Turn on `Payer API unavailable`.
-8. Show direct API submission failing with `PAYER_API_DOWN`.
-9. Open Mock Payer Portal at `http://127.0.0.1:5174`.
-10. Submit the synthetic portal form and show confirmation
+8. Turn on `Payer API unavailable`.
+9. Show direct API submission failing with `PAYER_API_DOWN`.
+10. Open Mock Payer Portal at `http://127.0.0.1:5174`.
+11. Submit the synthetic portal form and show confirmation
     `AVFH-PORTAL-SYN-001`.
-11. Return to the Command Center and show the robot/fallback-flavored event
+12. Return to the Command Center and show the robot/fallback-flavored event
     state.
-12. Show denial rescue, clinician-reviewed appeal draft, care handoff, and audit
+13. Show denial rescue, clinician-reviewed appeal draft, care handoff, and audit
     timeline.
-13. Close by stating exactly which live UiPath actions remain approval-gated.
+14. Close by stating exactly which live provider checks passed and which live
+    UiPath actions remain approval-gated.
 
 If live RPA is not approved or UIA capture/job execution has not been approved,
 say:
@@ -166,16 +170,17 @@ say:
 
 Use this as the Devpost transparency section:
 
-| Area             | What is working locally                                                                                                            | What is not claimed                                                                                      |
-| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Synthetic data   | Deterministic fictional patient, payer, policy, evidence, denial, and audit data.                                                  | No real PHI, payer, provider, credential, or patient data.                                               |
-| Command Center   | Renders case state, evidence matrix, seven agent traces, fallback, denial, appeal, care, and audit views.                          | It is not claimed as the live system of record.                                                          |
-| Mock API         | Supports health, reset, toggles, event ingestion, payer unavailable behavior, portal fallback success, and state reads.            | It is not a real payer/EHR/pharmacy integration.                                                         |
-| Seven agents     | Local contracts and deterministic smoke runtime prove behavior and trace/audit payloads.                                           | No live Agent Builder run/debug is claimed.                                                              |
-| UiPath workflows | Maestro/API Workflow/Action Center/Data Service artifacts and runbooks exist.                                                      | No live side-effecting Maestro run, task creation, Data Service write, or workflow execution is claimed. |
-| Portal fallback  | Mock payer portal, local fallback smoke, and real UiPath RPA project/solution shell prove the API-down-to-portal handoff boundary. | No live RPA run, Orchestrator job, UIA target capture, or external payer portal submission is claimed.   |
-| IXP/DU           | Fallback parser keeps source spans and confidence so IXP can be swapped in later.                                                  | No IXP project mutation or live extraction deployment is claimed.                                        |
-| Solution         | Local solution shell includes `PayerPortalFallback` and passes pack dry-run.                                                       | No solution upload, publish, deploy, or activation is claimed.                                           |
+| Area                      | What is working locally or after smoke                                                                                              | What is not claimed                                                                                      |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| Synthetic data            | Deterministic fictional patient, payer, policy, evidence, denial, and audit data.                                                    | No real PHI, payer, provider, credential, or patient data.                                               |
+| Command Center            | Renders product dashboard, case state, evidence matrix, agent traces, fallback, denial, appeal, care, and audit views.               | It is not claimed as the live system of record.                                                          |
+| Mock API                  | Supports health, reset, toggles, event ingestion, payer unavailable behavior, portal fallback success, and state reads.              | It is not a real payer/EHR/pharmacy integration.                                                         |
+| Seven agents              | Local contracts and deterministic smoke runtime prove behavior and trace/audit payloads.                                             | No live Agent Builder run/debug is claimed.                                                              |
+| Fireworks/LangSmith       | Live provider readiness is claimed only after `CI=true pnpm smoke:checkpoint6-live-providers` passes or equivalent evidence exists. | No live LLM output or LangSmith trace is claimed from deterministic local proof alone.                    |
+| UiPath workflows          | Maestro/API Workflow/Action Center/Data Service artifacts and runbooks exist.                                                        | No live side-effecting Maestro run, task creation, Data Service write, or workflow execution is claimed. |
+| Portal fallback           | Mock payer portal, local fallback smoke, and real UiPath RPA project/solution shell prove the API-down-to-portal handoff boundary.   | No live RPA run, Orchestrator job, UIA target capture, or external payer portal submission is claimed.   |
+| IXP/DU                    | Fallback parser keeps source spans and confidence so IXP can be swapped in later.                                                    | No IXP project mutation or live extraction deployment is claimed.                                        |
+| Solution                  | Local solution shell includes `PayerPortalFallback` and passes pack dry-run.                                                         | No solution upload, publish, deploy, or activation is claimed.                                           |
 
 ## Safety And Privacy
 
@@ -283,6 +288,8 @@ Run these before final submission:
 ```bash
 CI=true pnpm verify:setup
 CI=true pnpm format:check
+CI=true pnpm verify:submission-readiness
+CI=true pnpm smoke:checkpoint6-readiness
 git diff --check
 ```
 
@@ -294,6 +301,20 @@ CI=true pnpm seed
 CI=true pnpm smoke:checkpoint1
 CI=true pnpm smoke:agents
 CI=true pnpm smoke:checkpoint4
+CI=true pnpm verify:checkpoint6
+```
+
+After live Fireworks and LangSmith credentials are configured, run the
+no-side-effect live provider proof:
+
+```bash
+CI=true pnpm smoke:checkpoint6-live-providers
+```
+
+After the redesigned Command Center is running locally, run the page smoke:
+
+```bash
+CI=true pnpm smoke:checkpoint6-ui
 ```
 
 If a live UiPath, GitHub, Vercel, or network dependency is unavailable, state
