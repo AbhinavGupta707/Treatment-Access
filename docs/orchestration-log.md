@@ -227,3 +227,34 @@ Checkpoint 2 result:
 Next checkpoint:
 
 - Move into the approved live UiPath runtime buildout: review/approve the Maestro SDD, generate the Maestro task plan and `caseplan.json`, then run live runtime smoke only after explicit approval for each side-effecting UiPath action.
+
+## 2026-06-29 - Checkpoint 3 Launch Prep
+
+Starting point:
+
+```text
+9a78504 Finalize checkpoint 2 integration
+```
+
+Checkpoint 3 outcome:
+
+- Create the seven-agent layer for Treatment Access: Coverage Requirement, Evidence Retrieval, Missing Evidence, Submission Packet, Denial Rescue, Appeal Packet, Care Continuity, plus audit/extraction readiness.
+- Preserve distinct input/output contracts and runtime traces for each agent.
+- Keep local verification deterministic through shared schemas, synthetic fixtures, and agent smoke checks.
+- Prepare UiPath Agent Builder/IXP artifacts and runbooks without running live side-effecting UiPath debug/publish/deploy steps.
+
+Planned isolated lanes:
+
+| Merge order | Lane                                    | Ownership                                                                                                                 |
+| ----------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| 1           | Shared Agent Contracts & Runtime        | `packages/shared-schemas/**`, `packages/agent-runtime/**`, agent smoke scripts                                            |
+| 2           | Policy/Evidence/Missing Evidence Agents | `uipath/agents/coverage-requirement/**`, `uipath/agents/evidence-retrieval/**`, `uipath/agents/missing-evidence/**`       |
+| 3           | Submission/Denial/Appeal Agents         | `uipath/agents/submission-packet/**`, `uipath/agents/denial-rescue/**`, `uipath/agents/appeal-packet/**`                  |
+| 4           | Care Continuity/Audit/Extraction        | `uipath/agents/care-continuity/**`, `uipath/agents/audit-packet/**`, `uipath/agents/extraction/**`, extraction setup docs |
+
+Control runbook: `docs/checkpoint-3-orchestrator.md`.
+
+Runtime safety:
+
+- Workers may run static validation, local tests, and read-only UiPath discovery.
+- Workers must not run live `uip agent debug`, `uip solution upload`, `uip solution publish`, `uip solution deploy`, `uip maestro case debug`, IXP project creation/upload/publish, Action Center task creation, or Data Service writes without explicit user approval.

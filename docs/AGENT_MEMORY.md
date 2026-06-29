@@ -81,4 +81,19 @@ Run/publish safety: no live Maestro debug, side-effecting workflow execution, pu
 
 ## Next Checkpoint
 
-Checkpoint 3 should start from the verified Checkpoint 2 `main` state. Recommended focus: approve the Maestro SDD, generate the task plan and `caseplan.json`, then proceed to live UiPath runtime smoke with explicit approval for each side-effecting action.
+Checkpoint 3 orchestration is being launched from the verified Checkpoint 2 `main` state.
+
+Base commit: `9a78504 Finalize checkpoint 2 integration`.
+
+Control runbook: `docs/checkpoint-3-orchestrator.md`.
+
+Planned lanes:
+
+| Lane                                    | Ownership                                                                                |
+| --------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Shared Agent Contracts & Runtime        | Shared agent schemas, deterministic local agent runtime, agent smoke checks              |
+| Policy/Evidence/Missing Evidence Agents | Coverage Requirement, Evidence Retrieval, and Missing Evidence agent artifacts           |
+| Submission/Denial/Appeal Agents         | Submission Packet, Denial Rescue, and Appeal Packet agent artifacts                      |
+| Care Continuity/Audit/Extraction        | Care Continuity, Audit Packet, IXP/Document Understanding readiness, extraction fallback |
+
+Runtime safety remains unchanged: live UiPath agent debug, publish/deploy/upload, IXP project mutation, Action Center task creation, Maestro debug, and Data Service writes require explicit user approval. Checkpoint 3 workers may perform static/local authoring and read-only UiPath discovery.
