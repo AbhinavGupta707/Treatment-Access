@@ -402,6 +402,12 @@ function CommandCenter({
     runtime.data.evidenceMappings.find(
       (mapping) => mapping.mapping_id === selectedEvidenceId,
     ) ?? runtime.data.evidenceMappings[0];
+  const proofRunForDrawer =
+    liveProofRun ??
+    buildSyntheticLiveProofRun(runtime.data, runtime.lastFetchedAt, {
+      status: "not_started",
+      sourceLabel: "Ready for live UiPath proof",
+    });
 
   return (
     <main className="app-shell">
@@ -466,10 +472,10 @@ function CommandCenter({
           runtime={runtime}
         />
       ) : null}
-      {isLiveProofOpen && liveProofRun ? (
+      {isLiveProofOpen ? (
         <LiveProofDrawer
           onClose={() => onLiveProofOpenChange(false)}
-          run={liveProofRun}
+          run={proofRunForDrawer}
         />
       ) : null}
     </main>
@@ -1277,12 +1283,12 @@ function LiveProofPanel({
   return (
     <section className="live-proof-panel">
       <div className="live-proof-copy">
-        <span className="eyebrow">Checkpoint 7 live proof</span>
+        <span className="eyebrow">Checkpoint 8 final proof</span>
         <h2>{previewRun.headline}</h2>
         <p>
-          Start one synthetic treatment-access run to show fewer preventable
-          denials, less manual chart review, faster prior authorization prep,
-          safer appeal review, and auditable human gates.
+          Prepare one governed treatment-access run to show time saved in
+          prior-auth prep, fewer preventable denials, faster appeal readiness,
+          safer human gates, and auditability.
         </p>
         <div className="live-proof-actions">
           <button
@@ -1296,15 +1302,14 @@ function LiveProofPanel({
             ) : (
               <Workflow size={16} />
             )}
-            {run ? "Run live proof again" : "Run live proof"}
+            {run ? "Prepare proof again" : "Prepare proof run"}
           </button>
           <button
             className="secondary-button"
-            disabled={!run}
             onClick={onOpenDetail}
             type="button"
           >
-            View proof detail
+            View proof manifest
             <PanelRightOpen size={16} />
           </button>
         </div>
@@ -1957,7 +1962,7 @@ function LiveProofDrawer({
       <aside className="live-proof-drawer" aria-label="Live proof detail">
         <div className="audit-header">
           <div>
-            <span>Live proof detail</span>
+            <span>Proof manifest</span>
             <h2>{run.headline}</h2>
           </div>
           <button
@@ -1980,11 +1985,50 @@ function LiveProofDrawer({
             <span style={{ width: `${progress}%` }} />
           </div>
           <p>
-            The Command Center visualizes governed records and run metadata. It
-            does not replace UiPath as the orchestration or source-of-truth
-            layer, and it does not submit to a real payer.
+            The Command Center visualizes governed records and run metadata. If
+            live UiPath evidence has not run, this drawer says ready for live
+            UiPath proof instead of claiming completed execution.
           </p>
+          {run.safety_status ? <small>{run.safety_status}</small> : null}
           <small>{run.synthetic_data_disclaimer}</small>
+        </section>
+        <section className="audit-section">
+          <PanelHeader
+            icon={<ShieldCheck size={18} />}
+            title="UiPath Evidence Manifest"
+          />
+          <div className="manifest-grid">
+            {(run.proof_manifest ?? []).map((item) => (
+              <article
+                className={`manifest-item ${item.status}`}
+                key={`${item.label}-${item.value}`}
+              >
+                <div>
+                  <strong>{item.label}</strong>
+                  <span>{item.value}</span>
+                </div>
+                <StatusPill
+                  tone={manifestTone(item.status)}
+                  value={manifestStatusCopy(item.status)}
+                />
+                <small>
+                  {sourceKindLabel(item.source)}
+                  {item.timestamp
+                    ? ` - ${formatShortDate(item.timestamp)}`
+                    : ""}
+                </small>
+              </article>
+            ))}
+          </div>
+          {run.source_labels?.length ? (
+            <div className="source-label-row manifest-source-labels">
+              {run.source_labels.map((label) => (
+                <span className="source-label info" key={label}>
+                  {label}
+                </span>
+              ))}
+            </div>
+          ) : null}
         </section>
         <section className="audit-section">
           <PanelHeader icon={<UserCheck size={18} />} title="Human Gate" />
@@ -2067,7 +2111,8 @@ function LiveProofStepCard({ step }: { step: LiveProofStep }) {
         {step.evidence_refs.slice(0, 3).map((ref) => (
           <span
             className={`source-label ${sourceTone(ref.source)}`}
-            key={`${step.step_id}-${ref.label}`}
+            key={`${step.step_id}-${ref.label}-${ref.detail}`}
+            title={ref.detail}
           >
             {ref.label}
           </span>
@@ -2854,7 +2899,7 @@ function liveStepDot(status: LiveProofStep["status"]) {
 function approvalGateTone(status: LiveProofRun["approval_gate"]["status"]) {
   if (status === "approved" || status === "not_required") return "good";
   if (status === "waiting" || status === "required") return "warn";
-  if (status === "rejected") return "danger";
+  if (status === "rejected" || status === "blocked") return "danger";
   return "idle";
 }
 
@@ -2866,15 +2911,38 @@ function traceTone(status: LiveProofRun["traces"][number]["status"]) {
 
 function sourceKindLabel(source: LiveProofStep["source"]) {
   if (source === "event_mirror") return "Event mirror";
+  if (source === "data_service") return "Data Service";
+  if (source === "mock_api") return "Mock API";
   if (source === "deterministic") return "Deterministic fallback";
+  if (source === "orchestrator") return "Orchestrator";
   return source.charAt(0).toUpperCase() + source.slice(1);
 }
 
 function sourceTone(source: LiveProofStep["source"]) {
   if (source === "fireworks" || source === "langsmith") return "info";
-  if (source === "uipath" || source === "event_mirror") return "good";
+  if (
+    source === "uipath" ||
+    source === "event_mirror" ||
+    source === "orchestrator" ||
+    source === "data_service"
+  )
+    return "good";
   if (source === "human") return "warn";
   return "idle";
+}
+
+function manifestTone(status: "available" | "ready" | "pending" | "blocked") {
+  if (status === "available") return "good";
+  if (status === "ready" || status === "pending") return "warn";
+  return "danger";
+}
+
+function manifestStatusCopy(
+  status: "available" | "ready" | "pending" | "blocked",
+) {
+  if (status === "ready") return "Ready for proof";
+  if (status === "pending") return "Pending live proof";
+  return labelize(status);
 }
 
 function riskTone(risk: string) {

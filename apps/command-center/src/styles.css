@@ -1779,6 +1779,7 @@ kbd {
 
 .approval-gate-card,
 .proof-step-card,
+.manifest-item,
 .trace-card {
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -1820,9 +1821,62 @@ kbd {
 }
 
 .proof-step-list,
+.manifest-grid,
 .trace-list {
   display: grid;
   gap: 12px;
+  margin-top: 14px;
+}
+
+.manifest-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.manifest-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 12px;
+  padding: 14px;
+}
+
+.manifest-item.available {
+  border-color: rgba(101, 214, 120, 0.24);
+}
+
+.manifest-item.ready,
+.manifest-item.pending {
+  border-color: rgba(255, 182, 65, 0.3);
+}
+
+.manifest-item.blocked {
+  border-color: rgba(255, 93, 98, 0.34);
+}
+
+.manifest-item strong,
+.manifest-item span,
+.manifest-item small {
+  display: block;
+}
+
+.manifest-item strong {
+  color: var(--text);
+  font-size: 13px;
+}
+
+.manifest-item span,
+.manifest-item small {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.manifest-item small {
+  grid-column: 1 / -1;
+}
+
+.manifest-source-labels {
   margin-top: 14px;
 }
 

@@ -23,13 +23,21 @@ wildcard listener advertised at `http://192.168.1.205:5173`, with page title
 These captures require explicit approval and account/browser action. Do not
 fabricate them from local mock state.
 
-| Required capture                  | What it proves                                                                                   | Manual path                                                                                                               | Status                  |
-| --------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
-| Maestro Case                      | Treatment access lifecycle is present in UiPath Maestro Case under `TreatmentAccessHackathon`.   | Automation Cloud -> `galacticus` -> `DefaultTenant` -> folder `TreatmentAccessHackathon` -> Maestro Case instance/detail. | Manual capture required |
-| Action Center task                | Clinician evidence or appeal signoff gate exists as a live human approval surface.               | Automation Cloud -> Action Center -> Tasks filtered to `TreatmentAccessHackathon` treatment-access task.                  | Manual capture required |
-| Orchestrator job / robot run      | `PayerPortalFallback` robot is registered or run through UiPath, not only the local mock portal. | Automation Cloud -> Orchestrator -> folder `TreatmentAccessHackathon` -> Jobs / Robot logs for the fallback process.      | Manual capture required |
-| Agent Builder trace               | One treatment-access agent produces a live trace/output with distinct contract fields.           | Automation Cloud -> Agent Builder -> selected treatment-access agent -> trace/run detail.                                 | Manual capture required |
-| Data Service / Data Fabric record | UiPath-written case/event state exists in the live tenant when approved.                         | Automation Cloud -> Data Service/Data Fabric -> treatment-access entity/table record for synthetic case `case-syn-001`.   | Manual capture required |
+The Command Center proof drawer is the final judge-facing manifest. It should
+display folder `TreatmentAccessHackathon`, folder ID `7986316`, folder key
+`4fba2fa1-012b-469a-b6aa-e5be3811c173`, event/record ID, task ID, job ID,
+confirmation ID, source labels, timestamp, and safety status when live proof is
+available. Until approval-gated live execution runs, rows should say "ready for
+live UiPath proof" or "pending live proof" rather than completed.
+
+| Required capture                  | What it proves                                                                                   | Manual path                                                                                                                                        | Status                      |
+| --------------------------------- | ------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| Maestro Case                      | Treatment access lifecycle is present in UiPath Maestro Case under `TreatmentAccessHackathon`.   | Automation Cloud -> `galacticus` -> `DefaultTenant` -> folder `TreatmentAccessHackathon` -> Maestro Case instance/detail.                          | Manual capture required     |
+| Action Center task                | Clinician evidence or appeal signoff gate exists as a live human approval surface.               | Automation Cloud -> Action Center -> Tasks filtered to `TreatmentAccessHackathon` treatment-access task.                                           | Manual capture required     |
+| Orchestrator job / robot run      | `PayerPortalFallback` robot is registered or run through UiPath, not only the local mock portal. | Automation Cloud -> Orchestrator -> folder `TreatmentAccessHackathon` -> Jobs / Robot logs for the fallback process.                               | Manual capture required     |
+| Agent Builder trace               | One treatment-access agent produces a live trace/output with distinct contract fields.           | Automation Cloud -> Agent Builder -> selected treatment-access agent -> trace/run detail.                                                          | Manual capture required     |
+| Data Service / Data Fabric record | UiPath-written case/event state exists in the live tenant when approved.                         | Automation Cloud -> Data Service/Data Fabric -> treatment-access entity/table record for synthetic case `case-syn-001`.                            | Manual capture required     |
+| Command Center proof manifest     | Product UI displays live UiPath IDs and safety status without cluttering the main screen.        | Command Center -> `View proof manifest`; capture rows for folder, event/record ID, task ID, job ID, confirmation ID, timestamp, and source labels. | Ready for live UiPath proof |
 
 ## Submission Boundary
 

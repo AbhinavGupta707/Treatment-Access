@@ -28,6 +28,17 @@ paired with actual scripts, smoke commands, screenshots, logs, captured
 evidence, or explicit caveats. Do not lead with architecture until the value to
 access teams, clinicians, and patients is clear.
 
+## Final Proof Boundary
+
+Keep these proof types separate in the Devpost text, video narration, and judge
+walkthrough:
+
+| Proof type            | Evidence to show                                                                                                                                | Claim boundary                                                                                       |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Local Synthetic Proof | Local Command Center, mock healthcare API, mock payer portal, deterministic agent runtime, screenshots, and smokes.                             | Proves the workflow semantics with synthetic data only.                                              |
+| Live Provider Proof   | Fireworks/LangSmith readiness or traces after provider smoke passes.                                                                            | Does not imply UiPath task, job, record, deployment, or payer submission.                            |
+| Live UiPath Proof     | `TreatmentAccessHackathon` folder evidence with event/record ID, task ID, job ID, confirmation ID, timestamp, source labels, and safety status. | Say "ready for live UiPath proof" until those live identifiers are captured after explicit approval. |
+
 ## Inspiration
 
 Prior authorization is not just a form problem. It is a coordination problem
@@ -179,21 +190,27 @@ say:
 
 Use this as the Devpost transparency section:
 
-| Area                | What is working locally or after smoke                                                                                              | What is not claimed                                                                                      |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Synthetic data      | Deterministic fictional patient, payer, policy, evidence, denial, and audit data.                                                   | No real PHI, payer, provider, credential, or patient data.                                               |
-| Command Center      | Renders product dashboard, case state, evidence matrix, agent traces, fallback, denial, appeal, care, and audit views.              | It is not claimed as the live system of record.                                                          |
-| Mock API            | Supports health, reset, toggles, event ingestion, payer unavailable behavior, portal fallback success, and state reads.             | It is not a real payer/EHR/pharmacy integration.                                                         |
-| Seven agents        | Local contracts and deterministic smoke runtime prove behavior and trace/audit payloads.                                            | No live Agent Builder run/debug is claimed.                                                              |
-| Fireworks/LangSmith | Live provider readiness is claimed only after `CI=true pnpm smoke:checkpoint6-live-providers` passes or equivalent evidence exists. | No live LLM output or LangSmith trace is claimed from deterministic local proof alone.                   |
-| UiPath workflows    | Maestro/API Workflow/Action Center/Data Service artifacts and runbooks exist.                                                       | No live side-effecting Maestro run, task creation, Data Service write, or workflow execution is claimed. |
-| Portal fallback     | Mock payer portal, local fallback smoke, and real UiPath RPA project/solution shell prove the API-down-to-portal handoff boundary.  | No live RPA run, Orchestrator job, UIA target capture, or external payer portal submission is claimed.   |
-| IXP/DU              | Fallback parser keeps source spans and confidence so IXP can be swapped in later.                                                   | No IXP project mutation or live extraction deployment is claimed.                                        |
-| Solution            | Local solution shell includes `PayerPortalFallback` and passes pack dry-run.                                                        | No solution upload, publish, deploy, or activation is claimed.                                           |
+| Area                | What is working locally or after smoke                                                                                                                                                            | What is not claimed                                                                                                                                          |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Synthetic data      | Deterministic fictional patient, payer, policy, evidence, denial, and audit data.                                                                                                                 | No real PHI, payer, provider, credential, or patient data.                                                                                                   |
+| Command Center      | Renders product dashboard, case state, evidence matrix, agent traces, fallback, denial, appeal, care, and proof manifest.                                                                         | It is not claimed as the live system of record.                                                                                                              |
+| Mock API            | Supports health, reset, toggles, event ingestion, payer unavailable behavior, portal fallback success, and state reads.                                                                           | It is not a real payer/EHR/pharmacy integration.                                                                                                             |
+| Seven agents        | Local contracts and deterministic smoke runtime prove behavior and trace/audit payloads.                                                                                                          | No live Agent Builder run/debug is claimed.                                                                                                                  |
+| Fireworks/LangSmith | Live provider readiness is claimed only after `CI=true pnpm smoke:checkpoint6-live-providers` passes or equivalent evidence exists.                                                               | No live LLM output or LangSmith trace is claimed from deterministic local proof alone.                                                                       |
+| UiPath workflows    | Maestro/API Workflow/Action Center/Data Service artifacts and runbooks exist; final manifest is ready to display folder, record, task, job, confirmation, source, timestamp, and safety evidence. | No live side-effecting Maestro run, task creation, Data Service write, or workflow execution is claimed unless the manifest shows the live ID and timestamp. |
+| Portal fallback     | Mock payer portal, local fallback smoke, and real UiPath RPA project/solution shell prove the API-down-to-portal handoff boundary.                                                                | No live RPA run, Orchestrator job, UIA target capture, or external payer portal submission is claimed.                                                       |
+| IXP/DU              | Fallback parser keeps source spans and confidence so IXP can be swapped in later.                                                                                                                 | No IXP project mutation or live extraction deployment is claimed.                                                                                            |
+| Solution            | Local solution shell includes `PayerPortalFallback` and passes pack dry-run.                                                                                                                      | No solution upload, publish, deploy, or activation is claimed.                                                                                               |
 
 Checkpoint 6 adds `CI=true pnpm uipath:readiness` as the no-side-effect UiPath
 readiness sweep. It verifies registration/discovery state, RPA validate/build,
 and solution dry-run without running live UiPath side effects.
+
+Checkpoint 8 adds `CI=true pnpm smoke:checkpoint8-live-uipath` as the final
+no-side-effect readiness sweep. It verifies the Command Center proof manifest,
+the `TreatmentAccessHackathon` folder identifiers, local/provider/UiPath proof
+separation, and final safety wording without creating live UiPath records,
+tasks, jobs, deployments, robot runs, or payer submissions.
 
 ## Safety And Privacy
 
@@ -305,6 +322,7 @@ CI=true pnpm format:check
 CI=true pnpm verify:submission-readiness
 CI=true pnpm smoke:checkpoint6-readiness
 CI=true pnpm smoke:checkpoint7-live-proof
+CI=true pnpm smoke:checkpoint8-live-uipath
 git diff --check
 ```
 

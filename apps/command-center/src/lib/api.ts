@@ -9,7 +9,14 @@ import {
   type DemoToggles,
 } from "@tacc/shared-schemas";
 import type { DemoState, RuntimeState } from "./types";
-import type { LiveProofRun, LiveProofStep } from "./types";
+import type {
+  LiveProofApprovalGate,
+  LiveProofRun,
+  LiveProofSourceKind,
+  LiveProofStep,
+  LiveProofStepStatus,
+  UiPathProofManifestItem,
+} from "./types";
 
 const fallbackNow = "2026-06-28T22:00:00.000Z";
 
@@ -528,6 +535,20 @@ export function buildSyntheticLiveProofRun(
     ],
     source_label:
       options?.sourceLabel ?? "Contract preview until live proof API responds",
+    source_labels: [
+      "Local synthetic event mirror",
+      "Ready for live UiPath proof",
+      "No real payer submission",
+    ],
+    proof_status:
+      options?.status === "completed"
+        ? "local_synthetic_proof"
+        : "ready_for_live_uipath_proof",
+    proof_manifest: buildLocalProofManifest(state, timestamp, caseId),
+    safety_status:
+      "Synthetic only; clinical assertions require source evidence, policy citation, or human approval.",
+    no_live_uipath_side_effects: true,
+    no_real_payer_submission: true,
     synthetic_data_disclaimer:
       state.case?.synthetic_data_disclaimer ??
       "Synthetic fictional demo data; not a real person or encounter.",
@@ -569,12 +590,517 @@ function parseLiveProofRun(value: unknown): LiveProofRun | null {
 
   if (!candidate || typeof candidate !== "object") return null;
 
-  const run = candidate as Partial<LiveProofRun>;
+  const run = candidate as Partial<LiveProofRun> & Record<string, unknown>;
   if (!run.run_id || !run.case_id || !run.status || !Array.isArray(run.steps)) {
     return null;
   }
 
-  return run as LiveProofRun;
+  if ("current_stage" in run || "approval_gates" in run) {
+    return normalizeSharedLiveProofRun(run as unknown as SharedLiveProofRun);
+  }
+
+  return {
+    ...(run as LiveProofRun),
+    proof_manifest:
+      run.proof_manifest ??
+      buildGenericProofManifest(run as LiveProofRun, new Date().toISOString()),
+    proof_status: run.proof_status ?? "ready_for_live_uipath_proof",
+    safety_status:
+      run.safety_status ??
+      "Synthetic only; live UiPath side effects require explicit approval.",
+  };
+}
+
+type SharedUiPathEvidenceRef = {
+  evidence_ref_id?: string;
+  source?: string;
+  label?: string;
+  external_id?: string;
+  url?: string;
+  captured_at?: string;
+};
+
+type SharedLiveProofTrace = {
+  trace_id?: string;
+  provider?: string;
+  status?: string;
+  project_name?: string;
+  url?: string;
+  captured_at?: string;
+};
+
+type SharedLiveProofApprovalGate = {
+  gate_id?: string;
+  gate_type?: string;
+  status?: string;
+  assigned_role?: string;
+  reason?: string;
+  source_stage?: string;
+  uipath_task_id?: string;
+};
+
+type SharedLiveProofStep = {
+  step_id?: string;
+  stage?: string;
+  status?: string;
+  title?: string;
+  summary?: string;
+  actor_type?: string;
+  actor_name?: string;
+  completed_at?: string;
+  started_at?: string;
+  trace?: SharedLiveProofTrace;
+  uipath_evidence_refs?: SharedUiPathEvidenceRef[];
+  evidence_refs?: string[];
+};
+
+type SharedSubmissionAttempt = {
+  orchestrator_job_id?: string;
+  portal_confirmation_id?: string;
+  confirmation_id?: string;
+  status?: string;
+  completed_at?: string;
+};
+
+type SharedLiveProofRun = {
+  run_id?: string;
+  case_id?: string;
+  status?: string;
+  started_at?: string;
+  requested_by?: string;
+  mode?: string;
+  current_stage?: string;
+  completed_at?: string;
+  steps?: SharedLiveProofStep[];
+  approval_gates?: SharedLiveProofApprovalGate[];
+  traces?: SharedLiveProofTrace[];
+  uipath_evidence_refs?: SharedUiPathEvidenceRef[];
+  submission_attempts?: SharedSubmissionAttempt[];
+  mirror_events?: Array<{ event_id?: string; timestamp?: string }>;
+  source_labels?: string[];
+  no_live_uipath_side_effects?: boolean;
+  no_real_payer_submission?: boolean;
+  synthetic_data_disclaimer?: string;
+  proof_manifest?: UiPathProofManifestItem[];
+};
+
+function normalizeSharedLiveProofRun(run: SharedLiveProofRun): LiveProofRun {
+  const updatedAt =
+    run.completed_at ??
+    latestTimestamp([
+      ...(run.steps ?? []).flatMap((step) => [
+        step.completed_at,
+        step.started_at,
+      ]),
+      ...(run.uipath_evidence_refs ?? []).map((ref) => ref.captured_at),
+    ]) ??
+    new Date().toISOString();
+  const traces = (run.traces ?? []).map(normalizeSharedTrace);
+  const proofManifest = buildSharedProofManifest(run, updatedAt);
+
+  return {
+    run_id: String(run.run_id),
+    case_id: String(run.case_id),
+    status: normalizeRunStatus(String(run.status)),
+    headline: run.no_live_uipath_side_effects
+      ? "Ready for live UiPath proof"
+      : "Live UiPath proof recorded",
+    started_at: run.started_at,
+    updated_at: updatedAt,
+    current_agent: currentAgentFromSharedRun(run),
+    value_summary: [
+      "Cuts prior-auth prep by turning chart review into a governed evidence matrix",
+      "Reduces preventable denials by blocking unsupported payer-facing claims",
+      "Speeds appeal readiness while keeping clinician signoff in the loop",
+      "Keeps auditability visible without putting backend clutter on the main screen",
+    ],
+    steps: (run.steps ?? []).map((step) => normalizeSharedStep(step, traces)),
+    approval_gate: normalizeSharedApprovalGate(run.approval_gates?.[0]),
+    traces,
+    source_label:
+      run.no_live_uipath_side_effects === true
+        ? "Ready for live UiPath proof; no side-effecting UiPath run claimed"
+        : "Live UiPath evidence returned by runtime",
+    source_labels: run.source_labels ?? [],
+    proof_manifest: proofManifest,
+    proof_status:
+      run.no_live_uipath_side_effects === true
+        ? "ready_for_live_uipath_proof"
+        : "live_uipath_proof_recorded",
+    safety_status:
+      "Synthetic only; every clinical assertion needs source evidence, policy citation, or human approval.",
+    no_live_uipath_side_effects: run.no_live_uipath_side_effects,
+    no_real_payer_submission: run.no_real_payer_submission,
+    synthetic_data_disclaimer:
+      run.synthetic_data_disclaimer ??
+      "Synthetic live proof run; no real patient, payer, provider, credential, or personal health data.",
+  };
+}
+
+function normalizeSharedStep(
+  step: SharedLiveProofStep,
+  _traces: LiveProofRun["traces"],
+): LiveProofStep {
+  const source = sourceFromSharedStep(step);
+  return {
+    step_id: step.step_id ?? step.stage ?? "live-proof-step",
+    label: step.title ?? labelizeSource(step.stage ?? "Proof step"),
+    agent: step.actor_name ?? labelizeSource(step.actor_type ?? "UiPath"),
+    status: normalizeStepStatus(step.status),
+    summary: step.summary ?? "Runtime returned proof step metadata.",
+    source,
+    evidence_refs: (step.uipath_evidence_refs ?? []).map((ref) => ({
+      label: ref.label ?? ref.evidence_ref_id ?? sourceKindLabel(source),
+      source: normalizeEvidenceSource(ref.source),
+      detail: ref.external_id ?? ref.url ?? ref.evidence_ref_id ?? "Captured",
+      href: ref.url,
+      record_id: ref.external_id ?? ref.evidence_ref_id,
+    })),
+  };
+}
+
+function normalizeSharedTrace(
+  trace: SharedLiveProofTrace,
+): LiveProofRun["traces"][number] {
+  return {
+    provider:
+      trace.provider === "fireworks"
+        ? "Fireworks"
+        : trace.provider === "langsmith"
+          ? "LangSmith"
+          : "Deterministic",
+    label: trace.project_name ?? trace.trace_id ?? "Trace metadata",
+    status:
+      trace.status === "available"
+        ? "available"
+        : trace.status === "metadata_only"
+          ? "metadata_only"
+          : "unavailable",
+    trace_id: trace.trace_id,
+    trace_url: trace.url,
+    detail:
+      trace.status === "not_configured"
+        ? "Provider trace not configured for this run."
+        : `Captured at ${trace.captured_at ?? "runtime"}.`,
+  };
+}
+
+function normalizeSharedApprovalGate(
+  gate?: SharedLiveProofApprovalGate,
+): LiveProofApprovalGate {
+  if (!gate) {
+    return {
+      gate_id: "live-uipath-approval-gate",
+      label: "Live UiPath approval gate",
+      status: "required",
+      owner: "Demo operator",
+      reason:
+        "Live Action Center task creation, Data Service writes, robot jobs, and payer submissions remain approval-gated.",
+      source: "uipath",
+    };
+  }
+
+  return {
+    gate_id: gate.gate_id ?? "live-uipath-approval-gate",
+    label: labelizeSource(gate.gate_type ?? "Live UiPath approval gate"),
+    status: normalizeApprovalStatus(gate.status),
+    owner: gate.assigned_role ?? "Demo operator",
+    reason:
+      gate.reason ??
+      "Live UiPath side effects remain approval-gated until evidence is captured.",
+    source: gate.uipath_task_id ? "human" : "uipath",
+  };
+}
+
+function normalizeRunStatus(status: string): LiveProofRun["status"] {
+  if (status === "created") return "not_started";
+  if (status === "waiting_for_approval") return "waiting_for_approval";
+  if (status === "completed") return "completed";
+  if (status === "blocked") return "blocked";
+  if (status === "failed") return "failed";
+  if (status === "running") return "running";
+  return "not_started";
+}
+
+function normalizeStepStatus(status?: string): LiveProofStepStatus {
+  if (status === "pending") return "queued";
+  if (status === "waiting_for_approval") return "needs_human";
+  if (status === "skipped") return "blocked";
+  if (status === "completed" || status === "running" || status === "blocked") {
+    return status;
+  }
+  return "queued";
+}
+
+function normalizeApprovalStatus(
+  status?: string,
+): LiveProofApprovalGate["status"] {
+  if (status === "not_created") return "required";
+  if (status === "pending") return "waiting";
+  if (status === "approved_for_demo") return "approved";
+  if (status === "blocked") return "blocked";
+  return "required";
+}
+
+function sourceFromSharedStep(step: SharedLiveProofStep): LiveProofSourceKind {
+  const evidenceSource = step.uipath_evidence_refs?.[0]?.source;
+  if (evidenceSource) return normalizeEvidenceSource(evidenceSource);
+  if (step.actor_type === "human") return "human";
+  if (step.actor_type === "api_workflow") return "uipath";
+  if (step.trace?.provider === "fireworks") return "fireworks";
+  if (step.trace?.provider === "langsmith") return "langsmith";
+  return "deterministic";
+}
+
+function normalizeEvidenceSource(source?: string): LiveProofSourceKind {
+  if (source === "uipath_event_mirror") return "event_mirror";
+  if (source === "uipath_orchestrator") return "orchestrator";
+  if (source === "uipath_data_service") return "data_service";
+  if (source === "uipath_action_center") return "human";
+  if (source === "mock_healthcare_api") return "mock_api";
+  if (source === "fireworks" || source === "langsmith") return source;
+  if (source === "deterministic_runtime") return "deterministic";
+  return "uipath";
+}
+
+function currentAgentFromSharedRun(run: SharedLiveProofRun) {
+  const activeStep =
+    run.steps?.find((step) => step.status === "running") ??
+    run.steps?.find((step) => step.status === "waiting_for_approval") ??
+    run.steps?.at(-1);
+  return (
+    activeStep?.actor_name ?? labelizeSource(run.current_stage ?? "UiPath")
+  );
+}
+
+function buildSharedProofManifest(
+  run: SharedLiveProofRun,
+  timestamp: string,
+): UiPathProofManifestItem[] {
+  const evidenceRefs = run.uipath_evidence_refs ?? [];
+  const latestEventId = run.mirror_events?.at(-1)?.event_id;
+  const taskId = run.approval_gates?.find(
+    (gate) => gate.uipath_task_id,
+  )?.uipath_task_id;
+  const jobId = run.submission_attempts?.find(
+    (attempt) => attempt.orchestrator_job_id,
+  )?.orchestrator_job_id;
+  const confirmationId = run.submission_attempts?.find(
+    (attempt) => attempt.portal_confirmation_id ?? attempt.confirmation_id,
+  );
+  const sourceLabels = run.source_labels?.join(" | ");
+
+  return [
+    {
+      label: "UiPath folder",
+      value: "TreatmentAccessHackathon / DefaultTenant / galacticus",
+      status: "ready",
+      source: "uipath",
+      timestamp,
+    },
+    {
+      label: "Folder ID",
+      value: "7986316",
+      status: "ready",
+      source: "uipath",
+      timestamp,
+    },
+    {
+      label: "Folder key",
+      value: "4fba2fa1-012b-469a-b6aa-e5be3811c173",
+      status: "ready",
+      source: "uipath",
+      timestamp,
+    },
+    {
+      label: "Run / record ID",
+      value: String(run.run_id),
+      status: "available",
+      source: "event_mirror",
+      timestamp,
+    },
+    {
+      label: "Event record ID",
+      value: latestEventId ?? "Ready for UiPath-written event record",
+      status: latestEventId ? "available" : "pending",
+      source: "event_mirror",
+      timestamp: run.mirror_events?.at(-1)?.timestamp ?? timestamp,
+    },
+    {
+      label: "Action Center task ID",
+      value: taskId ?? "Ready for live Action Center task",
+      status: taskId ? "available" : "pending",
+      source: "human",
+      timestamp,
+    },
+    {
+      label: "Orchestrator job ID",
+      value: jobId ?? "Ready for live Orchestrator job",
+      status: jobId ? "available" : "pending",
+      source: "orchestrator",
+      timestamp,
+    },
+    {
+      label: "Portal confirmation ID",
+      value:
+        confirmationId?.portal_confirmation_id ??
+        confirmationId?.confirmation_id ??
+        "Ready for robot confirmation",
+      status:
+        (confirmationId?.portal_confirmation_id ??
+        confirmationId?.confirmation_id)
+          ? "available"
+          : "pending",
+      source: "orchestrator",
+      timestamp: confirmationId?.completed_at ?? timestamp,
+    },
+    {
+      label: "Source labels",
+      value: sourceLabels || "Ready for source labels",
+      status: sourceLabels ? "available" : "pending",
+      source: "uipath",
+      timestamp,
+    },
+    {
+      label: "Safety status",
+      value:
+        run.no_live_uipath_side_effects === true
+          ? "Ready for live UiPath proof; no side-effecting UiPath run claimed"
+          : "Live UiPath proof recorded",
+      status: run.no_live_uipath_side_effects === true ? "ready" : "available",
+      source: "uipath",
+      timestamp,
+    },
+    ...evidenceRefs.slice(0, 3).map((ref): UiPathProofManifestItem => ({
+      label: ref.label ?? ref.evidence_ref_id ?? "Evidence reference",
+      value: ref.external_id ?? ref.url ?? ref.evidence_ref_id ?? "Captured",
+      status: "available",
+      source: normalizeEvidenceSource(ref.source),
+      timestamp: ref.captured_at ?? timestamp,
+    })),
+  ];
+}
+
+function buildLocalProofManifest(
+  state: DemoState,
+  timestamp: string,
+  caseId: string,
+): UiPathProofManifestItem[] {
+  const robotEvent = state.events.find((event) => event.actor_type === "robot");
+  const portalSubmission = state.submissions.find(
+    (submission) => submission.channel === "portal_fallback",
+  );
+  return [
+    {
+      label: "UiPath folder",
+      value: "TreatmentAccessHackathon / DefaultTenant / galacticus",
+      status: "ready",
+      source: "uipath",
+      timestamp,
+    },
+    {
+      label: "Run / record ID",
+      value: `ready-for-live-proof-${caseId}`,
+      status: "ready",
+      source: "event_mirror",
+      timestamp,
+    },
+    {
+      label: "Event record ID",
+      value: state.events.at(-1)?.event_id ?? "Ready for UiPath event",
+      status: state.events.length > 0 ? "available" : "pending",
+      source: "event_mirror",
+      timestamp: state.events.at(-1)?.timestamp ?? timestamp,
+    },
+    {
+      label: "Action Center task ID",
+      value: "Ready for live Action Center task",
+      status: "pending",
+      source: "human",
+      timestamp,
+    },
+    {
+      label: "Orchestrator job ID",
+      value:
+        portalSubmission?.orchestrator_job_id ??
+        robotEvent?.orchestrator_job_id ??
+        "Ready for live Orchestrator job",
+      status:
+        (portalSubmission?.orchestrator_job_id ??
+        robotEvent?.orchestrator_job_id)
+          ? "available"
+          : "pending",
+      source: "orchestrator",
+      timestamp: portalSubmission?.completed_at ?? robotEvent?.timestamp,
+    },
+    {
+      label: "Confirmation ID",
+      value:
+        portalSubmission?.portal_confirmation_id ??
+        "Ready for robot confirmation",
+      status: portalSubmission?.portal_confirmation_id
+        ? "available"
+        : "pending",
+      source: "orchestrator",
+      timestamp: portalSubmission?.completed_at ?? timestamp,
+    },
+    {
+      label: "Safety status",
+      value: "Ready for live UiPath proof; local synthetic proof only",
+      status: "ready",
+      source: "uipath",
+      timestamp,
+    },
+  ];
+}
+
+function buildGenericProofManifest(
+  run: LiveProofRun,
+  timestamp: string,
+): UiPathProofManifestItem[] {
+  return [
+    {
+      label: "UiPath folder",
+      value: "TreatmentAccessHackathon / DefaultTenant / galacticus",
+      status: "ready",
+      source: "uipath",
+      timestamp,
+    },
+    {
+      label: "Run / record ID",
+      value: run.run_id,
+      status: "available",
+      source: "event_mirror",
+      timestamp: run.updated_at ?? timestamp,
+    },
+    {
+      label: "Safety status",
+      value:
+        run.no_live_uipath_side_effects === true
+          ? "Ready for live UiPath proof; no live UiPath side effect claimed"
+          : "Live proof status returned by runtime",
+      status: run.no_live_uipath_side_effects === true ? "ready" : "available",
+      source: "uipath",
+      timestamp: run.updated_at ?? timestamp,
+    },
+  ];
+}
+
+function latestTimestamp(values: Array<string | undefined>) {
+  return values
+    .filter((value): value is string => Boolean(value))
+    .sort((a, b) => b.localeCompare(a))[0];
+}
+
+function labelizeSource(value: string) {
+  return value.replace(/_/g, " ");
+}
+
+function sourceKindLabel(source: LiveProofSourceKind) {
+  if (source === "event_mirror") return "Event mirror";
+  if (source === "data_service") return "Data Service";
+  if (source === "mock_api") return "Mock API";
+  return source.charAt(0).toUpperCase() + source.slice(1);
 }
 
 function formatSourceRef(
