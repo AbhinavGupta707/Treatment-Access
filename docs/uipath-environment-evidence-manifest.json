@@ -1,0 +1,40 @@
+{
+  "project": "Treatment Access Command Center",
+  "hackathon": "UiPath AgentHack 2026",
+  "track": "Track 1 - UiPath Maestro Case / Agentic Case Management",
+  "publicRepository": "https://github.com/AbhinavGupta707/Treatment-Access",
+  "recommendedEnvironmentUrl": "https://cloud.uipath.com/galacticus/",
+  "tenantDeepLink": "https://cloud.uipath.com/galacticus/DefaultTenant/",
+  "environment": {
+    "baseUrl": "https://cloud.uipath.com",
+    "organizationDisplayName": "Galacticus",
+    "organizationLogicalName": "galacticus",
+    "organizationId": "1aa6cebf-ee8e-4fec-8520-b7971407d266",
+    "tenantName": "DefaultTenant",
+    "tenantId": "360e9052-0ec2-4b79-b879-e6c7f992c443",
+    "primaryFolderName": "TreatmentAccessHackathon",
+    "primaryFolderId": 7986316,
+    "primaryFolderKey": "4fba2fa1-012b-469a-b6aa-e5be3811c173"
+  },
+  "liveProof": {
+    "dataFabricEntity": "feea1705-e673-f111-ac9a-002248a16d28",
+    "proofRun": "tacc-live-uipath-proof-20260629-final",
+    "primaryProofRecord": "B2501C19-E673-F111-AC9A-0022489A9A06",
+    "actionCenterTaskId": "4401667",
+    "actionCenterTaskKey": "93c09da5-3edb-455e-9679-d513113fd4fa",
+    "actionCenterExternalTag": "TACC-2026-001",
+    "maestroCaseInstance": "cad900ae-e4f9-4e59-a1c8-c6f15934f5bc",
+    "maestroFlowInstance": "4e17f6d2-a2d7-4730-b1ed-9d0dcadef9b0",
+    "solutionPackage": "treatment-access-command-center@1.0.20260629",
+    "solutionDeployment": "46ec1e63-3b09-4308-8b44-ed4b65e4e7f7",
+    "orchestratorJob": "6d9b9fa9-f582-4983-98fa-167e87d57f2a",
+    "jobTraceId": "6d9b9fa9f582498398fa167e87d57f2a"
+  },
+  "safety": {
+    "syntheticOnly": true,
+    "usesRealPhi": false,
+    "usesRealPayerSubmission": false,
+    "clinicalAssertionRule": "Every clinical assertion needs source evidence, policy citation, or human approval.",
+    "appealLanguageBoundary": "Administrative draft for clinician review, not autonomous medical or legal advice."
+  }
+}
