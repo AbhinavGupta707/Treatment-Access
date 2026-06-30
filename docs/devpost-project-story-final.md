@@ -119,8 +119,9 @@ work, then UiPath turns the result into governed case state.
 
 ## Why This Fits The Maestro Track
 
-I am submitting this to **Multi-Agent Orchestration with Maestro** because the
-core product is a dynamic, exception-heavy case lifecycle.
+I am submitting this to **Track 1: UiPath Maestro Case / Agentic Case
+Management** because the core product is a dynamic, exception-heavy case
+lifecycle.
 
 This is not a standalone AI assistant. The Command Center is the customer-facing
 cockpit, but UiPath is the orchestration and governance layer underneath:

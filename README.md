@@ -3,7 +3,7 @@
 ## Project Description
 
 Treatment Access Command Center is a **UiPath AgentHack 2026** submission for
-the **Multi-Agent Orchestration with Maestro** track. It turns
+**Track 1: UiPath Maestro Case / Agentic Case Management**. It turns
 specialty-medication prior authorization into a governed treatment-access case:
 agents assemble the evidence and payer work, UiPath orchestrates the lifecycle,
 and humans approve clinical risk before payer-facing action.
@@ -107,12 +107,27 @@ flowchart LR
 | **IXP / Document Understanding path**   | Production extraction target for policies, chart notes, labs, and denial letters.                                                                     | `uipath/agents/extraction/`; local source-span parser preserves the same evidence contract with synthetic data.                                             |
 | **UiPath for Coding Agents / Codex**    | Used to build, checkpoint, test, and integrate the product through structured coding-agent workflows.                                                 | `.agents/skills`, orchestration logs, checkpoint docs, and committed implementation history.                                                                |
 
-Automation Cloud environment used for live proof:
+UiPath Labs / Automation Cloud environment used for the submission:
+
+```text
+Devpost UiPath Labs environment URL: https://staging.uipath.com/hackathon26_244/
+Automation Cloud tenant URL: https://cloud.uipath.com/galacticus/DefaultTenant/
+Organization: galacticus
+Tenant: DefaultTenant
+Folder: TreatmentAccessHackathon
+Folder ID: 7986316
+Folder key: 4fba2fa1-012b-469a-b6aa-e5be3811c173
+```
+
+If the organizer-provided UiPath Labs email shows a different
+`hackathon26_###` URL, use that exact Labs URL in the Devpost field. The
+`cloud.uipath.com` tenant URL above is the live proof tenant reached by the
+UiPath CLI and Automation Cloud records.
+
+Legacy/tenant deep link used by live proof records:
 
 ```text
 https://cloud.uipath.com/galacticus/DefaultTenant/
-Folder: TreatmentAccessHackathon
-Folder ID: 7986316
 ```
 
 ## Agent Type

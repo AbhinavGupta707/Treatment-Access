@@ -34,6 +34,18 @@ clinical risk, and robots handle payer exceptions.
 - LangSmith tracing integration
 - Playwright
 
+## UiPath Labs Link / Environment URL
+
+Use this for the Devpost field:
+
+```text
+https://staging.uipath.com/hackathon26_244/
+```
+
+If the organizer-provided Labs access email shows a different
+`hackathon26_###` URL, paste that exact URL instead. Do not use the GitHub URL,
+localhost URL, demo video URL, or general product URL for this field.
+
 ## About The Project
 
 # Treatment Access Command Center
