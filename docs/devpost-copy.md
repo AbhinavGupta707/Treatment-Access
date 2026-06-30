@@ -36,7 +36,8 @@ clinical risk, and robots handle payer exceptions.
 
 ## UiPath Labs Link / Environment URL
 
-Use this for the Devpost field:
+Use this for the Devpost field if it matches the organizer-provided Labs access
+email:
 
 ```text
 https://staging.uipath.com/hackathon26_244/
@@ -45,6 +46,12 @@ https://staging.uipath.com/hackathon26_244/
 If the organizer-provided Labs access email shows a different
 `hackathon26_###` URL, paste that exact URL instead. Do not use the GitHub URL,
 localhost URL, demo video URL, or general product URL for this field.
+
+Verified Automation Cloud proof tenant used by the CLI and live proof records:
+
+```text
+https://cloud.uipath.com/galacticus/DefaultTenant/
+```
 
 ## About The Project
 

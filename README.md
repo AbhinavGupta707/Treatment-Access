@@ -107,11 +107,11 @@ flowchart LR
 | **IXP / Document Understanding path**   | Production extraction target for policies, chart notes, labs, and denial letters.                                                                     | `uipath/agents/extraction/`; local source-span parser preserves the same evidence contract with synthetic data.                                             |
 | **UiPath for Coding Agents / Codex**    | Used to build, checkpoint, test, and integrate the product through structured coding-agent workflows.                                                 | `.agents/skills`, orchestration logs, checkpoint docs, and committed implementation history.                                                                |
 
-UiPath Labs / Automation Cloud environment used for the submission:
+Submission environment references:
 
 ```text
-Devpost UiPath Labs environment URL: https://staging.uipath.com/hackathon26_244/
-Automation Cloud tenant URL: https://cloud.uipath.com/galacticus/DefaultTenant/
+Organizer-requested UiPath Labs field URL: https://staging.uipath.com/hackathon26_244/
+Verified Automation Cloud proof tenant URL: https://cloud.uipath.com/galacticus/DefaultTenant/
 Organization: galacticus
 Tenant: DefaultTenant
 Folder: TreatmentAccessHackathon
@@ -121,8 +121,8 @@ Folder key: 4fba2fa1-012b-469a-b6aa-e5be3811c173
 
 If the organizer-provided UiPath Labs email shows a different
 `hackathon26_###` URL, use that exact Labs URL in the Devpost field. The
-`cloud.uipath.com` tenant URL above is the live proof tenant reached by the
-UiPath CLI and Automation Cloud records.
+`cloud.uipath.com` tenant URL above is the verified live proof tenant reached by
+the UiPath CLI and Automation Cloud records.
 
 Legacy/tenant deep link used by live proof records:
 
