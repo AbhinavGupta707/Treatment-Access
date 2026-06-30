@@ -110,7 +110,7 @@ flowchart LR
 Submission environment references:
 
 ```text
-Organizer-requested UiPath Labs field URL: https://staging.uipath.com/hackathon26_244/
+Organizer-requested UiPath Labs field URL: https://staging.uipath.com/<your-assigned-hackathon26-org>/
 Verified Automation Cloud proof tenant URL: https://cloud.uipath.com/galacticus/DefaultTenant/
 Organization: galacticus
 Tenant: DefaultTenant
@@ -119,10 +119,12 @@ Folder ID: 7986316
 Folder key: 4fba2fa1-012b-469a-b6aa-e5be3811c173
 ```
 
-If the organizer-provided UiPath Labs email shows a different
-`hackathon26_###` URL, use that exact Labs URL in the Devpost field. The
-`cloud.uipath.com` tenant URL above is the verified live proof tenant reached by
-the UiPath CLI and Automation Cloud records.
+The Devpost field must use the exact UiPath Labs organization URL from the
+organizer-provided Labs access email, typically shaped like
+`https://staging.uipath.com/hackathon26_###/`. Do not paste the example URL
+unless it is the one assigned to this project. The `cloud.uipath.com` tenant URL
+above is the verified live proof tenant reached by the UiPath CLI and Automation
+Cloud records.
 
 Legacy/tenant deep link used by live proof records:
 

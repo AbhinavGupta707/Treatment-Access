@@ -36,16 +36,16 @@ clinical risk, and robots handle payer exceptions.
 
 ## UiPath Labs Link / Environment URL
 
-Use this for the Devpost field if it matches the organizer-provided Labs access
-email:
+Use the exact UiPath Labs organization URL from the organizer-provided access
+email. It should look like this, but with your assigned org suffix:
 
 ```text
-https://staging.uipath.com/hackathon26_244/
+https://staging.uipath.com/hackathon26_###/
 ```
 
-If the organizer-provided Labs access email shows a different
-`hackathon26_###` URL, paste that exact URL instead. Do not use the GitHub URL,
-localhost URL, demo video URL, or general product URL for this field.
+Do not use Suhani's `hackathon26_244` example unless that exact URL is the org
+assigned to this project. Do not use the GitHub URL, localhost URL, demo video
+URL, or general product URL for this field.
 
 Verified Automation Cloud proof tenant used by the CLI and live proof records:
 
