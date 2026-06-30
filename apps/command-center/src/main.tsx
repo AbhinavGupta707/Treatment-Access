@@ -287,7 +287,6 @@ function App() {
     try {
       const run = await startLiveProofRun(currentRuntime.data.case.case_id);
       setLiveProofRun(run);
-      setIsLiveProofOpen(true);
       await refresh(true);
     } catch (error) {
       const preview = buildSyntheticLiveProofRun(
@@ -296,11 +295,10 @@ function App() {
         {
           status: "blocked",
           sourceLabel:
-            "Live proof API not available yet; showing contract-ready synthetic preview",
+            "Event mirror unavailable; showing prepared case-run preview",
         },
       );
       setLiveProofRun(preview);
-      setIsLiveProofOpen(true);
       setMutationError(
         error instanceof Error
           ? error.message
@@ -1275,20 +1273,29 @@ function LiveProofPanel({
     run ??
     buildSyntheticLiveProofRun(data, runtime.lastFetchedAt, {
       status: "not_started",
-      sourceLabel: "Ready to start a synthetic governed proof",
+      sourceLabel: "Ready to start governed case orchestration",
     });
   const progress = liveProofProgress(previewRun.steps);
-  const activeSteps = previewRun.steps.slice(0, 4);
+  const displayedProgress = previewRun.status === "not_started" ? 0 : progress;
+  const hasRun = Boolean(run);
+  const workflowSteps = orchestrationJourney(previewRun, hasRun);
+  const currentStep =
+    workflowSteps.find((step) => step.tone === "warn") ?? workflowSteps[0];
 
   return (
-    <section className="live-proof-panel">
+    <section className="live-proof-panel orchestration-panel">
       <div className="live-proof-copy">
-        <span className="eyebrow">Checkpoint 8 final proof</span>
-        <h2>{previewRun.headline}</h2>
+        <span className="eyebrow">Maestro case orchestration</span>
+        <h2>
+          {hasRun
+            ? "Case prepared; clinician approval is next"
+            : "Start the access workflow"}
+        </h2>
         <p>
-          Prepare one governed treatment-access run to show time saved in
-          prior-auth prep, fewer preventable denials, faster appeal readiness,
-          safer human gates, and auditability.
+          Run this case through policy review, evidence matching, human signoff,
+          payer routing, exception handling, and appeal readiness. The screen
+          shows what the access team does next; UiPath keeps the governed record
+          underneath.
         </p>
         <div className="live-proof-actions">
           <button
@@ -1302,54 +1309,90 @@ function LiveProofPanel({
             ) : (
               <Workflow size={16} />
             )}
-            {run ? "Prepare proof again" : "Prepare proof run"}
+            {hasRun ? "Run case again" : "Start case orchestration"}
           </button>
           <button
             className="secondary-button"
             onClick={onOpenDetail}
             type="button"
           >
-            View proof manifest
+            Open UiPath records
             <PanelRightOpen size={16} />
           </button>
         </div>
       </div>
-      <div className="live-proof-status-card">
+      <div className="live-proof-status-card orchestration-status-card">
         <div className="live-proof-status-head">
           <StatusPill
             tone={liveRunTone(previewRun.status)}
-            value={liveProofStatusCopy(previewRun.status)}
+            value={hasRun ? "Case run prepared" : "Ready to run"}
           />
           <span>{previewRun.source_label}</span>
         </div>
-        <div className="proof-meter" aria-label={`${progress}% complete`}>
-          <span style={{ width: `${progress}%` }} />
+        <div
+          className="proof-meter"
+          aria-label={`${displayedProgress}% complete`}
+        >
+          <span style={{ width: `${displayedProgress}%` }} />
         </div>
         <div className="live-proof-current">
-          <Bot size={22} />
+          <UserCheck size={22} />
           <div>
-            <span>Current work</span>
-            <strong>{previewRun.current_agent}</strong>
+            <span>Next safe action</span>
+            <strong>
+              {currentStep?.nextAction ?? "Review generated packet"}
+            </strong>
           </div>
         </div>
-        <div className="live-proof-mini-steps">
-          {activeSteps.map((step) => (
-            <div className="mini-step" key={step.step_id}>
-              <StatusDot tone={liveStepDot(step.status)} />
-              <span>{step.label}</span>
-              <em>{step.agent}</em>
-            </div>
+        <div className="orchestration-workflow">
+          {workflowSteps.map((step) => (
+            <article className={`workflow-step ${step.tone}`} key={step.label}>
+              <StatusDot tone={step.tone} />
+              <div>
+                <strong>{step.label}</strong>
+                <span>{step.owner}</span>
+                <p>{step.detail}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+        <div className="agent-chip-strip" aria-label="Seven specialist agents">
+          {[
+            "Coverage",
+            "Evidence",
+            "Missing Evidence",
+            "Submission Packet",
+            "Denial Rescue",
+            "Appeal Packet",
+            "Care Continuity",
+          ].map((agent) => (
+            <span key={agent}>{agent}</span>
           ))}
         </div>
       </div>
-      <div className="live-proof-value-list">
-        {previewRun.value_summary.map((value) => (
-          <div className="value-proof" key={value}>
-            <ShieldCheck size={18} />
-            <span>{value}</span>
-          </div>
-        ))}
+      <div className="live-proof-value-list orchestration-value-list">
+        <div className="value-proof">
+          <FileCheck2 size={18} />
+          <span>Policy criteria become a source-backed checklist.</span>
+        </div>
+        <div className="value-proof">
+          <ShieldCheck size={18} />
+          <span>Unsupported clinical claims stop at human approval.</span>
+        </div>
+        <div className="value-proof">
+          <Network size={18} />
+          <span>API downtime becomes a governed exception route.</span>
+        </div>
+        <div className="value-proof">
+          <Gavel size={18} />
+          <span>Denials turn into cited appeal work, not rework.</span>
+        </div>
       </div>
+      <p className="orchestration-note">
+        Payer API unavailable is an intentional exception branch: the product is
+        proving that a prior-auth case can keep moving when a payer channel
+        fails.
+      </p>
     </section>
   );
 }
@@ -1956,14 +1999,15 @@ function LiveProofDrawer({
   run: LiveProofRun;
 }) {
   const progress = liveProofProgress(run.steps);
+  const displayedProgress = run.status === "not_started" ? 0 : progress;
 
   return (
     <div className="audit-backdrop" role="presentation">
       <aside className="live-proof-drawer" aria-label="Live proof detail">
         <div className="audit-header">
           <div>
-            <span>Proof manifest</span>
-            <h2>{run.headline}</h2>
+            <span>Governed run detail</span>
+            <h2>Case orchestration record</h2>
           </div>
           <button
             aria-label="Close live proof detail"
@@ -1981,13 +2025,17 @@ function LiveProofDrawer({
             />
             <span>{run.source_label}</span>
           </div>
-          <div className="proof-meter" aria-label={`${progress}% complete`}>
-            <span style={{ width: `${progress}%` }} />
+          <div
+            className="proof-meter"
+            aria-label={`${displayedProgress}% complete`}
+          >
+            <span style={{ width: `${displayedProgress}%` }} />
           </div>
           <p>
-            The Command Center visualizes governed records and run metadata. If
-            live UiPath evidence has not run, this drawer says ready for live
-            UiPath proof instead of claiming completed execution.
+            This drawer separates the product workflow from the governance
+            record. Agents prepare the case, Action Center holds accountable
+            approvals, Orchestrator owns robot execution, and UiPath records
+            preserve what happened.
           </p>
           {run.safety_status ? <small>{run.safety_status}</small> : null}
           <small>{run.synthetic_data_disclaimer}</small>
@@ -1995,7 +2043,7 @@ function LiveProofDrawer({
         <section className="audit-section">
           <PanelHeader
             icon={<ShieldCheck size={18} />}
-            title="UiPath Evidence Manifest"
+            title="UiPath Governance Records"
           />
           <div className="manifest-grid">
             {(run.proof_manifest ?? []).map((item) => (
@@ -2045,7 +2093,7 @@ function LiveProofDrawer({
           </div>
         </section>
         <section className="audit-section">
-          <PanelHeader icon={<Bot size={18} />} title="Agent Work" />
+          <PanelHeader icon={<Bot size={18} />} title="Agent Outputs" />
           <div className="proof-step-list">
             {run.steps.map((step) => (
               <LiveProofStepCard key={step.step_id} step={step} />
@@ -2055,7 +2103,7 @@ function LiveProofDrawer({
         <section className="audit-section">
           <PanelHeader
             icon={<DatabaseZap size={18} />}
-            title="Trace And Source Labels"
+            title="Runtime Traces And Source Labels"
           />
           <div className="trace-list">
             {run.traces.map((trace) => (
@@ -2872,6 +2920,127 @@ function liveProofProgress(steps: LiveProofStep[]) {
   return Math.round((completed / steps.length) * 100);
 }
 
+type OrchestrationJourneyStep = {
+  label: string;
+  owner: string;
+  tone: "good" | "warn" | "danger" | "idle";
+  detail: string;
+  nextAction: string;
+};
+
+function orchestrationJourney(
+  run: LiveProofRun,
+  hasRun: boolean,
+): OrchestrationJourneyStep[] {
+  if (!hasRun) {
+    return [
+      {
+        label: "1. Read payer policy",
+        owner: "Coverage Requirement Agent",
+        tone: "idle",
+        detail: "Extract criteria, required documents, and citations.",
+        nextAction: "Start case orchestration",
+      },
+      {
+        label: "2. Match chart evidence",
+        owner: "Evidence Retrieval Agent",
+        tone: "idle",
+        detail: "Map notes, medications, and labs to payer requirements.",
+        nextAction: "Start case orchestration",
+      },
+      {
+        label: "3. Hold human gate",
+        owner: "Action Center",
+        tone: "idle",
+        detail: "Require clinician signoff for high-impact assertions.",
+        nextAction: "Start case orchestration",
+      },
+      {
+        label: "4. Route payer channel",
+        owner: "API Workflow",
+        tone: "idle",
+        detail: "Try the governed payer channel and detect exceptions.",
+        nextAction: "Start case orchestration",
+      },
+      {
+        label: "5. Prepare rescue path",
+        owner: "Robot + Appeal Agent",
+        tone: "idle",
+        detail: "Queue portal fallback or appeal work when needed.",
+        nextAction: "Start case orchestration",
+      },
+    ];
+  }
+
+  const policyStep = stepById(run, "policy_checked");
+  const evidenceStep = stepById(run, "evidence_mapped");
+  const humanStep = stepById(run, "human_gate_required");
+  const payerStep = stepById(run, "payer_api_unavailable_or_not_attempted");
+  const outcomeStep = stepById(
+    run,
+    "live_proof_completed_or_waiting_for_approval",
+  );
+
+  return [
+    {
+      label: "1. Policy requirements",
+      owner: policyStep?.agent ?? "Coverage Requirement Agent",
+      tone: stepTone(policyStep),
+      detail:
+        "Payer criteria were converted into a source-backed checklist before packet language was drafted.",
+      nextAction: "Review mapped policy criteria",
+    },
+    {
+      label: "2. Evidence mapped",
+      owner: evidenceStep?.agent ?? "Evidence Retrieval Agent",
+      tone: stepTone(evidenceStep),
+      detail:
+        evidenceStep?.summary ??
+        "Chart evidence was matched to payer criteria with source references.",
+      nextAction: "Open evidence matrix",
+    },
+    {
+      label: "3. Clinician approval",
+      owner: "Action Center",
+      tone: stepTone(humanStep),
+      detail:
+        "Clinician review is the accountable checkpoint before payer-facing submission.",
+      nextAction: "Request clinician signoff",
+    },
+    {
+      label: "4. Payer channel",
+      owner: payerStep?.agent ?? "API Workflow",
+      tone: payerStep?.status === "blocked" ? "warn" : stepTone(payerStep),
+      detail:
+        payerStep?.status === "blocked"
+          ? "The payer API exception was caught and routed to the fallback lane."
+          : "The payer channel is ready; no real payer submission is implied.",
+      nextAction: "Review submission route",
+    },
+    {
+      label: "5. Rescue path ready",
+      owner: "Robot + Appeal Agent",
+      tone:
+        outcomeStep?.status === "needs_human" ? "idle" : stepTone(outcomeStep),
+      detail:
+        "Portal fallback and appeal preparation are ready after approval, with payer submission still blocked until safe.",
+      nextAction: "Open appeal plan",
+    },
+  ];
+}
+
+function stepById(run: LiveProofRun, stepId: string) {
+  return run.steps.find((step) => step.step_id === stepId);
+}
+
+function stepTone(step?: LiveProofStep): "good" | "warn" | "danger" | "idle" {
+  if (!step) return "idle";
+  if (step.status === "completed") return "good";
+  if (step.status === "needs_human" || step.status === "running") return "warn";
+  if (step.status === "blocked" || step.status === "failed") return "danger";
+  return "idle";
+}
+
 function liveRunTone(status: LiveProofRun["status"]) {
   if (status === "completed") return "good";
   if (status === "waiting_for_approval" || status === "running") return "warn";
@@ -2940,8 +3109,9 @@ function manifestTone(status: "available" | "ready" | "pending" | "blocked") {
 function manifestStatusCopy(
   status: "available" | "ready" | "pending" | "blocked",
 ) {
-  if (status === "ready") return "Ready for proof";
-  if (status === "pending") return "Pending live proof";
+  if (status === "ready") return "Registered";
+  if (status === "pending") return "Awaiting event";
+  if (status === "blocked") return "Boundary";
   return labelize(status);
 }
 
@@ -3036,4 +3206,10 @@ function formatRelativeDue(value: string) {
   return `in ${days} day${days === 1 ? "" : "s"}`;
 }
 
-createRoot(document.getElementById("root")!).render(<App />);
+const rootContainer = document.getElementById("root")!;
+const rootRegistry = globalThis as typeof globalThis & {
+  __taccCommandCenterRoot?: ReturnType<typeof createRoot>;
+};
+
+rootRegistry.__taccCommandCenterRoot ??= createRoot(rootContainer);
+rootRegistry.__taccCommandCenterRoot.render(<App />);

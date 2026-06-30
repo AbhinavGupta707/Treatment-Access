@@ -60,7 +60,7 @@ function assertFinalUxManifest() {
   assertMatches(
     "Command Center proof manifest",
     ui,
-    /UiPath Evidence Manifest/i,
+    /UiPath (?:Evidence Manifest|Governance Records)/i,
     /TreatmentAccessHackathon/i,
     /7986316/i,
     /4fba2fa1-012b-469a-b6aa-e5be3811c173/i,
@@ -68,17 +68,18 @@ function assertFinalUxManifest() {
     /Orchestrator job ID/i,
     /Portal confirmation ID|Confirmation ID/i,
     /Safety status/i,
-    /Ready for live UiPath proof|Live UiPath proof recorded/i,
+    /Verified final UiPath proof records|Live UiPath evidence recorded|Live UiPath proof recorded/i,
   );
 
   assertMatches(
     "value-first dashboard copy",
     ui,
-    /prior-auth prep/i,
-    /preventable denials/i,
+    /Maestro case orchestration/i,
+    /policy review/i,
+    /evidence matching/i,
+    /human signoff/i,
     /appeal readiness/i,
-    /human gates/i,
-    /auditability/i,
+    /UiPath keeps the governed record/i,
   );
 }
 

@@ -15,6 +15,159 @@ judge-facing visual surfaces; live proof state is now also recorded in UiPath
 Data Fabric, Action Center, Solution, Orchestrator, and Maestro debug records
 under the `TreatmentAccessHackathon` folder.
 
+## Devpost Submission Requirements
+
+This repository is the public code submission for **UiPath AgentHack 2026 -
+Track 1: UiPath Maestro Case**.
+
+### Project Description
+
+Treatment Access Command Center solves the specialty-medication prior
+authorization bottleneck. Access teams must coordinate payer policy criteria,
+chart evidence, clinician attestations, payer submissions, denial responses,
+appeals, and pharmacy handoffs across disconnected systems. The product turns
+that fragmented work into a governed UiPath case: agents assemble the evidence
+and packet, UiPath orchestrates the case state and proof trail, and humans
+approve high-impact clinical assertions before payer-facing work proceeds.
+
+A judge can run the local synthetic product and walk one case from intake to
+policy matching, evidence mapping, clinician review, payer-channel exception
+routing, denial rescue, appeal readiness, and UiPath proof review. The project
+uses synthetic data only and does not submit real payer requests or use real
+patient, provider, payer, credential, or personal health data.
+
+### UiPath Components Used
+
+- **UiPath Maestro Case**: dynamic treatment-access lifecycle with stages for
+  intake, policy check, evidence mapping, clinician signoff, submission, denial
+  rescue, appeal, and care handoff.
+- **UiPath Maestro Flow / HITL design**: clinician-validation flow and
+  human-task boundary proof for accountable review.
+- **UiPath Agent Builder contracts**: seven specialist agents for coverage
+  requirements, evidence retrieval, missing evidence, submission packet, denial
+  rescue, appeal packet, and care continuity.
+- **Coded Agents / external agent runtime**: TypeScript agent-runtime package
+  with shared schemas and deterministic/local provider-ready behavior used by
+  smoke tests and the Command Center.
+- **UiPath API Workflow artifacts**: EHR hydration, payer submission/status,
+  pharmacy handoff, and event-write contracts.
+- **UiPath Action Center**: clinician evidence approval and appeal signoff
+  patterns; live ExternalTask `4401667` was created, assigned, completed, and
+  read back with synthetic clinician-attestation output.
+- **UiPath Data Fabric / Data Service**: folder-scoped proof entity
+  `TreatmentAccessProofEvent` and synthetic proof records under the
+  `TreatmentAccessHackathon` folder.
+- **UiPath Orchestrator**: folder, machine assignment, process, logs, and live
+  job execution for the `PayerPortalFallback` process.
+- **UiPath RPA / Assistant robot project**: `PayerPortalFallback` project and
+  solution-packaged robot process for payer API unavailable scenarios.
+- **UiPath Solutions**: package `treatment-access-command-center@1.0.20260629`
+  published, deployed, and activated in Automation Cloud.
+- **UiPath Apps / Action App contracts**: intake and human-review surface
+  contracts documented for production UI handoff.
+- **UiPath IXP / Document Understanding design path**: production extraction
+  target for policies, chart notes, labs, and denial letters; local source-span
+  parser preserves the same evidence contract in the synthetic workflow.
+- **UiPath for Coding Agents / Codex**: checkpointed implementation lanes,
+  merge logs, and QA traces used to build, test, and integrate the project.
+
+### Agent Type
+
+This solution uses **both Coded Agents and Low-code Agent Builder-style agents**.
+
+- **Coded Agents**: TypeScript agent runtime and shared Zod contracts implement
+  the local, testable behavior for coverage, evidence, missing-evidence,
+  submission, denial, appeal, and care-continuity outputs.
+- **Low-code Agent Builder artifacts**: UiPath agent packet folders, contracts,
+  sample outputs, entry points, and validation artifacts are included under
+  `uipath/agents/**` for the UiPath-native agent layer.
+
+UiPath remains the orchestration and governance layer. The custom React apps are
+visualization and judge-facing operator surfaces.
+
+### Setup Instructions For Judging
+
+1. Clone the public repository:
+
+   ```bash
+   git clone https://github.com/AbhinavGupta707/Treatment-Access.git
+   cd Treatment-Access
+   ```
+
+   If the cloned folder name differs, run the remaining commands from the repo
+   root that contains this `README.md`.
+
+2. Install Node.js 22+ and pnpm 11+. This project was built with
+   `pnpm@11.7.0`.
+
+3. Install dependencies:
+
+   ```bash
+   CI=true pnpm install
+   ```
+
+4. Verify the local setup:
+
+   ```bash
+   CI=true pnpm verify:setup
+   ```
+
+5. Run the full local verification suite if time allows:
+
+   ```bash
+   CI=true pnpm verify
+   ```
+
+6. Start the three local product surfaces in separate terminals:
+
+   ```bash
+   CI=true pnpm dev:api
+   CI=true pnpm dev:command-center
+   CI=true pnpm dev:mock-payer
+   ```
+
+7. Open the Command Center:
+
+   ```text
+   http://127.0.0.1:5173
+   ```
+
+8. Optional: open the synthetic payer portal used by the portal-recovery route:
+
+   ```text
+   http://127.0.0.1:5174
+   ```
+
+9. Demo path for judges:
+
+   - Start on **Dashboard** to see active cases, risk, clinician signoff load,
+     and the urgent synthetic case.
+   - Open **Cases** to inspect `TACC-2026-001`, the treatment, payer, deadline,
+     actors, and recent activity.
+   - Open **Evidence** and select the first row showing `Needs Signoff` to see
+     policy criteria, evidence source, confidence, and clinical-review gating.
+   - Return to **Dashboard** and run the case orchestration card to show the
+     seven-agent case preparation flow.
+   - Open **Submissions** to see the payer API unavailable branch and the
+     governed portal-recovery path.
+   - Open **Appeals** to see denial rescue, appeal packet assembly, supporting
+     attachments, clinician attestation, and signoff.
+   - Return to **Dashboard** and open **UiPath records** to inspect the live
+     proof IDs and safety boundary.
+
+10. Optional focused smoke commands:
+
+    ```bash
+    CI=true pnpm seed
+    CI=true pnpm smoke:agents
+    CI=true pnpm smoke:checkpoint8-live-uipath
+    ```
+
+11. UiPath live proof is documented in
+    `docs/live-uipath-proof-closeout.md`. The proof uses the
+    `TreatmentAccessHackathon` folder in the `galacticus` org and
+    `DefaultTenant` tenant.
+
 ## Current Status
 
 This repository is demo-ready for the local synthetic product path and has a
